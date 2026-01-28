@@ -44,6 +44,7 @@ let tableData = [
   // connect button to add data
   document.getElementById("add-row-btn").addEventListener("click", () => {
     // maybe filter to ensure a valid ticker?
+    // we could run some sort of query to validate the ticker
     const ticker = prompt("Enter Ticker (e.g., AAPL):");
     if (!ticker) return;
   
