@@ -29,8 +29,8 @@ async function printAllTables() {
         db.all(`SELECT * FROM price_table`, [], (err, rows) => {
             if (err) return console.error(err.message);
             if (rows.length === 0) console.log("(Table is currently empty)");
-            console.log("PK\tTICK_FK\tPRICE\tDATE");
-            rows.forEach(row => console.log(`${row.price_pk}\t${row.ticker_fk}\t$${row.price_price}\t${row.price_date}`));
+            console.log("PK\tTICK_FK\tPRICE\tHOLDINGS\tDATE");
+            rows.forEach(row => console.log(`${row.price_pk}\t${row.ticker_fk}\t$${row.price_price}\t${row.tot_holdings}\t${row.price_date}`));
             
             db.close();
         });
