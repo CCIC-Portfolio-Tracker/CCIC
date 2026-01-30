@@ -1,9 +1,12 @@
 import sqlite3 from 'sqlite3'
 let db = new sqlite3.Database('./portfolio.db');
 
-db.serialize(() => {
 
-    db.run(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
+export async function createHoldingDatabase() {
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+
+            db.run(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
         values (1, 1, 100.87),
                (1, 2, 8.00),
                (1, 3, 74.18),
@@ -84,6 +87,17 @@ db.serialize(() => {
                (1, 78, 40.00),
                (1, 79, 15.00),
                (1, 80, 3.27),
-               (1, 81, 6796.31)`);
+               (1, 81, 6796.31)`, (err) => {
+                    if (err) {
+                        console.error("Error creating tables:", err);
+                        reject(err);
+                    } else {
+                        console.log("Database tables initialized successfully.");
+                        resolve();
+                    }
+                });
+        });
 
-});
+    });
+
+}
