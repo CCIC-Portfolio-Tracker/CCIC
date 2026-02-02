@@ -9,7 +9,7 @@ function Holdings() {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
-    fetch("/api/user")
+    fetch("/api/holdings")
       .then((res) => res.json())
       .then((json) => {
         const mapped = (json || []).map((d) => [
@@ -21,7 +21,7 @@ function Holdings() {
         setRows(mapped);
       })
       .catch((err) => {
-        console.error("Failed to load /api/user:", err);
+        console.error("Failed to load /api/holdings:", err);
         setRows([]);
       });
   }, []);
