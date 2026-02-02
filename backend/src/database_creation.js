@@ -31,15 +31,15 @@ export async function createDatabase() {
         ticker_fk integer not null,
         tot_holdings real not null
     )`, (err) => {
-        if (err) {
-            console.error("Error creating tables:", err);
-            reject(err);
-        } else {
-            console.log("Database tables initialized successfully.");
-            resolve();
-        }
-    });
-    
+                if (err) {
+                    console.error("Error creating tables:", err);
+                    reject(err);
+                } else {
+                    console.log("Database tables initialized successfully.");
+                    resolve();
+                }
+            });
+
 
 
 
