@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Grid } from "gridjs-react";
-import "gridjs/dist/theme/mermaid.css";
+//import "gridjs/dist/theme/mermaid.css";
 import "./App.css";
 
 const columns = ["Ticker", "Name", "Price", "Total Value"];

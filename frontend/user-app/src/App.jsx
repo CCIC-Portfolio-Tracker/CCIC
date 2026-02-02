@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Grid } from 'gridjs-react';
-import OurComponent from './ourComponent';
+import React from 'react';
 import Holdings from './holdings';
 
 
