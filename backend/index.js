@@ -1,6 +1,6 @@
 import express from "express";
-import users from "./user.js"
 import holdings from "./src/import_holdings.js"
+import news from "./src/company_news.js"
 
 const app = express();
 
@@ -8,14 +8,13 @@ app.get("/", (req, res) => {
     res.send("Server is ready!");
 })
 
-/*
-app.get("/api/user", (req, res) => {
-    res.send(users);
-})
-    */
 
-app.get("/api/user", (req, res) => {
+app.get("/api/holdings", (req, res) => {
     res.send(holdings);
+})
+
+app.get("/api/news", (req, res) => {
+    res.send(news);
 })
 
 const port = process.env.PORT || 3000;
