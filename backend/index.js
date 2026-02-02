@@ -17,6 +17,7 @@ app.get("/api/news", (req, res) => {
     res.send(news);
 })
 
+
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
