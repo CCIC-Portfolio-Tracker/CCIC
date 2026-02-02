@@ -1,4 +1,4 @@
-// remove?
+// DO NOT USE THIS FILE USER INDEX.JS TO SEND REQUESTS TO THE FRONTEND
 
 const express = require('express');
 const app = express();
@@ -7,6 +7,7 @@ const port = 5000;
 // Middleware to allow your frontend to talk to your backend (CORS)
 const cors = require('cors');
 app.use(cors());
+app.use(express.json());
 
 async function importHoldings() {
 
