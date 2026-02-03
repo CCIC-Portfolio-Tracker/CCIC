@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback, use } from "react";
 import { Grid } from "gridjs-react";
-import { html } from "gridjs"; // <-- ADD THIS
+import { html } from "gridjs"; 
 import "gridjs/dist/theme/mermaid.css";
 import "./App.css";
 
@@ -19,7 +19,6 @@ function Holdings() {
           d.holdings ?? 0,
           d.price ?? 0,
           d.totalValue ?? 0,
-          d.sector ?? "",
         ]);
         setRows(mapped);
               })
@@ -132,7 +131,6 @@ function Holdings() {
       "Shares",
       "Current Price",
       "Total Value",
-      "Sector",
       {
         name: "Actions",
         formatter: (cell, row) => {
