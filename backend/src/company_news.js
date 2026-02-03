@@ -3,7 +3,7 @@ dotenv.config()
 
 async function getStockNews(ticker) {
     const apiKey = process.env.FINNHUB_KEY;
-    const toDate = new Date(); // Start with a Date object
+    const toDate = new Date(); 
     const fromDate = new Date();
 
     fromDate.setDate(toDate.getDate() - 30);

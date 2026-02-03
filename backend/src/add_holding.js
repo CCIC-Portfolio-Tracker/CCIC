@@ -1,9 +1,6 @@
-import sqlite3 from 'sqlite3';
+import db from "./db.js";
 import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
-
-
-const db = new sqlite3.Database('./src/portfolio.db');
 
 async function addHolding(ticker, amount, sector) {
     const result = await yahooFinance.quote(ticker);
@@ -14,7 +11,7 @@ async function addHolding(ticker, amount, sector) {
         }
 
         db.serialize(() => {
-            db.run(
+            db.execute(
                 `INSERT OR IGNORE INTO ticker_table (ticker_text, ticker_co, ticker_sector) VALUES (?, ?, ?)`,
                 [result.symbol, result.shortName, sector],
                 (err) => { if (err) return reject(err); }
@@ -34,7 +31,7 @@ async function addHolding(ticker, amount, sector) {
                         VALUES (?, ?, 1, 1, ?)
                     `;
 
-                    db.run(holdingQuery, [tickerPK, amount, result.regularMarketOpen], function(err) {
+                    db.execute(holdingQuery, [tickerPK, amount, result.regularMarketOpen], function(err) {
                         if (err) return reject(err);
                         
                         console.log(`Successfully added ${amount} shares of ${result.symbol}`);
@@ -47,5 +44,4 @@ async function addHolding(ticker, amount, sector) {
     });
 }
 
-// Ensure the export matches the function name
 export default addHolding;

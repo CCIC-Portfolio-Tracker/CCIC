@@ -1,8 +1,5 @@
-import sqlite3 from 'sqlite3'
+import db from "./db.js";
 
-const db = new sqlite3.Database('./src/portfolio.db');
-
-// Function to get all tickers from ticker_table
 async function deleteHolding(ticker) {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
@@ -14,7 +11,7 @@ async function deleteHolding(ticker) {
 
             console.log(ticker);
            
-            stmt.run(0, 0, ticker);
+            stmt.execute(0, 0, ticker);
 
 
 

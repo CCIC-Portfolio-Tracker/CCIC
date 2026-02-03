@@ -1,6 +1,4 @@
-import sqlite3 from 'sqlite3'
-let db = new sqlite3.Database('./portfolio.db');
-
+import db from "./db.js";
 
 export async function createTickerDatabase() {
     return new Promise((resolve, reject) => {
@@ -8,7 +6,7 @@ export async function createTickerDatabase() {
 
         db.serialize(() => {
 
-            db.run(`insert or ignore into ticker_table (ticker_text, ticker_co)
+            db.execute(`insert or ignore into ticker_table (ticker_text, ticker_co)
         values ('INTC', 'INTEL CORPORATION'),
        ('ISRG', 'INTUITIVE SURGICAL, INC.'),
        ('MDT', 'MEDTRONIC PUBLIC LIMITED COMPANY'),

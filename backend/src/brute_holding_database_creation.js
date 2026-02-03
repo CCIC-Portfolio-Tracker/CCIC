@@ -1,12 +1,12 @@
-import sqlite3 from 'sqlite3'
-let db = new sqlite3.Database('./portfolio.db');
+import db from "./db.js";
+
 
 
 export async function createHoldingDatabase() {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
 
-            db.run(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
+            db.execute(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
         values (1, 1, 100.87),
                (1, 2, 8.00),
                (1, 3, 74.18),

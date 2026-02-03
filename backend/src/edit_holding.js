@@ -1,13 +1,11 @@
-import sqlite3 from 'sqlite3';
-
-const db = new sqlite3.Database('./src/portfolio.db');
+import db from "./db.js";
 
 async function editHolding(ticker, amount, sector) {
 
     return new Promise((resolve, reject) => {
 
         db.serialize(() => {
-            db.get(
+            db.execute(
                 `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`, 
                 [ticker], 
                 (err, row) => {
@@ -22,7 +20,7 @@ async function editHolding(ticker, amount, sector) {
                         WHERE ticker_fk = ${tickerPK}
                     `;
 
-                    db.run(holdingQuery, [amount], function(err) {
+                    db.execute(holdingQuery, [amount], function(err) {
                         if (err) return reject(err);
                         
                         console.log(`Successfully updated to ${amount} shares of ${ticker}`);
@@ -36,7 +34,7 @@ async function editHolding(ticker, amount, sector) {
                         WHERE ticker_pk = ${tickerPK}
                     `;
 
-                    db.run(sectorQuery, [sector], function(err) {
+                    db.execute(sectorQuery, [sector], function(err) {
                         if (err) return reject(err);
                         
                         console.log(`Successfully updated sector to ${sector} for ${ticker}`);
@@ -49,5 +47,4 @@ async function editHolding(ticker, amount, sector) {
     });
 }
 
-// Ensure the export matches the function name
 export default editHolding;

@@ -1,8 +1,6 @@
 import YahooFinance from 'yahoo-finance2'
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
-import sqlite3 from 'sqlite3'
-
-const db = new sqlite3.Database('./src/portfolio.db');
+import db from "./db.js";
 
 // Function to get all tickers from ticker_table
 async function importTickerPK() {
@@ -116,7 +114,7 @@ async function getUpdatedPrices() {
                     const match = rows.find(r => r.ticker_text === stock.symbol);
 
                     if (match) {
-                        stmt.run(
+                        stmt.execute(
                             match.ticker_pk,
                             stock.regularMarketPrice,
                             timestamp
@@ -132,10 +130,9 @@ async function getUpdatedPrices() {
         });
     });
 
-    await printTable();
-
 }
 
+/*
 async function printTable() {
     console.log("\n--- Price Table ---");
     db.all(`SELECT * FROM price_table`, [], (err, rows) => {
@@ -146,5 +143,6 @@ async function printTable() {
 
     });
 }
+*/
 
 export default getUpdatedPrices;
