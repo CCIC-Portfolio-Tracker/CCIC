@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, use } from "react";
 import { Grid } from "gridjs-react";
 import { html } from "gridjs"; // <-- ADD THIS
 import "gridjs/dist/theme/mermaid.css";
@@ -16,11 +16,12 @@ function Holdings() {
         const mapped = (json || []).map((d) => [
           d.ticker ?? "",
           d.name ?? "",
+          d.holdings ?? 0,
           d.price ?? 0,
           d.totalValue ?? 0,
         ]);
         setRows(mapped);
-      })
+              })
       .catch((err) => {
         console.error("Failed to load /api/holdings:", err);
         setRows([]);
@@ -37,21 +38,11 @@ function Holdings() {
     const ticker = prompt("Enter Ticker (e.g., AAPL):");
     if (!ticker) return;
 
-    const name = prompt("Enter Name:") || "";
-
-    const priceStr = prompt("Enter Price:");
-    if (!priceStr) return;
-    const price = Number(priceStr);
-    if (Number.isNaN(price)) {
-      alert("Price must be a number.");
-      return;
-    }
-
-    const totalValueStr = prompt("Enter Total Value:");
-    if (!totalValueStr) return;
-    const totalValue = Number(totalValueStr);
-    if (Number.isNaN(totalValue)) {
-      alert("Total Value must be a number.");
+    const shareSt = prompt("Enter Share Count:");
+    if (!shareSt) return;
+    const shares = Number(shareSt);
+    if (Number.isNaN(shares)) {
+      alert("Share must be a number.");
       return;
     }
 
@@ -59,7 +50,7 @@ function Holdings() {
       const res = await fetch("/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticker, name, price, totalValue }),
+        body: JSON.stringify({ ticker, shares}),
       });
 
       if (!res.ok) {
@@ -146,7 +137,8 @@ function Holdings() {
     () => [
       "Ticker",
       "Name",
-      "Price",
+      "Shares",
+      "Current Price",
       "Total Value",
       {
         name: "Actions",
@@ -163,6 +155,7 @@ function Holdings() {
   );
 
   // handle button clicks
+  // change this to only populate if user has admin acesss
   useEffect(() => {
     const wrapper = document.getElementById("wrapper");
     if (!wrapper) return;

@@ -1,6 +1,6 @@
 import {useState} from "react";
 
-function OurComponent() {
+function Graphics() {
     const[strawberries, setStrawberries] = useState(0);
 
     function handleClick() {
@@ -16,4 +16,4 @@ function OurComponent() {
     )
 }
 
-export default OurComponent;
+export default Graphics;

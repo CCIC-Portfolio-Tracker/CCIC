@@ -1,25 +1,44 @@
-import React from 'react';
-import Holdings from './holdings';
-
-
+import React, { useState } from "react";
+import Holdings from "./holdings";
+import Graphics from "./graphics";
 
 const App = () => {
+  const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "home"
 
   return (
     <>
-      {/* Tab links (same as old HTML) */}
+      {/* Navigation tabs */}
       <div className="tab">
-        <a href="/index.html" className="active">Portfolio</a>
-        <a href="/home.html">Home</a>
+        <a
+          className={activeTab === "portfolio" ? "active" : ""}
+          onClick={() => setActiveTab("portfolio")}
+        >
+          Portfolio
+        </a>
+        <a
+          className={activeTab === "home" ? "active" : ""}
+          onClick={() => setActiveTab("home")}
+        >
+          Home
+        </a>
       </div>
 
       {/* Page content */}
-      <h1>Portfolio</h1>
+      {activeTab === "portfolio" && (
+        <>
+          <h1>Portfolio</h1>
+          <Holdings />
+        </>
+      )}
 
-      <Holdings />
+      {activeTab === "home" && (
+        <>
+          <h1>Home</h1>
+          <Graphics />
+        </>
+      )}
     </>
   );
-}
+};
 
-
-export default App
+export default App;
