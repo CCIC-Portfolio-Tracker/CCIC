@@ -10,7 +10,7 @@ export async function createDatabase() {
         ticker_pk integer primary key autoincrement,
         ticker_text text not null,
         ticker_co text not null,
-        ticker_sector text not null
+        ticker_sector text not null default 'Unknown'
     )`);
 
             db.run(`create table if not exists price_table (
@@ -31,7 +31,7 @@ export async function createDatabase() {
         ticker_fk integer not null,
         tot_holdings real not null,
         holding_active boolean not null default 1,
-        purchase_price real not null
+        purchase_price real not null default 100
     )`, (err) => {
                 if (err) {
                     console.error("Error creating tables:", err);

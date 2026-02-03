@@ -30,12 +30,10 @@ app.get("/api/news", (req, res) => {
 // for adding holdings
 app.post("/api/holdings", async (req, res) => {
   try {
-    console.log("ticker:", req.body.ticker);
-    console.log("amount:", req.body);
     const ticker = req.body.ticker.toUpperCase();
     const amount = req.body.shares;
-    console.log(amount*2);
-    await addHolding(ticker, amount);
+    const sector = req.body.sector;
+    await addHolding(ticker, amount, sector);
     res.json({ ok: true });
   } catch (error) {
     console.error("Failed to add holding:", error);
