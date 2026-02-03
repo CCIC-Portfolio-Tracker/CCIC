@@ -2,6 +2,7 @@ import express from "express";
 import importHoldings from "./src/import_holdings.js"
 import news from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
+import addHolding from "./src/add_holding.js"
 
 const app = express();
 app.use(express.json());
@@ -27,9 +28,19 @@ app.get("/api/news", (req, res) => {
 })
 
 // for adding holdings
-app.post("/api/holdings", (req, res) => {
-  console.log("Got new holding:", req.body);
-  res.json({ ok: true });
+app.post("/api/holdings", async (req, res) => {
+  try {
+    console.log("ticker:", req.body.ticker);
+    console.log("amount:", req.body);
+    const ticker = req.body.ticker.toUpperCase();
+    const amount = req.body.shares;
+    console.log(amount*2);
+    await addHolding(ticker, amount);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Failed to add holding:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // for editing holdings

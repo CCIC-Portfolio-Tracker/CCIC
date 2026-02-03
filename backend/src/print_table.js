@@ -8,14 +8,18 @@ async function printAllTables() {
             if (err) return console.error(err.message);
             console.log("\n--- Ticker Table ---");
             console.log("PK\tTICKER\tCOMPANY");
-            rows.forEach(row => console.log(`${row.ticker_pk}\t${row.ticker_text}\t${row.ticker_co}`));
+            //rows.forEach(row => console.log(`${row.ticker_pk}\t${row.ticker_text}\t${row.ticker_co}`));
+            rows.forEach(row => console.log(row));
+
         });
 
         db.all(`SELECT * FROM portfolio_table`, [], (err, rows) => {
             if (err) return console.error(err.message);
             console.log("\n--- Portfolio Table ---");
             console.log("PK\tNAME");
-            rows.forEach(row => console.log(`${row.portfolio_pk}\t${row.portfolio_name}`));
+            //rows.forEach(row => console.log(`${row.portfolio_pk}\t${row.portfolio_name}`));
+            rows.forEach(row => console.log(row));
+
         });
 
         db.all(`SELECT * FROM holding_table`, [], (err, rows) => {
@@ -31,8 +35,9 @@ async function printAllTables() {
             if (rows.length === 0) console.log("(Table is currently empty)");
             console.log("\n--- Price Table ---");
             console.log("PK\tTICK_FK\tPRICE\tHOLDINGS\tDATE");
-            rows.forEach(row => console.log(`${row.price_pk}\t${row.ticker_fk}\t$${row.price_price}\t${row.tot_holdings}\t${row.price_date}`));
-            
+            //rows.forEach(row => console.log(`${row.price_pk}\t${row.ticker_fk}\t$${row.price_price}\t${row.tot_holdings}\t${row.price_date}`));
+            rows.forEach(row => console.log(row));
+
             db.close();
         });
     });

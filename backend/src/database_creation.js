@@ -9,14 +9,15 @@ export async function createDatabase() {
             db.run(`create table if not exists ticker_table (
         ticker_pk integer primary key autoincrement,
         ticker_text text not null,
-        ticker_co text not null
+        ticker_co text not null,
+        ticker_sector text not null
     )`);
 
             db.run(`create table if not exists price_table (
         price_pk integer primary key autoincrement,
         ticker_fk integer not null,
         price_price real not null,
-        price_date text not null,
+        price_date text not null
     )`);
 
             db.run(`create table if not exists portfolio_table (
@@ -29,7 +30,8 @@ export async function createDatabase() {
         portfolio_fk integer not null,
         ticker_fk integer not null,
         tot_holdings real not null,
-        holding_active boolean not null default 1
+        holding_active boolean not null default 1,
+        purchase_price real not null
     )`, (err) => {
                 if (err) {
                     console.error("Error creating tables:", err);
