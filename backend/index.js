@@ -65,8 +65,7 @@ app.delete("/api/holdings/:ticker", async (req, res) => {
 });
 
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  console.log(`Server at http://localhost:${port}`);
-})
+app.listen(process.env.PORT || 3000, "0.0.0.0")
+  {
+    console.log("Server is running...");
+  }

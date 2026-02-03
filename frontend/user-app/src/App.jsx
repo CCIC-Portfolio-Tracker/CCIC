@@ -34,7 +34,7 @@ const App = () => {
       {activeTab === "home" && (
         <>
           <h1>Home</h1>
-          <Graphics />
+  
         </>
       )}
     </>
