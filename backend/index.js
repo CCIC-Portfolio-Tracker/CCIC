@@ -3,6 +3,9 @@ import importHoldings from "./src/import_holdings.js"
 import news from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
 import addHolding from "./src/add_holding.js"
+import editHolding from "./src/edit_holding.js"
+
+
 
 const app = express();
 app.use(express.json());
@@ -44,7 +47,7 @@ app.post("/api/holdings", async (req, res) => {
 // for editing holdings
 app.put("/api/holdings/:ticker", (req, res) => {
   const ticker = (req.params.ticker || "").toUpperCase();
-  console.log("edit ticker:", ticker, "updates:", req.body);
+  editHolding(ticker, req.body.shares, req.body.sector);
   // can configure req.body to better fit db needs
   res.json({ ok: true });
 });

@@ -1,9 +1,17 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-async function getStockNews(ticker, fromDate, toDate) {
+async function getStockNews(ticker) {
     const apiKey = process.env.FINNHUB_KEY;
-    const url = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${fromDate}&to=${toDate}&token=${apiKey}`;
+    const toDate = new Date(); // Start with a Date object
+    const fromDate = new Date();
+
+    fromDate.setDate(toDate.getDate() - 30);
+
+    const toDateStr = toDate.toISOString().split('T')[0];
+    const fromDateStr = fromDate.toISOString().split('T')[0];
+
+    const url = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${fromDateStr}&to=${toDateStr}&token=${apiKey}`;
 
     try {
         const response = await fetch(url);
@@ -16,18 +24,16 @@ async function getStockNews(ticker, fromDate, toDate) {
         const articles = data.map(article => ({
             headline: article.headline,
             company: article.related,
-            date: new Date(article.datetime * 1000).toLocaleDateString(), 
+            date: new Date(article.datetime * 1000).toLocaleDateString(),
             summary: article.summary,
             link: article.url
         }));
-        
+
         return articles;
-                 
+
     } catch (error) {
         console.error("Could not fetch news:", error);
     }
 };
 
-const companyNews = await getStockNews('AAPL', '2025-01-28', '2026-01-28');
-
-export default companyNews
+export default getStockNews;
