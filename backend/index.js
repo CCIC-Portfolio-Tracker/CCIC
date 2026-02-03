@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
   res.send("Server is ready!");
 })
 
-app.get("https://ccic.onrender.com/api/holdings", async (req, res) => {
+app.get("/api/holdings", async (req, res) => {
   try {
     const holdings = await importHoldings();
 
@@ -26,12 +26,12 @@ app.get("https://ccic.onrender.com/api/holdings", async (req, res) => {
   }
 });
 
-app.get("https://ccic.onrender.com/api/news", (req, res) => {
+app.get("/api/news", (req, res) => {
   res.send(news);
 })
 
 // for adding holdings
-app.post("https://ccic.onrender.com/api/holdings", async (req, res) => {
+app.post("/api/holdings", async (req, res) => {
   try {
     const ticker = req.body.ticker.toUpperCase();
     const amount = req.body.shares;
@@ -45,7 +45,7 @@ app.post("https://ccic.onrender.com/api/holdings", async (req, res) => {
 });
 
 // for editing holdings
-app.put("https://ccic.onrender.com/api/holdings/:ticker", (req, res) => {
+app.put("/api/holdings/:ticker", (req, res) => {
   const ticker = (req.params.ticker || "").toUpperCase();
   editHolding(ticker, req.body.shares, req.body.sector);
   // can configure req.body to better fit db needs
@@ -53,7 +53,7 @@ app.put("https://ccic.onrender.com/api/holdings/:ticker", (req, res) => {
 });
 
 // for deleting holdings
-app.delete("https://ccic.onrender.com/api/holdings/:ticker", async (req, res) => {
+app.delete("/api/holdings/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
     console.log("delete ticker:", ticker);
@@ -68,7 +68,8 @@ app.delete("https://ccic.onrender.com/api/holdings/:ticker", async (req, res) =>
 });
 
 
-app.listen(process.env.PORT || 3000, "0.0.0.0")
-  {
-    console.log("Server is running...");
-  }
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+  console.log(`Server at http://localhost:${port}`);
+})
