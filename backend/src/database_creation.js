@@ -29,7 +29,8 @@ export async function createDatabase() {
         holding_pk integer primary key autoincrement,
         portfolio_fk integer not null,
         ticker_fk integer not null,
-        tot_holdings real not null
+        tot_holdings real not null,
+        holding_active boolean not null default 1
     )`, (err) => {
                 if (err) {
                     console.error("Error creating tables:", err);

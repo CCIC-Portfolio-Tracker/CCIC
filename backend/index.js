@@ -2,6 +2,8 @@ import express from "express";
 import holdings from "./src/import_holdings.js"
 import news from "./src/company_news.js"
 
+import deleteHolding from "./src/delete_holding.js"
+
 const app = express();
 app.use(express.json());
 
@@ -37,6 +39,7 @@ app.put("/api/holdings/:ticker", (req, res) => {
  app.delete("/api/holdings/:ticker", (req, res) => {
     const ticker = (req.params.ticker || "").toUpperCase();
     console.log("delete ticker:", ticker);
+    deleteHolding(ticker);
     res.json({ ok: true });
   });
 

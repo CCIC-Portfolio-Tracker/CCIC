@@ -2,7 +2,7 @@ import YahooFinance from 'yahoo-finance2'
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import sqlite3 from 'sqlite3'
 
-const db = new sqlite3.Database('./portfolio.db');
+const db = new sqlite3.Database('./src/portfolio.db');
 
 // Function to get all tickers from ticker_table
 async function importTickerPK() {
@@ -149,4 +149,4 @@ async function printTable() {
     });
 }
 
-getUpdatedPrices();
+export default getUpdatedPrices;
