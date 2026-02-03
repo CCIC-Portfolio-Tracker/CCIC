@@ -22,7 +22,8 @@ async function printAllTables() {
             if (err) return console.error(err.message);
             console.log("\n--- Holding Table ---");
             console.log("PK\tPORT_FK\tTICK_FK\tHOLDINGS");
-            rows.forEach(row => console.log(`${row.holding_pk}\t${row.portfolio_fk}\t${row.ticker_fk}\t${row.tot_holdings}`));
+            //rows.forEach(row => console.log(`${row.holding_pk}\t${row.portfolio_fk}\t${row.ticker_fk}\t${row.tot_holdings}`));
+            rows.forEach(row => console.log(row));
         });
 
         db.all(`SELECT * FROM price_table`, [], (err, rows) => {

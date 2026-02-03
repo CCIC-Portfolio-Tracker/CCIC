@@ -144,7 +144,6 @@ async function printTable() {
         console.log("PK\tTICK_FK\tPRICE\tHOLDINGS\tDATE");
         rows.forEach(row => console.log(`${row.price_pk}\t${row.ticker_fk}\t$${row.price_price}\t${row.tot_holdings}\t${row.price_date}`));
 
-        db.close();
     });
 }
 

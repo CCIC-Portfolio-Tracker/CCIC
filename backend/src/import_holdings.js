@@ -36,7 +36,4 @@ async function importHoldings() {
   });
 }
 
-const holdings = await importHoldings();
-
-
-export default holdings
+export default importHoldings;
