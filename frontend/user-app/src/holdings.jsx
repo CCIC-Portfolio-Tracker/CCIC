@@ -72,25 +72,13 @@ function Holdings() {
 
   // send edit to backend
   const editHolding = async (ticker) => {
-    const name = prompt("New Name (blank = keep same):");
-    const priceStr = prompt("New Price (blank = keep same):");
-    const totalValueStr = prompt("New Total Value (blank = keep same):");
+    const shares = prompt("Enter Share Count:");
+    const sector = prompt("Enter sector");
 
     const updates = {};
 
-    if (name !== null && name !== "") updates.name = name;
-
-    if (priceStr !== null && priceStr !== "") {
-      const price = Number(priceStr);
-      if (Number.isNaN(price)) return alert("Price must be a number.");
-      updates.price = price;
-    }
-
-    if (totalValueStr !== null && totalValueStr !== "") {
-      const totalValue = Number(totalValueStr);
-      if (Number.isNaN(totalValue)) return alert("Total Value must be a number.");
-      updates.totalValue = totalValue;
-    }
+    if (shares !== null && shares !== "") updates.shares = shares;
+    if (sector !== null && sector !== "") updates.sector = sector;
 
     // If user left everything blank, do nothing
     if (Object.keys(updates).length === 0) return;
