@@ -9,18 +9,18 @@ const App = () => {
     <>
       {/* Navigation tabs */}
       <div className="tab">
-        <a
+        <button
           className={activeTab === "portfolio" ? "active" : ""}
-          onClick={() => setActiveTab("portfolio")}
+          onClick={() => setActiveTab("portfolio")}type="button"
         >
           Portfolio
-        </a>
-        <a
+        </button>
+        <button
           className={activeTab === "home" ? "active" : ""}
-          onClick={() => setActiveTab("home")}
+          onClick={() => setActiveTab("home")}type="button"
         >
           Home
-        </a>
+        </button>
       </div>
 
       {/* Page content */}

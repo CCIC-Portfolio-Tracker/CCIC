@@ -17,7 +17,7 @@ async function addHolding(ticker, amount, sector) {
                 (err) => { if (err) return reject(err); }
             );
 
-            db.get(
+            db.execute(
                 `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`, 
                 [result.symbol], 
                 (err, row) => {
