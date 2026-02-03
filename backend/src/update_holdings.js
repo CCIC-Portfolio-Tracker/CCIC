@@ -108,8 +108,8 @@ async function getUpdatedPrices() {
 
             db.serialize(() => {
                 const stmt = db.prepare(`
-                INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO price_table (ticker_fk, price_price, price_date)
+                VALUES (?, ?, ?)
             `);
 
                 results.forEach(stock => {
@@ -119,8 +119,7 @@ async function getUpdatedPrices() {
                         stmt.run(
                             match.ticker_pk,
                             stock.regularMarketPrice,
-                            timestamp,
-                            match.tot_holdings
+                            timestamp
                         );
                     }
                 });

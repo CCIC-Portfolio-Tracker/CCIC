@@ -20,22 +20,6 @@ async function deleteHolding(ticker) {
 
             stmt.finalize(() => resolve());
         });
-
-        db.serialize(() => {
-            const stmt = db.prepare(`
-                UPDATE price_table
-                SET tot_holdings = ?
-                WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?)
-            `);
-
-            console.log(ticker);
-           
-            stmt.run(0, ticker);
-
-
-
-            stmt.finalize(() => resolve());
-        });
     });
 }
 
