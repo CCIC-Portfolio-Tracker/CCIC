@@ -19,6 +19,7 @@ function Holdings() {
           d.holdings ?? 0,
           d.price ?? 0,
           d.totalValue ?? 0,
+          d.sector ?? "",
         ]);
         setRows(mapped);
               })
@@ -143,6 +144,7 @@ function Holdings() {
       "Shares",
       "Current Price",
       "Total Value",
+      "Sector",
       {
         name: "Actions",
         formatter: (cell, row) => {
