@@ -46,11 +46,14 @@ function Holdings() {
       return;
     }
 
+    const sector = prompt("Enter Sector:");
+    if (!sector) return;
+
     try {
       const res = await fetch("/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticker, shares}),
+        body: JSON.stringify({ ticker, shares, sector}),
       });
 
       if (!res.ok) {
