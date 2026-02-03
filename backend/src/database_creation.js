@@ -27,13 +27,9 @@ export async function createDatabase() {
         tot_holdings real not null,
         holding_active boolean not null default 1,
         purchase_price real not null default 100
-    )`, (err) => {
-        if (err) {
-            console.error("Error creating tables:", err);
-        } else {
-            console.log("Database tables initialized successfully.");
-        }
-    });
+    )`);
+
+    console.log("Tables created successfully.");
 
 
 }

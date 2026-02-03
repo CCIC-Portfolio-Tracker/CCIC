@@ -4,7 +4,7 @@ import db from "./db.js";
 
 export async function createHoldingDatabase() {
 
-    db.execute(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
+    await db.execute(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
         values (1, 1, 100.87),
                (1, 2, 8.00),
                (1, 3, 74.18),

@@ -35,9 +35,9 @@ async function getOutdatedTickers() {
     }
 
     const query = `
-            SELECT ticker_text
+            SELECT ticker_text, ticker_pk
             FROM ticker_table
-            WHERE ticker_pk IN (${outdatedTickerPKs});
+            WHERE ticker_pk IN (${outdatedTickerPKs.join(',')});
         `;
 
     const result = await db.execute(query);
@@ -48,39 +48,46 @@ async function getOutdatedTickers() {
 }
 
 async function getUpdatedPrices() {
-    const { outdatedTickers, outdatedTickerPKs } = await getOutdatedTickers();
+    try {
+        const { outdatedTickers, outdatedTickerPKs } = await getOutdatedTickers();
 
-    if (!outdatedTickers || outdatedTickers.length === 0) {
-        console.log("Nothing to update.");
-        return;
-    }
-
-    // gets list of prices from yahooFinance
-    const results = await yahooFinance.quote(outdatedTickers);
-    const timestamp = new Date().toISOString().split('T')[0];
-
-    const batchQueries = [];
-    results.forEach(stock => {
-        // Find the PK for this specific symbol
-        const matchPK = outdatedTickerPKs[outdatedTickers.indexOf(stock.symbol)];
-
-        if (matchPK) {
-            batchQueries.push({
-                sql: `INSERT INTO price_table (ticker_fk, price_price, price_date) VALUES (?, ?, ?)`,
-                args: [matchPK, stock.regularMarketPrice, timestamp]
-            });
+        if (!outdatedTickers || outdatedTickers.length === 0) {
+            console.log("Nothing to update.");
+            return;
         }
-    });
+
+        // gets list of prices from yahooFinance
+        const results = await yahooFinance.quote(outdatedTickers);
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        const batchQueries = [];
+        results.forEach(stock => {
+            // Find the PK for this specific symbol
+            const matchPK = outdatedTickerPKs[outdatedTickers.indexOf(stock.symbol)];
+
+            if (matchPK) {
+                batchQueries.push({
+                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date) VALUES (?, ?, ?)`,
+                    args: [matchPK, stock.regularMarketPrice, timestamp]
+                });
+            }
+        });
 
 
-    if (batchQueries.length > 0) {
-        try {
-            // Turso batch() sends all inserts in one network call
-            await db.batch(batchQueries, "write");
-            console.log(`Successfully updated prices for ${batchQueries.length} tickers.`);
-        } catch (error) {
-            console.error("Batch update failed:", error);
+        if (batchQueries.length > 0) {
+            try {
+                // Turso batch() sends all inserts in one network call
+                await db.batch(batchQueries, "write");
+                console.log(`Successfully updated prices for ${batchQueries.length} tickers.`);
+            } catch (error) {
+                console.error("Batch update failed:", error);
+            }
         }
+
+    } catch (error) {
+        console.error("Critical error in update_holdings:", error);
+        // We re-throw so the 'await' in importHoldings knows the operation failed
+        throw error;
     }
 
 
