@@ -13,22 +13,18 @@ async function importHoldings() {
     WHERE h.tot_holdings > 0
     `;
 
-  return new Promise((resolve, reject) => {
-    db.all(query, [], (err, rows) => {
-      if (err) return console.error(err.message);
-      if (rows.length === 0) console.log("(Table is currently empty)");
+  const result = await db.execute(query);
+  const rows = result.rows;
+  if (rows.length === 0) console.log("(Table is currently empty)");
 
-      const formattedHoldings = rows.map(row => ({
-        ticker: row.ticker_text,
-        name: row.ticker_co,
-        price: row.price_price,
-        holdings: row.tot_holdings,
-        totalValue: (row.price_price * row.tot_holdings).toFixed(2)
-      }));
+  return rows.map(row => ({
+    ticker: row.ticker_text,
+    name: row.ticker_co,
+    price: row.price_price,
+    holdings: row.tot_holdings,
+    totalValue: (row.price_price * row.tot_holdings).toFixed(2)
+  }));
 
-      resolve(formattedHoldings);
-    });
-  });
 }
 
 export default importHoldings;

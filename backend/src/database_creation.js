@@ -1,30 +1,26 @@
 import db from "./db.js";
 
 export async function createDatabase() {
-    return new Promise((resolve, reject) => {
-
-
-        db.serialize(() => {
-            db.execute(`create table if not exists ticker_table (
+    await db.execute(`create table if not exists ticker_table (
         ticker_pk integer primary key autoincrement,
         ticker_text text not null,
         ticker_co text not null,
         ticker_sector text not null default 'Unknown'
     )`);
 
-            db.execute(`create table if not exists price_table (
+    await db.execute(`create table if not exists price_table (
         price_pk integer primary key autoincrement,
         ticker_fk integer not null,
         price_price real not null,
         price_date text not null
     )`);
 
-            db.execute(`create table if not exists portfolio_table (
+    await db.execute(`create table if not exists portfolio_table (
         portfolio_pk integer primary key autoincrement,
         portfolio_name text not null
     )`);
 
-            db.execute(`create table if not exists holding_table (
+    await db.execute(`create table if not exists holding_table (
         holding_pk integer primary key autoincrement,
         portfolio_fk integer not null,
         ticker_fk integer not null,
@@ -32,16 +28,12 @@ export async function createDatabase() {
         holding_active boolean not null default 1,
         purchase_price real not null default 100
     )`, (err) => {
-                if (err) {
-                    console.error("Error creating tables:", err);
-                    reject(err);
-                } else {
-                    console.log("Database tables initialized successfully.");
-                    resolve();
-                }
-            });
-
-        });
+        if (err) {
+            console.error("Error creating tables:", err);
+        } else {
+            console.log("Database tables initialized successfully.");
+        }
     });
+
 
 }
