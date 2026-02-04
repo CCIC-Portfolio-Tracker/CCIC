@@ -1,12 +1,19 @@
 import useState from "react";
+import React, { Component } from react;  
 
 function login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     
     const handleLogin = () => {
-        
-        alert(`Logging in with username: ${username} and password: ${password}`);
+        // import login logic here
+        // when the user clicks sign in.. redirect to open ID
+        if (username === "" || password === "") {
+            alert("Please enter both username and password.");
+            return;
+        }
+
+        console.log(`Logging in with username: ${username} and password: ${password}`);
     };
     
     return (

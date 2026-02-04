@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import Holdings from "./holdings";
+import Login from "./login";
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "home"
+  const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "home" | "login"
 
   return (
     <>
@@ -24,8 +25,10 @@ const App = () => {
 
         <button
           className={activeTab === "login" ? "active" : ""}
-          onClick={() => setActiveTab("login")}
-          ></button>
+          onClick={() => setActiveTab("login")}type="button"
+         >
+          Login
+          </button>
       </div>
 
       {/* Page content */}
@@ -46,6 +49,7 @@ const App = () => {
       {activeTab === "login" && (
         <>
           <h1>Login</h1>
+          <Login />
         </>
       )}
     </>
