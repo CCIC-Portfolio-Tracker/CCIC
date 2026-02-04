@@ -3,9 +3,10 @@ import updateHoldings from "./update_holdings.js"
 
 
 async function importHoldings() {
-  await updateHoldings();
+  try {
+    await updateHoldings();
 
-  const query = `
+    const query = `
     SELECT t.ticker_text, t.ticker_co, p.price_price, h.tot_holdings
     FROM price_table p
     INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
@@ -13,22 +14,23 @@ async function importHoldings() {
     WHERE h.tot_holdings > 0
     `;
 
-  return new Promise((resolve, reject) => {
-    db.all(query, [], (err, rows) => {
-      if (err) return console.error(err.message);
-      if (rows.length === 0) console.log("(Table is currently empty)");
+    const result = await db.execute(query);
+    const rows = result.rows;
+    if (rows.length === 0) console.log("(Table is currently empty)");
 
-      const formattedHoldings = rows.map(row => ({
-        ticker: row.ticker_text,
-        name: row.ticker_co,
-        price: row.price_price,
-        holdings: row.tot_holdings,
-        totalValue: (row.price_price * row.tot_holdings).toFixed(2)
-      }));
+    return rows.map(row => ({
+      ticker: row.ticker_text,
+      name: row.ticker_co,
+      price: row.price_price,
+      holdings: row.tot_holdings,
+      totalValue: (row.price_price * row.tot_holdings).toFixed(2)
+    }));
 
-      resolve(formattedHoldings);
-    });
-  });
+  } catch (err) {
+    console.error("Error in importHoldings:", err);
+    return [];
+  }
+
 }
 
 export default importHoldings;

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback, use } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Grid } from "gridjs-react";
 import { html } from "gridjs"; 
 import "gridjs/dist/theme/mermaid.css";
@@ -10,7 +10,7 @@ function Holdings() {
 
   // load from backend function
   const loadHoldings = useCallback(() => {
-    fetch("/api/holdings")
+    fetch("https://ccic.onrender.com/api/holdings")
       .then((res) => res.json())
       .then((json) => {
         const mapped = (json || []).map((d) => [
@@ -23,7 +23,7 @@ function Holdings() {
         setRows(mapped);
               })
       .catch((err) => {
-        console.error("Failed to load /api/holdings:", err);
+        console.error("Failed to load https://ccic.onrender.com/api/holdings:", err);
         setRows([]);
       });
   }, []);
@@ -50,7 +50,7 @@ function Holdings() {
     if (!sector) return;
 
     try {
-      const res = await fetch("/api/holdings", {
+      const res = await fetch("https://ccic.onrender.com/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticker, shares, sector}),
@@ -64,13 +64,13 @@ function Holdings() {
       // reload from backend so UI reflects backend
       loadHoldings();
     } catch (e) {
-      console.error("POST /api/holdings failed:", e);
+      console.error("POST https://ccic.onrender.com/api/holdings failed:", e);
       alert("Failed to add holding.");
     }
   };
 
   // send edit to backend
-  const editHolding = async (ticker) => {
+  const editHolding = useCallback (async (ticker) => {
     const shares = prompt("Enter Share Count:");
     const sector = prompt("Enter sector");
 
@@ -83,7 +83,7 @@ function Holdings() {
     if (Object.keys(updates).length === 0) return;
 
     try {
-      const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
+      const res = await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
@@ -96,18 +96,18 @@ function Holdings() {
 
       loadHoldings();
     } catch (e) {
-      console.error("PUT /api/holdings failed:", e);
+      console.error("PUT https://ccic.onrender.com/api/holdings failed:", e);
       alert("Failed to edit holding.");
     }
-  };
+  }, [loadHoldings]);
 
   // send delete to backend
-  const deleteHolding = async (ticker) => {
+  const deleteHolding = useCallback(async (ticker) => {
     const ok = window.confirm(`Delete ${ticker}?`);
     if (!ok) return;
 
     try {
-      const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
+      const res = await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
         method: "DELETE",
       });
 
@@ -118,10 +118,10 @@ function Holdings() {
 
       loadHoldings();
     } catch (e) {
-      console.error("DELETE /api/holdings failed:", e);
+      console.error("DELETE https://ccic.onrender.com/api/holdings failed:", e);
       alert("Failed to delete holding.");
     }
-  };
+  }, [loadHoldings]);
 
   //  add an Actions column that renders buttons
   const columns = useMemo(
@@ -167,7 +167,7 @@ function Holdings() {
 
     wrapper.addEventListener("click", onClick);
     return () => wrapper.removeEventListener("click", onClick);
-  }, [rows]); // rows changes cause re-render
+  }, [rows, editHolding, deleteHolding]); // rows changes cause re-render
 
   // Add styling
   const gridStyle = useMemo(

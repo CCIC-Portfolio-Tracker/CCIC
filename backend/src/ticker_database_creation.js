@@ -1,12 +1,8 @@
 import db from "./db.js";
 
 export async function createTickerDatabase() {
-    return new Promise((resolve, reject) => {
 
-
-        db.serialize(() => {
-
-            db.execute(`insert or ignore into ticker_table (ticker_text, ticker_co)
+        await db.execute(`insert or ignore into ticker_table (ticker_text, ticker_co)
         values ('INTC', 'INTEL CORPORATION'),
        ('ISRG', 'INTUITIVE SURGICAL, INC.'),
        ('MDT', 'MEDTRONIC PUBLIC LIMITED COMPANY'),
@@ -87,18 +83,7 @@ export async function createTickerDatabase() {
        ('NXT', 'Nextpower Inc.'),
        ('PSN', 'PARSONS CORPORATION'),
        ('XYL', 'XYLEM INC.'),
-       ('TOTZF', 'TOTAL ENERGY SERVICES INC.')`, (err) => {
-                if (err) {
-                    console.error("Error creating tables:", err);
-                    reject(err);
-                } else {
-                    console.log("Database tables initialized successfully.");
-                    resolve();
-                }
-            });
+       ('TOTZF', 'TOTAL ENERGY SERVICES INC.')`)
 
-        });
-
-    });
 
 }

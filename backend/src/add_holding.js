@@ -5,43 +5,35 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 async function addHolding(ticker, amount, sector) {
     const result = await yahooFinance.quote(ticker);
 
-    return new Promise((resolve, reject) => {
-        if (!result || result.regularMarketPrice === undefined) {
-            return reject("Ticker not valid");
-        }
+    if (!result || result.regularMarketPrice === undefined) {
+        return reject("Ticker not valid");
+    }
 
-        db.serialize(() => {
-            db.execute(
-                `INSERT OR IGNORE INTO ticker_table (ticker_text, ticker_co, ticker_sector) VALUES (?, ?, ?)`,
-                [result.symbol, result.shortName, sector],
-                (err) => { if (err) return reject(err); }
-            );
+    await db.execute({
+        sql: `INSERT OR IGNORE INTO ticker_table (ticker_text, ticker_co, ticker_sector) VALUES (?, ?, ?)`,
+        args: [result.symbol, result.shortName, sector]
+    });
 
-            db.get(
-                `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`, 
-                [result.symbol], 
-                (err, row) => {
-                    if (err) return reject(err);
-                    if (!row) return reject("Ticker ID not found.");
+    const tickerResult = await db.execute({
+        sql: `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`,
+        args: [result.symbol]
+    });
 
-                    const tickerPK = row.ticker_pk;
+    if (tickerResult.rows.length === 0) throw new Error("Ticker ID not found.");
+    const tickerPK = tickerResult.rows[0].ticker_pk;
 
-                    const holdingQuery = `
+    const holdingQuery = `
                         INSERT INTO holding_table (ticker_fk, tot_holdings, portfolio_fk, holding_active, purchase_price)
                         VALUES (?, ?, 1, 1, ?)
                     `;
 
-                    db.execute(holdingQuery, [tickerPK, amount, result.regularMarketOpen], function(err) {
-                        if (err) return reject(err);
-                        
-                        console.log(`Successfully added ${amount} shares of ${result.symbol}`);
-
-                        resolve({ success: true, tickerPK });
-                    });
-                }
-            );
-        });
+    await db.execute({
+        sql: holdingQuery,
+        args: [tickerPK, amount, result.regularMarketOpen]
     });
+
+    console.log(`Successfully added ${amount} shares of ${result.symbol}`);
+    return { success: true, tickerPK };
 }
 
 export default addHolding;

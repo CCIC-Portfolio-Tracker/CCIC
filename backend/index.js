@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import importHoldings from "./src/import_holdings.js"
 import news from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
@@ -8,6 +9,8 @@ import editHolding from "./src/edit_holding.js"
 
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 
@@ -46,10 +49,15 @@ app.post("/api/holdings", async (req, res) => {
 
 // for editing holdings
 app.put("/api/holdings/:ticker", (req, res) => {
-  const ticker = (req.params.ticker || "").toUpperCase();
-  editHolding(ticker, req.body.shares, req.body.sector);
-  // can configure req.body to better fit db needs
-  res.json({ ok: true });
+  try {
+    const ticker = (req.params.ticker || "").toUpperCase();
+    editHolding(ticker, req.body.shares, req.body.sector);
+    // can configure req.body to better fit db needs
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Failed to edit holding:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // for deleting holdings
@@ -68,7 +76,8 @@ app.delete("/api/holdings/:ticker", async (req, res) => {
 });
 
 
-app.listen(process.env.PORT || 3000, "0.0.0.0")
-  {
-    console.log("Server is running...");
-  }
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+  console.log(`Server at http://localhost:${port}`);
+})
