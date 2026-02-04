@@ -6,7 +6,7 @@ function News() {
   const [error, setError] = useState(null);
 
   const loadNews = () => {
-    fetch("/api/news")
+    fetch("https://ccic.onrender.com/api/news")
       .then(res => res.json())
       .then(json => {
         setArticles(json.articles || []);
