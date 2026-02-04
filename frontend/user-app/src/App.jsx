@@ -50,7 +50,6 @@ const App = () => {
       {activeTab === "login" && (
         <>
           <h1>Login</h1>
-          <Graphics />
         </>
       )}
     </>
