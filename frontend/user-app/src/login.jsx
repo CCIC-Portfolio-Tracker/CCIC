@@ -5,7 +5,7 @@ function login() {
     const [password, setPassword] = useState("");
     
     const handleLogin = () => {
-        // Implement login logic here
+        
         alert(`Logging in with username: ${username} and password: ${password}`);
     };
     
