@@ -21,8 +21,8 @@ function News() {
       .catch(err => {
         console.error("Failed to load https://ccic.onrender.com/api/news:", err);
         setRows([]);
-      });
-  };
+    });
+};
 
   return (
     <div>
