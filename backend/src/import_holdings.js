@@ -7,11 +7,11 @@ async function importHoldings() {
     await updateHoldings();
 
     const query = `
-    SELECT t.ticker_text, t.ticker_co, p.price_price, h.tot_holdings
+    SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings
     FROM price_table p
     INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
     INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
-    WHERE h.tot_holdings > 0
+    WHERE p.tot_holdings > 0
     `;
 
     const result = await db.execute(query);

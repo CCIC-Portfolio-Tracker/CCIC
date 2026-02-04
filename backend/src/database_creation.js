@@ -12,7 +12,8 @@ export async function createDatabase() {
         price_pk integer primary key autoincrement,
         ticker_fk integer not null,
         price_price real not null,
-        price_date text not null
+        price_date text not null,
+        tot_holdings real not null
     )`);
 
     await db.execute(`create table if not exists portfolio_table (

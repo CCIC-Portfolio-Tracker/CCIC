@@ -35,26 +35,26 @@ async function getOutdatedTickers() {
     }
 
     const query = `
-            SELECT ticker_text, ticker_pk
-            FROM ticker_table
+            SELECT t.ticker_text, t.ticker_pk, h.tot_holdings
+            FROM ticker_table t
+            INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
             WHERE ticker_pk IN (${outdatedTickerPKs.join(',')});
         `;
 
     const result = await db.execute(query);
-    return {
-        outdatedTickers: result.rows.map(row => row.ticker_text),
-        outdatedTickerPKs: result.rows.map(row => row.ticker_pk)
-    };
+    return result.rows;
 }
 
 async function getUpdatedPrices() {
     try {
-        const { outdatedTickers, outdatedTickerPKs } = await getOutdatedTickers();
+        const outdatedData = await getOutdatedTickers();
 
-        if (!outdatedTickers || outdatedTickers.length === 0) {
+        if (!outdatedData || outdatedData.length === 0) {
             console.log("Nothing to update.");
             return;
         }
+
+        const outdatedTickers = outdatedData.map(row => row.ticker_text);
 
         // gets list of prices from yahooFinance
         const results = await yahooFinance.quote(outdatedTickers);
@@ -63,12 +63,12 @@ async function getUpdatedPrices() {
         const batchQueries = [];
         results.forEach(stock => {
             // Find the PK for this specific symbol
-            const matchPK = outdatedTickerPKs[outdatedTickers.indexOf(stock.symbol)];
+            const match = outdatedData.find(row => row.ticker_text === stock.symbol);
 
-            if (matchPK) {
+            if (match) {
                 batchQueries.push({
-                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date) VALUES (?, ?, ?)`,
-                    args: [matchPK, stock.regularMarketPrice, timestamp]
+                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
+                    args: [match.ticker_pk, stock.regularMarketOpen, timestamp, match.tot_holdings || 0]
                 });
             }
         });
@@ -92,18 +92,5 @@ async function getUpdatedPrices() {
 
 
 }
-
-/*
-async function printTable() {
-    console.log("\n--- Price Table ---");
-    db.all(`SELECT * FROM price_table`, [], (err, rows) => {
-        if (err) return console.error(err.message);
-        if (rows.length === 0) console.log("(Table is currently empty)");
-        console.log("PK\tTICK_FK\tPRICE\tHOLDINGS\tDATE");
-        rows.forEach(row => console.log(`${row.price_pk}\t${row.ticker_fk}\t$${row.price_price}\t${row.tot_holdings}\t${row.price_date}`));
-
-    });
-}
-*/
 
 export default getUpdatedPrices;
