@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Holdings from "./holdings";
 import Login from "./login";
+import News from "./news";
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "home" | "login"
@@ -42,6 +43,7 @@ const App = () => {
       {activeTab === "home" && (
         <>
           <h1>Home</h1>
+          <News />  
   
         </>
       )}
