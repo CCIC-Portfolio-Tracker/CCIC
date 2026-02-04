@@ -1,40 +1,48 @@
 import React, { useState } from "react";
-
+import "./Login.css";   
 
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    
+
+    // add openid login logic here
+
     const handleLogin = () => {
-        // import login logic here
-        // when the user clicks sign in.. redirect to open ID
         if (username === "" || password === "") {
             alert("Please enter both username and password.");
             return;
         }
 
-        console.log(`Logging in with username: ${username} and password: ${password}`);
-    };
-    
-    return (
-        <div>
-        <h2>Login</h2>
-        <input
+    console.log(`Logging in with username: ${username}`);
+  };
+
+  return (
+    <div className="login-page">
+        <div className="login-box">
+            <h2>Login</h2>
+
+            <input
+            className="text_area"
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
+            />
+
+            <input
+            className="text_area"
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin}>Login</button>
-        </div>
-    );
+            />
 
-    
+            <button className="button" onClick={handleLogin}>
+            Login
+            </button>
+         </div>
+    </div>
+  );
 }
-    export default Login;
+
+export default Login;
