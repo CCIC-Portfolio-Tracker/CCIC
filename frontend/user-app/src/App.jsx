@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Holdings from "./holdings";
+import News from "./news";
 import Graphics from "./graphics";
 
 const App = () => {
@@ -21,6 +22,10 @@ const App = () => {
         >
           Home
         </a>
+        <a
+          className={activeTab === "login" ? "active" : ""}
+          onClick={() => setActiveTab("login")}
+        />
       </div>
 
       {/* Page content */}
@@ -34,7 +39,16 @@ const App = () => {
       {activeTab === "home" && (
         <>
           <h1>Home</h1>
+          <News />
+
   
+        </>
+      )}
+
+      {activeTab === "login" && (
+        <>
+          <h1>Login</h1>
+          <Graphics />
         </>
       )}
     </>
