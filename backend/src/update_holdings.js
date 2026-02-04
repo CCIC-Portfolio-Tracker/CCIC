@@ -42,34 +42,38 @@ async function getOutdatedTickers() {
         `;
 
     const result = await db.execute(query);
-    return result.rows;
+    return {
+        outdatedTickers: result.rows.map(row => row.ticker_text),
+        outdatedTickerPKs: result.rows.map(row => row.ticker_pk),
+        currentHoldings: result.rows.map(row => row.tot_holdings)
+    };
 }
 
 async function getUpdatedPrices() {
     try {
-        const outdatedData = await getOutdatedTickers();
+        const { outdatedTickers, outdatedTickerPKs, currentHoldings } = await getOutdatedTickers();
 
-        if (!outdatedData || outdatedData.length === 0) {
+        if (!outdatedTickers || outdatedTickers.length === 0) {
             console.log("Nothing to update.");
             return;
         }
 
-        const outdatedTickers = outdatedData.map(row => row.ticker_text);
-
         // gets list of prices from yahooFinance
         const results = await yahooFinance.quote(outdatedTickers);
-        const quotes = Array.isArray(results) ? results : [results];
+        const resultsArray = Array.isArray(results) ? results : [results];
         const timestamp = new Date().toISOString().split('T')[0];
 
         const batchQueries = [];
-        quotes.forEach(stock => {
-            // Find the PK for this specific symbol
-            const match = outdatedData.find(row => row.ticker_text === stock.symbol);
 
-            if (match) {
+        resultsArray.forEach(stock => {
+            const index = outdatedTickers.findIndex(t => t.toUpperCase() === stock.symbol.toUpperCase());
+            const matchPK = outdatedTickerPKs[index];
+            const holdings = currentHoldings[index];
+
+            if (matchPK) {
                 batchQueries.push({
-                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
-                    args: [match.ticker_pk, stock.regularMarketOpen, timestamp, match.tot_holdings || 0]
+                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date) VALUES (?, ?, ?, ?)`,
+                    args: [matchPK, stock.regularMarketPrice, timestamp, holdings]
                 });
             }
         });
