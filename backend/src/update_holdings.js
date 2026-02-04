@@ -58,10 +58,11 @@ async function getUpdatedPrices() {
 
         // gets list of prices from yahooFinance
         const results = await yahooFinance.quote(outdatedTickers);
+        const quotes = Array.isArray(results) ? results : [results];
         const timestamp = new Date().toISOString().split('T')[0];
 
         const batchQueries = [];
-        results.forEach(stock => {
+        quotes.forEach(stock => {
             // Find the PK for this specific symbol
             const match = outdatedData.find(row => row.ticker_text === stock.symbol);
 
