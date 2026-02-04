@@ -19,7 +19,7 @@ function News() {
           setRows(mapped);
                 })
       .catch(err => {
-        cconsole.error("Failed to load https://ccic.onrender.com/api/news:", err);
+        console.error("Failed to load https://ccic.onrender.com/api/news:", err);
         setRows([]);
       });
   };
