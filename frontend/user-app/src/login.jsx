@@ -1,5 +1,4 @@
 import useState from "react";
-import React, { Component } from react;  
 
 function login() {
     const [username, setUsername] = useState("");
