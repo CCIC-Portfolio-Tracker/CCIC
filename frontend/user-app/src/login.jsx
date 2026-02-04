@@ -1,6 +1,7 @@
-import useState from "react";
+import React, { useState } from "react";
 
-function login() {
+
+function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     
@@ -36,4 +37,4 @@ function login() {
 
     
 }
-    export default login;
+    export default Login;
