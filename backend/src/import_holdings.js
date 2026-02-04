@@ -6,12 +6,14 @@ async function importHoldings() {
   try {
     await updateHoldings();
 
+    const timestamp = new Date().toISOString().split('T')[0];
+
     const query = `
     SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date
     FROM price_table p
     INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
     INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
-    WHERE p.tot_holdings > 0 AND p.price_date = (SELECT MAX(price_date) FROM price_table
+    WHERE p.tot_holdings > 0 AND p.price_date = '${timestamp}'
     `;
 
     const result = await db.execute(query);
