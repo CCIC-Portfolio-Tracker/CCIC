@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import importHoldings from "./src/import_holdings.js"
-import getStockNews from "./src/company_news.js"
+import getAllNews from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
 import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
@@ -29,9 +29,16 @@ app.get("/api/holdings", async (req, res) => {
   }
 });
 
-app.get("/api/news", (req, res) => {
-  res.send(news);
-})
+app.get("/api/news", async (req, res) => {
+  try {
+    const news = await getAllNews();
+
+    res.json(news);
+  } catch (error) {
+    console.error("Failed to fetch news:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 // for adding holdings
 app.post("/api/holdings", async (req, res) => {
