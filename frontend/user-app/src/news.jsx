@@ -9,8 +9,15 @@ function News() {
     fetch("https://ccic.onrender.com/api/news")
       .then(res => res.json())
       .then(json => {
-        setArticles(json.articles || []);
-      })
+        const mapped = (json || []).map((d) => [
+            d.headline ?? "",
+            d.company ?? "",
+            d.date ?? 0,
+            d.summary ?? 0,
+            d.link ?? 0,
+          ]);
+          setRows(mapped);
+                })
       .catch(err => {
         console.error("Failed to load /api/news:", err);
         setError("Failed to load news");
