@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import "./App.css";
 
 function News() {
@@ -19,8 +19,8 @@ function News() {
           setRows(mapped);
                 })
       .catch(err => {
-        console.error("Failed to load /api/news:", err);
-        setError("Failed to load news");
+        cconsole.error("Failed to load https://ccic.onrender.com/api/news:", err);
+        setRows([]);
       });
   };
 
@@ -31,13 +31,6 @@ function News() {
       <button onClick={loadNews}>Load Latest News</button>
 
       {error && <p>{error}</p>}
-
-      {articles.map((article, i) => (
-        <div key={i} className="article">
-          <h3>{article.title}</h3>
-          <p>{article.description}</p>
-        </div>
-      ))}
     </div>
   );
 }
