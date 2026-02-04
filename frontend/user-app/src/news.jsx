@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, {useState } from "react";
 import "./App.css";
 
 function News() {
-  const [articles, setArticles] = useState([]);
-  const [error, setError] = useState(null);
+  const [rows, setRows] = useState([]);
 
   const loadNews = () => {
     fetch("https://ccic.onrender.com/api/news")
@@ -29,6 +28,8 @@ function News() {
       <h2>News Section</h2>
 
       <button onClick={loadNews}>Load Latest News</button>
+
+      <h3> rows </h3>
 
       {error && <p>{error}</p>}
     </div>
