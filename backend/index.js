@@ -31,12 +31,11 @@ app.get("/api/holdings", async (req, res) => {
 
 app.get("/api/news", async (req, res) => {
   try {
-    const news = await getStockNews('AAPL');
-
-    res.json(news);
+    const news = await getStockNews("AAPL");
+    res.json(news || []);
   } catch (error) {
     console.error("Failed to fetch news:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 });
 
