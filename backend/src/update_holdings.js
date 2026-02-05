@@ -72,7 +72,7 @@ async function getUpdatedPrices() {
 
             if (matchPK) {
                 batchQueries.push({
-                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date) VALUES (?, ?, ?, ?)`,
+                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
                     args: [matchPK, stock.regularMarketPrice, timestamp, holdings]
                 });
             }
