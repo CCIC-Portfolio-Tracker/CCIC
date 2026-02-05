@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 dotenv.config()
+import db from "./db.js";
 
 async function importHoldings() {
     const query = `SELECT ticker_text FROM ticker_table`;
