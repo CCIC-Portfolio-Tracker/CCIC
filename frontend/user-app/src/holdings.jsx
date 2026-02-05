@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Grid } from "gridjs-react";
-import { html } from "gridjs"; 
+import { html } from "gridjs";
 import "gridjs/dist/theme/mermaid.css";
-import "./App.css";
+import "./tndex.css";
 
-// holdings component
-function Holdings() {
+function Holdings({ onSelectTicker }) {
   const [rows, setRows] = useState([]);
 
   // load from backend function
@@ -21,9 +20,12 @@ function Holdings() {
           d.totalValue ?? 0,
         ]);
         setRows(mapped);
-              })
+      })
       .catch((err) => {
-        console.error("Failed to load https://ccic.onrender.com/api/holdings:", err);
+        console.error(
+          "Failed to load https://ccic.onrender.com/api/holdings:",
+          err
+        );
         setRows([]);
       });
   }, []);
@@ -40,6 +42,7 @@ function Holdings() {
 
     const shareSt = prompt("Enter Share Count:");
     if (!shareSt) return;
+
     const shares = Number(shareSt);
     if (Number.isNaN(shares)) {
       alert("Share must be a number.");
@@ -53,7 +56,7 @@ function Holdings() {
       const res = await fetch("https://ccic.onrender.com/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticker, shares, sector}),
+        body: JSON.stringify({ ticker, shares, sector }),
       });
 
       if (!res.ok) {
@@ -61,7 +64,6 @@ function Holdings() {
         throw new Error(text || `HTTP ${res.status}`);
       }
 
-      // reload from backend so UI reflects backend
       loadHoldings();
     } catch (e) {
       console.error("POST https://ccic.onrender.com/api/holdings failed:", e);
@@ -70,63 +72,79 @@ function Holdings() {
   };
 
   // send edit to backend
-  const editHolding = useCallback (async (ticker) => {
-    const shares = prompt("Enter Share Count:");
-    const sector = prompt("Enter sector");
+  const editHolding = useCallback(
+    async (ticker) => {
+      const shares = prompt("Enter Share Count:");
+      const sector = prompt("Enter sector");
 
-    const updates = {};
+      const updates = {};
+      if (shares !== null && shares !== "") updates.shares = shares;
+      if (sector !== null && sector !== "") updates.sector = sector;
 
-    if (shares !== null && shares !== "") updates.shares = shares;
-    if (sector !== null && sector !== "") updates.sector = sector;
+      if (Object.keys(updates).length === 0) return;
 
-    // If user left everything blank, do nothing
-    if (Object.keys(updates).length === 0) return;
+      try {
+        const res = await fetch(
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updates),
+          }
+        );
 
-    try {
-      const res = await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
+        }
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
+        loadHoldings();
+      } catch (e) {
+        console.error("PUT https://ccic.onrender.com/api/holdings failed:", e);
+        alert("Failed to edit holding.");
       }
-
-      loadHoldings();
-    } catch (e) {
-      console.error("PUT https://ccic.onrender.com/api/holdings failed:", e);
-      alert("Failed to edit holding.");
-    }
-  }, [loadHoldings]);
+    },
+    [loadHoldings]
+  );
 
   // send delete to backend
-  const deleteHolding = useCallback(async (ticker) => {
-    const ok = window.confirm(`Delete ${ticker}?`);
-    if (!ok) return;
+  const deleteHolding = useCallback(
+    async (ticker) => {
+      const ok = window.confirm(`Delete ${ticker}?`);
+      if (!ok) return;
 
-    try {
-      const res = await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
-        method: "DELETE",
-      });
+      try {
+        const res = await fetch(
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
+          { method: "DELETE" }
+        );
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
+        }
+
+        loadHoldings();
+      } catch (e) {
+        console.error("DELETE https://ccic.onrender.com/api/holdings failed:", e);
+        alert("Failed to delete holding.");
       }
+    },
+    [loadHoldings]
+  );
 
-      loadHoldings();
-    } catch (e) {
-      console.error("DELETE https://ccic.onrender.com/api/holdings failed:", e);
-      alert("Failed to delete holding.");
-    }
-  }, [loadHoldings]);
-
-  //  add an Actions column that renders buttons
+  // columns (Ticker is clickable)
   const columns = useMemo(
     () => [
-      "Ticker",
+      {
+        name: "Ticker",
+        formatter: (cell) => {
+          const ticker = String(cell ?? "");
+          return html(
+            `<a href="#" class="ticker-link" data-ticker="${ticker}">${ticker}</a>`
+          );
+        },
+      },
       "Name",
       "Shares",
       "Current Price",
@@ -134,7 +152,7 @@ function Holdings() {
       {
         name: "Actions",
         formatter: (cell, row) => {
-          const ticker = row.cells[0].data; // first col is ticker
+          const ticker = row.cells[0].data;
           return html(`
             <button class="edit-btn" data-ticker="${ticker}">Edit</button>
             <button class="delete-btn" data-ticker="${ticker}">Delete</button>
@@ -145,13 +163,22 @@ function Holdings() {
     []
   );
 
-  // handle button clicks
-  // change this to only populate if user has admin acesss
+  // click handling (ticker link + buttons)
   useEffect(() => {
     const wrapper = document.getElementById("wrapper");
     if (!wrapper) return;
 
     const onClick = (e) => {
+      // ticker link
+      const link = e.target.closest("a.ticker-link");
+      if (link) {
+        e.preventDefault();
+        const ticker = link.getAttribute("data-ticker");
+        if (ticker && onSelectTicker) onSelectTicker(ticker);
+        return;
+      }
+
+      // buttons
       const btn = e.target.closest("button");
       if (!btn) return;
 
@@ -167,9 +194,9 @@ function Holdings() {
 
     wrapper.addEventListener("click", onClick);
     return () => wrapper.removeEventListener("click", onClick);
-  }, [rows, editHolding, deleteHolding]); // rows changes cause re-render
+  }, [rows, editHolding, deleteHolding, onSelectTicker]);
 
-  // Add styling
+  // grid styling
   const gridStyle = useMemo(
     () => ({
       table: {
@@ -198,7 +225,7 @@ function Holdings() {
 
       <div id="wrapper">
         <Grid
-          columns={columns} 
+          columns={columns}
           data={rows}
           search={true}
           sort={true}
