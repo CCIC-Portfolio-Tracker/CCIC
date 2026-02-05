@@ -31,7 +31,7 @@ app.get("/api/holdings", async (req, res) => {
 
 app.get("/api/news", async (req, res) => {
   try {
-    const news = await getAllNews();
+    const news = await getStockNews('AAPL');
 
     res.json(news);
   } catch (error) {
