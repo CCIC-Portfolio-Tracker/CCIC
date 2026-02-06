@@ -30,6 +30,14 @@ const App = () => {
         </button>
 
         <button
+          className={activeTab === "news" ? "active" : ""}
+          onClick={() => setActiveTab("news")}
+          type="button"
+        >
+          News
+        </button>
+
+        <button
           className={activeTab === "login" ? "active" : ""}
           onClick={() => setActiveTab("login")}
           type="button"
@@ -42,11 +50,11 @@ const App = () => {
       <main className="page">
         {activeTab === "home" && (
           <>
-            <News />
             <Graphics />
           </>
         )}
         {activeTab === "portfolio" && <Holdings />}
+        {activeTab === "news" && <News />}
         {activeTab === "login" && <Login />}
       </main>
     </>
