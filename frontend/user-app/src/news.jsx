@@ -49,8 +49,22 @@ function News() {
           headers: { Accept: "application/json" },
         });
 
+        const contentType = res.headers.get("content-type") || "";
+        const bodyText = await res.text();
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${bodyText.slice(0, 200)}`);
+        }
+
+        if (!contentType.includes("application/json")) {
+          throw new Error(
+            `Expected JSON but got "${contentType}". Body starts: ${bodyText.slice(0, 80)}`
+          );
+        }
+
+        const rawData = JSON.parse(bodyText);
         // Clean data and parse JSON 
-        const rawData = await res.json();
+        //const rawData = await res.json();
 
         // Normalize backend response into UI-friendly articles list
         const { articles: cleaned, error: cleaningError } = cleanInput(rawData);
