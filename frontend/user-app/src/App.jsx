@@ -40,7 +40,12 @@ const App = () => {
 
       {/* Page content */}
       <main className="page">
-        {activeTab === "home" && <Graphics />}
+        {activeTab === "home" && (
+          <>
+            <News />
+            <Graphics />
+          </>
+        )}
         {activeTab === "portfolio" && <Holdings />}
         {activeTab === "login" && <Login />}
       </main>
