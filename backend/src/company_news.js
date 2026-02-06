@@ -29,6 +29,8 @@ async function getStockNews(ticker) {
             link: article.url
         }));
 
+        console.log(articles)
+
         return articles;
 
     } catch (error) {

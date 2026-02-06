@@ -101,4 +101,5 @@ async function getUpdatedPrices() {
 
 }
 
-export default getUpdatedPrices;
+//export default getUpdatedPrices;
+getUpdatedPrices();
