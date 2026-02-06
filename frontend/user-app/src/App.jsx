@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Holdings from "./holdings";
 import Login from "./login";
 import News from "./news";
+import Graphics from "./graphics";  
 import "./App.css";
 
 
@@ -66,7 +67,7 @@ const App = () => {
 
       {/* Page content */}
       <main className="page">
-        {activeTab === "home" && <News />}
+        {activeTab === "home" && [<News key="news" />, <Graphics key="graphics" />]}
         {activeTab === "portfolio" && <Holdings />}
         {activeTab === "login" && <Login />}
         {activeTab === "ticker" && (
