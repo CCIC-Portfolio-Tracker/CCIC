@@ -6,7 +6,7 @@ async function importYTDValue() {
     const query = `
     SELECT tot_value, value_date
     FROM value_table
-    WHERE value_date >= DATE_FORMAT(NOW() ,'%Y-01-01')
+    WHERE value_date >= strftime('%Y-01-01', 'now')
     `;
 
     const result = await db.execute(query);

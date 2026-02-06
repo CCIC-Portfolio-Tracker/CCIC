@@ -6,7 +6,7 @@ async function addHolding(ticker, amount, sector) {
     const result = await yahooFinance.quote(ticker);
 
     if (!result || result.regularMarketPrice === undefined) {
-        return reject("Ticker not valid");
+        throw new error ("Ticker not valid");
     }
 
     await db.execute({

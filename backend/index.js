@@ -7,6 +7,9 @@ import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
 //import { Issuer } from 'openid-client';
 import session from 'express-session';
+import cron from 'node-cron';
+import getUpdatedPrices from "./src/update_holdings.js";
+import updateTotalValue from "./src/update_total_value.js";
 
 const app = express();
 
@@ -19,6 +22,25 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: true, httpOnly: true }
 }));
+
+// Calls updates every day at 9:31 est
+cron.schedule('31 09 * * *', async () => {
+  console.log("Running scheduled daily portfolio update at 09:31 EST...");
+  try {
+    // Update individual stock prices
+    await getUpdatedPrices(); 
+    
+    // Calculate and store the new total portfolio value
+    await updateTotalValue(); 
+    
+    console.log("Scheduled update completed successfully.");
+  } catch (error) {
+    console.error("Scheduled update failed:", error);
+  }
+}, {
+  scheduled: true,
+  timezone: "America/New_York" // This ensures it hits 9:31 AM EST regardless of server location
+});
 
 // Redirects user to school login page
 app.get("/api/auth/login", (req, res) => {

@@ -1,22 +1,19 @@
 import db from "./db.js";
-import updateHoldings from "./update_holdings.js"
-
 
 async function importHoldings() {
   try {
-    await updateHoldings();
-
-    const timestamp = new Date().toISOString().split('T')[0];
+    
+    const timestamp = new Date().toLocaleDateString('en-CA')
 
     const query = `
     SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date
     FROM price_table p
     INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
     INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
-    WHERE p.tot_holdings > 0 AND p.price_date = '${timestamp}'
+    WHERE p.tot_holdings > 0 AND p.price_date = ?
     `;
 
-    const result = await db.execute(query);
+    const result = await db.execute(query, [timestamp]);
     const rows = result.rows;
     if (rows.length === 0) console.log("(Table is currently empty)");
 

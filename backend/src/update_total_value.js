@@ -12,11 +12,9 @@ async function importTickerPK() {
     return result.rows.map(row => row.ticker_pk);
 }
 
-async function getTotalValue() {
+async function getTotalValue(timestamp) {
     try {
         const tickerPKs = await importTickerPK();
-
-        const timestamp = new Date().toISOString().split('T')[0];
 
         const query = `
             SELECT p.price_price, p.price_date, h.tot_holdings
@@ -42,9 +40,9 @@ async function getTotalValue() {
 }
 
 async function updateTotalValue() {
-    const totalValue = await getTotalValue();
+    const timestamp = new Date().toLocaleDateString('en-CA');
 
-    const timestamp = new Date().toISOString().split('T')[0];
+    const totalValue = await getTotalValue(timestamp);
 
     const query = `
         INSERT INTO value_table (tot_value, value_date) VALUES (?, '${timestamp}')
