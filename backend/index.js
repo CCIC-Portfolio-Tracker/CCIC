@@ -7,16 +7,23 @@ import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
 //import { Issuer } from 'openid-client';
 import session from 'express-session';
+import SQLiteStoreFactory from 'connect-sqlite3'; //
 import cron from 'node-cron';
 import getUpdatedPrices from "./src/update_holdings.js";
 import updateTotalValue from "./src/update_total_value.js";
 
+
 const app = express();
+const SQLiteStore = SQLiteStoreFactory(session); //
 
 app.use(cors());
 app.use(express.json());
 
 app.use(session({
+  store: new SQLiteStore({
+    db: 'sessions.sqlite', 
+    dir: './' 
+  }),
   secret: process.env.OIDC_CLIENT_SECRET,
   resave: false,
   saveUninitialized: true,
