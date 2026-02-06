@@ -10,17 +10,17 @@ async function importTickerPK() {
 }
 
 // Function to check which of the tickers have not been updated today
-async function checkCurrentHoldings() {
+async function checkCurrentHoldings(timestamp) {
     const tickerPKs = await importTickerPK();
     if (tickerPKs.length === 0) return [];
 
     const query = `
             SELECT ticker_fk, price_date
             FROM price_table
-            WHERE price_date = date('now')
+            WHERE price_date = ?
         `;
 
-    const result = await db.execute(query);
+    const result = await db.execute(query, [timestamp]);
     const updatedTickerSymbols = result.rows.map(row => row.ticker_fk);
 
     // returns a list of outdated tickers pks that need to be updated
@@ -28,8 +28,8 @@ async function checkCurrentHoldings() {
 }
 
 // Function to get the outdated tickers' text from their PKs
-async function getOutdatedTickers() {
-    const outdatedTickerPKs = await checkCurrentHoldings();
+async function getOutdatedTickers(timestamp) {
+    const outdatedTickerPKs = await checkCurrentHoldings(timestamp);
     if (outdatedTickerPKs.length === 0) {
         return { outdatedTickers: [], outdatedTickerPKs: [] };
     }
@@ -51,17 +51,18 @@ async function getOutdatedTickers() {
 
 async function getUpdatedPrices() {
     try {
-        const { outdatedTickers, outdatedTickerPKs, currentHoldings } = await getOutdatedTickers();
+        const timestamp = new Date().toLocaleDateString('en-CA');
+
+        const { outdatedTickers, outdatedTickerPKs, currentHoldings } = await getOutdatedTickers(timestamp);
 
         if (!outdatedTickers || outdatedTickers.length === 0) {
-            console.log("Nothing to update.");
+            console.log(`Nothing to update for ${timestamp}.`);
             return;
         }
 
         // gets list of prices from yahooFinance
         const results = await yahooFinance.quote(outdatedTickers);
         const resultsArray = Array.isArray(results) ? results : [results];
-        const timestamp = new Date().toISOString().split('T')[0];
 
         const batchQueries = [];
 

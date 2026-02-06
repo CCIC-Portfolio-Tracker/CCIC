@@ -5,7 +5,7 @@ import getStockNews from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
 import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
-import { Issuer } from 'openid-client';
+//import { Issuer } from 'openid-client';
 import session from 'express-session';
 
 const app = express();
