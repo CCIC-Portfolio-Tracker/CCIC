@@ -2,8 +2,10 @@ import db from "./db.js";
 
 async function importHoldings() {
   try {
-    
-    const timestamp = new Date().toLocaleDateString('en-CA')
+
+    const timestamp = new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Denver' 
+    });
 
     const query = `
     SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date
