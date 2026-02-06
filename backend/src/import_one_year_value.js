@@ -6,7 +6,7 @@ async function importOneYearValue() {
     const query = `
     SELECT tot_value, value_date
     FROM value_table
-    value_date >= date('now', '-1 year')
+    WHERE value_date >= date('now', '-1 year')
     `;
 
     const result = await db.execute(query);

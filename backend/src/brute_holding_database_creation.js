@@ -4,7 +4,9 @@ import db from "./db.js";
 
 export async function createHoldingDatabase() {
 
-    await db.execute(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
+    try {
+
+        await db.execute(`insert or ignore into holding_table (portfolio_fk, ticker_fk, tot_holdings)
         values (1, 1, 100.87),
                (1, 2, 8.00),
                (1, 3, 74.18),
@@ -85,14 +87,9 @@ export async function createHoldingDatabase() {
                (1, 78, 40.00),
                (1, 79, 15.00),
                (1, 80, 3.27),
-               (1, 81, 6796.31)`, (err) => {
-        if (err) {
-            console.error("Error creating tables:", err);
-            reject(err);
-        } else {
-            console.log("Database tables initialized successfully.");
-            resolve();
-        }
-    });
+               (1, 81, 6796.31)`)
+    } catch (err) {
+        console.error("Error in createHoldingDatabase:", err);
+    }
 
 }
