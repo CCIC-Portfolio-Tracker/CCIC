@@ -1,40 +1,53 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import dotenv from 'dotenv';
+dotenv.config();
 
 async function getStockNews(ticker) {
     const apiKey = process.env.FINNHUB_KEY;
-    const toDate = new Date();
-    const fromDate = new Date();
+    if (!apiKey) {
+        console.error("Missing Finnhub API Key");
+        return [];
+    }
 
-    fromDate.setDate(toDate.getDate() - 1);
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 1);
 
-    const toDateStr = toDate.toISOString().split('T')[0];
-    const fromDateStr = fromDate.toISOString().split('T')[0];
+    // YYYY-MM-DD
+    const formatDate = (date) => date.toISOString().split('T')[0];
 
-    const url = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${fromDateStr}&to=${toDateStr}&token=${apiKey}`;
+    const params = new URLSearchParams({
+        symbol: ticker.toUpperCase(),
+        from: formatDate(from),
+        to: formatDate(to),
+        token: apiKey
+    });
+
+    const url = `https://finnhub.io/api/v1/company-news?${params}`;
 
     try {
         const response = await fetch(url);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Finnhub API Error: ${response.status}`);
         }
 
         const data = await response.json();
 
-        const articles = data.map(article => ({
+        // Ensure data is an array before mapping
+        if (!Array.isArray(data)) return [];
+
+        return data.map(article => ({
             headline: article.headline,
             company: article.related,
             date: new Date(article.datetime * 1000).toLocaleDateString(),
             summary: article.summary,
-            link: article.url
+            link: article.url,
+            image: article.image 
         }));
 
-        console.log(articles)
-
-        return articles;
-
     } catch (error) {
-        console.error("Could not fetch news:", error);
+        console.error(`Could not fetch news for ${ticker}:`, error.message);
+        return []; 
     }
 };
 
