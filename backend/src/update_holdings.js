@@ -51,7 +51,9 @@ async function getOutdatedTickers(timestamp) {
 
 async function getUpdatedPrices() {
     try {
-        const timestamp = new Date().toLocaleDateString('en-CA');
+        const timestamp = new Date().toLocaleDateString('en-CA', {
+            timeZone: 'America/Denver' 
+        });
 
         const { outdatedTickers, outdatedTickerPKs, currentHoldings } = await getOutdatedTickers(timestamp);
 
@@ -74,7 +76,7 @@ async function getUpdatedPrices() {
             if (matchPK) {
                 batchQueries.push({
                     sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
-                    args: [matchPK, stock.regularMarketPrice, timestamp, holdings]
+                    args: [matchPK, stock.regularMarketOpen, timestamp, holdings]
                 });
             }
         });

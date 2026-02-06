@@ -40,7 +40,9 @@ async function getTotalValue(timestamp) {
 }
 
 async function updateTotalValue() {
-    const timestamp = new Date().toLocaleDateString('en-CA');
+    const timestamp = new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/Denver' 
+    });
 
     const totalValue = await getTotalValue(timestamp);
 

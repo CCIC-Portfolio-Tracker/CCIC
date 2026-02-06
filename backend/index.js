@@ -24,7 +24,7 @@ app.use(session({
 }));
 
 // Calls updates every day at 9:31 est
-cron.schedule('31 09 * * *', async () => {
+cron.schedule('31 09 * * 1-5', async () => {
   console.log("Running scheduled daily portfolio update at 09:31 EST...");
   try {
     // Update individual stock prices
