@@ -5,7 +5,7 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 async function addHolding(ticker, amount, sector) {
     const result = await yahooFinance.quote(ticker);
 
-    if (!result || result.regularMarketPrice === undefined) {
+    if (!result || result.regularMarketOpen === undefined) {
         throw new error ("Ticker not valid");
     }
 
