@@ -70,15 +70,5 @@ h1 {
   padding: 20px;
 }
 
-.ticker-link {
-  color: #1a73e8;
-  text-decoration: none;
-  font-weight: 600;
-}
-.ticker-link:hover {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 
 

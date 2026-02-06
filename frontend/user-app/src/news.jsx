@@ -45,7 +45,7 @@ function News() {
 
       // try to fetch news from backend
       try {
-        const res = await fetch("https://ccic.onrender.com/api/news", {
+        const res = await fetch("/api/news", {
           headers: { Accept: "application/json" },
         });
 
@@ -85,14 +85,13 @@ function News() {
   return (
     <div className="news-pane">
       <div className="news-header">News</div>
-  
-      <div className="news-scroll">
+
         {!loading && error && <div className="news-error">{error}</div>}
-  
+
         {!loading && !error && articles.length === 0 && (
           <div className="news-empty">No news available.</div>
         )}
-  
+
         {!loading &&
           !error &&
           articles.map((a, i) => (
@@ -105,19 +104,18 @@ function News() {
               >
                 {a.headline}
               </a>
-  
+
               <div className="news-meta">
                 {a.company}
                 {a.company && a.date ? " • " : ""}
                 {a.date}
               </div>
-  
+
               {a.summary && <div className="news-summary">{a.summary}</div>}
             </div>
           ))}
-      </div>
     </div>
   );
-}  
+}
 
 export default News;

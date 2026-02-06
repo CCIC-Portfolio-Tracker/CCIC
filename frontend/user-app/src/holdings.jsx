@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Grid } from "gridjs-react";
 import { html } from "gridjs";
 import "gridjs/dist/theme/mermaid.css";
-import "./tndex.css";
+
 
 function Holdings({ onSelectTicker }) {
   const [rows, setRows] = useState([]);
