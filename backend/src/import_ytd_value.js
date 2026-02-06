@@ -1,0 +1,28 @@
+import db from "./db.js";
+
+async function importYTDValue() {
+  try {
+
+    const query = `
+    SELECT tot_value, value_date
+    FROM value_table
+    WHERE value_date >= DATE_FORMAT(NOW() ,'%Y-01-01')
+    `;
+
+    const result = await db.execute(query);
+    const rows = result.rows;
+    if (rows.length === 0) console.log("(Table is currently empty)");
+
+    return rows.map(row => ({
+      value: row.tot_value,
+      date: row.value_date,
+    }));
+
+  } catch (err) {
+    console.error("Error in importYTDValue:", err);
+    return [];
+  }
+
+}
+
+export default importYTDValue;
