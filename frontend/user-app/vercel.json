@@ -1,5 +1,0 @@
-{
-    "rewrites": [
-      { "source": "/api/(.*)", "destination": "https://ccic-phi.vercel.app//api/$1" }
-    ]
-  }

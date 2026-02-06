@@ -45,7 +45,7 @@ function News() {
 
       // try to fetch news from backend
       try {
-        const res = await fetch("/api/news", {
+        const res = await fetch("https://ccic.onrender.com/api/news", {
           headers: { Accept: "application/json" },
         });
 
