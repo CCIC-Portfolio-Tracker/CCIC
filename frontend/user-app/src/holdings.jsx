@@ -3,13 +3,14 @@ import { Grid } from "gridjs-react";
 import { html } from "gridjs";
 import "gridjs/dist/theme/mermaid.css";
 
-
 function Holdings({ onSelectTicker }) {
   const [rows, setRows] = useState([]);
+  const isAdmin = true; // Placeholder for user role check
+  const user = null; // Placeholder for userid if edits
 
   // load from backend function
   const loadHoldings = useCallback(() => {
-    fetch("https://ccic.onrender.com/api/holdings")
+    fetch("/api/holdings")
       .then((res) => res.json())
       .then((json) => {
         const mapped = (json || []).map((d) => [
@@ -22,10 +23,7 @@ function Holdings({ onSelectTicker }) {
         setRows(mapped);
       })
       .catch((err) => {
-        console.error(
-          "Failed to load https://ccic.onrender.com/api/holdings:",
-          err
-        );
+        console.error("Failed to load /api/holdings:", err);
         setRows([]);
       });
   }, []);
@@ -37,6 +35,8 @@ function Holdings({ onSelectTicker }) {
 
   // send add to backend via POST, then reload from backend
   const addRow = async () => {
+    if (!isAdmin) return; // admin-only guard
+
     const ticker = prompt("Enter Ticker (e.g., AAPL):");
     if (!ticker) return;
 
@@ -53,7 +53,7 @@ function Holdings({ onSelectTicker }) {
     if (!sector) return;
 
     try {
-      const res = await fetch("https://ccic.onrender.com/api/holdings", {
+      const res = await fetch("/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticker, shares, sector }),
@@ -66,7 +66,7 @@ function Holdings({ onSelectTicker }) {
 
       loadHoldings();
     } catch (e) {
-      console.error("POST https://ccic.onrender.com/api/holdings failed:", e);
+      console.error("POST /api/holdings failed:", e);
       alert("Failed to add holding.");
     }
   };
@@ -74,6 +74,8 @@ function Holdings({ onSelectTicker }) {
   // send edit to backend
   const editHolding = useCallback(
     async (ticker) => {
+      if (!isAdmin) return; // admin-only guard
+
       const shares = prompt("Enter Share Count:");
       const sector = prompt("Enter sector");
 
@@ -84,14 +86,11 @@ function Holdings({ onSelectTicker }) {
       if (Object.keys(updates).length === 0) return;
 
       try {
-        const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updates),
-          }
-        );
+        const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates),
+        });
 
         if (!res.ok) {
           const text = await res.text();
@@ -100,24 +99,25 @@ function Holdings({ onSelectTicker }) {
 
         loadHoldings();
       } catch (e) {
-        console.error("PUT https://ccic.onrender.com/api/holdings failed:", e);
+        console.error("PUT /api/holdings failed:", e);
         alert("Failed to edit holding.");
       }
     },
-    [loadHoldings]
+    [isAdmin, loadHoldings]
   );
 
   // send delete to backend
   const deleteHolding = useCallback(
     async (ticker) => {
+      if (!isAdmin) return; // admin-only guard
+
       const ok = window.confirm(`Delete ${ticker}?`);
       if (!ok) return;
 
       try {
-        const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
-          { method: "DELETE" }
-        );
+        const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
+          method: "DELETE",
+        });
 
         if (!res.ok) {
           const text = await res.text();
@@ -126,41 +126,44 @@ function Holdings({ onSelectTicker }) {
 
         loadHoldings();
       } catch (e) {
-        console.error("DELETE https://ccic.onrender.com/api/holdings failed:", e);
+        console.error("DELETE /api/holdings failed:", e);
         alert("Failed to delete holding.");
       }
     },
-    [loadHoldings]
+    [isAdmin, loadHoldings]
   );
 
   // columns (Ticker is clickable)
   const columns = useMemo(
-    () => [
-      {
-        name: "Ticker",
-        formatter: (cell) => {
-          const ticker = String(cell ?? "");
-          return html(
-            `<a href="#" class="ticker-link" data-ticker="${ticker}">${ticker}</a>`
-          );
+    () =>
+      [
+        {
+          name: "Ticker",
+          formatter: (cell) => {
+            const ticker = String(cell ?? "");
+            return html(
+              `<a href="#" class="ticker-link" data-ticker="${ticker}">${ticker}</a>`
+            );
+          },
         },
-      },
-      "Name",
-      "Shares",
-      "Current Price",
-      "Total Value",
-      {
-        name: "Actions",
-        formatter: (cell, row) => {
-          const ticker = row.cells[0].data;
-          return html(`
-            <button class="edit-btn" data-ticker="${ticker}">Edit</button>
-            <button class="delete-btn" data-ticker="${ticker}">Delete</button>
-          `);
-        },
-      },
-    ],
-    []
+        "Name",
+        "Shares",
+        "Current Price",
+        "Total Value",
+        isAdmin
+          ? {
+              name: "Actions",
+              formatter: (cell, row) => {
+                const ticker = row.cells[0].data;
+                return html(`
+                  <button class="edit-btn" data-ticker="${ticker}">Edit</button>
+                  <button class="delete-btn" data-ticker="${ticker}">Delete</button>
+                `);
+              },
+            }
+          : undefined,
+      ].filter(Boolean),
+    [isAdmin]
   );
 
   // click handling (ticker link + buttons)
@@ -178,7 +181,9 @@ function Holdings({ onSelectTicker }) {
         return;
       }
 
-      // buttons
+      // Only admins can use edit/delete buttons
+      if (!isAdmin) return;
+
       const btn = e.target.closest("button");
       if (!btn) return;
 
@@ -194,34 +199,30 @@ function Holdings({ onSelectTicker }) {
 
     wrapper.addEventListener("click", onClick);
     return () => wrapper.removeEventListener("click", onClick);
-  }, [rows, editHolding, deleteHolding, onSelectTicker]);
+  }, [isAdmin, editHolding, deleteHolding, onSelectTicker]);
 
   // grid styling
   const gridStyle = useMemo(
     () => ({
-      table: {
-        "font-family": "Arial, sans-serif",
-        "font-size": "14px",
-      },
+      table: { "font-family": "Arial, sans-serif", "font-size": "14px" },
       th: {
         "background-color": "#f2f2f2",
         color: "#333",
         padding: "10px",
         "text-align": "left",
       },
-      td: {
-        padding: "10px",
-        "border-bottom": "1px solid #ddd",
-      },
+      td: { padding: "10px", "border-bottom": "1px solid #ddd" },
     }),
     []
   );
 
   return (
     <>
-      <button id="add-row-btn" onClick={addRow}>
-        Add New Holding
-      </button>
+      {isAdmin && (
+        <button id="add-row-btn" onClick={addRow}>
+          Add New Holding
+        </button>
+      )}
 
       <div id="wrapper">
         <Grid
