@@ -8,8 +8,8 @@ import Admin from "./admin";
 import "./App.css";
 
 const App = () => {
-  const isAdmin = true; // Placeholder for user role check
-  const loggedIn = true; // Placeholder for login status
+  const isAdmin = false; // Placeholder for user role check
+  const loggedIn = false; // Placeholder for login status
 
   const [activeTab, setActiveTab] = useState(loggedIn ? "home" : "login");
 
