@@ -144,6 +144,50 @@ app.delete("/api/holdings/:ticker", isAdmin, async (req, res) => {
 
 });
 
+// send back updated total portfolio value for the past year (for graph)
+app.get("/api/total-value", async (req, res) => {
+  try {
+    const valueData = await importOneYearValue();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch total value data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// send back updated total portfolio value for six months
+app.get("/api/six-months", async (req, res) => {
+  try {
+    const valueData = await importSixMonthValue();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch total value data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// send back updated total portfolio value for three months
+app.get("/api/three-months", async (req, res) => {
+  try {
+    const valueData = await importThreeMonthValue();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch total value data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// send back updated total portfolio value for six months
+app.get("/api/ytd", async (req, res) => {
+  try {
+    const valueData = await importYTDValue();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch total value data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 const port = process.env.PORT || 3000;
 
