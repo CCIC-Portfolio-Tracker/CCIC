@@ -9,7 +9,7 @@ import "./App.css";
 
 const App = () => {
   const isAdmin = false; // Placeholder for user role check
-  const loggedIn = false; // Placeholder for login status
+  const loggedIn = true; // Placeholder for login status
 
   const [activeTab, setActiveTab] = useState(loggedIn ? "home" : "login");
 
