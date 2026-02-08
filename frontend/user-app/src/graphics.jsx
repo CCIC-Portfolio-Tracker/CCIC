@@ -4,10 +4,10 @@ import "./graphics.css";
 
 function Graphics() {
   const RANGE_ENDPOINTS = {
-    "1y": "/api/total-value",
-    "6m": "/api/six-months",
-    "3m": "/api/three-months",
-    "ytd": "/api/ytd",
+    "1y": "https://ccic.onrender.com/api/total-value",
+    "6m": "https://ccic.onrender.com/api/six-months",
+    "3m": "https://ccic.onrender.com/api/three-months",
+    "ytd": "https://ccic.onrender.com/api/ytd",
   };
 
   // dropdown state for charts
