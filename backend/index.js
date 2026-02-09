@@ -26,7 +26,6 @@ app.use(cors({
   credentials: true
 }));
 
-app.set("trust proxy", 1); //
 app.use(express.json());
 
 // stops memory leaks, creates secure session cookie for users
@@ -166,21 +165,6 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
-// logs out user by destroying session and cookie
-app.post("/api/auth/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) return res.status(500).json({ error: "Failed to logout" });
-
-    // If you set a custom cookie name, use that name here
-    res.clearCookie("connect.sid", {
-      secure: true,
-      httpOnly: true,
-      sameSite: "none",
-    });
-
-    res.json({ ok: true });
-  });
-});
 
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Holdings from "./holdings";
 import Login from "./login";
 import News from "./news";
@@ -6,54 +6,22 @@ import Graphics from "./graphics";
 import Admin from "./admin";
 import "./App.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://ccic.onrender.com";
-
 const App = () => {
-  const [auth, setAuth] = useState({
-    loading: true,
-    loggedIn: false,
-    isAdmin: false,
-    role: null,
-    user: null
-  });
+  const loggedIn = true;   // placeholder: replace with real auth later
+  const isAdmin = true;   // placeholder: role check if needed later
 
-  const [activeTab, setActiveTab] = useState("home");
-
-  const fetchAuth = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/auth`, {
-        method: "GET",
-        credentials: "include", 
-      });
-
-      const data = await res.json();
-      setAuth({ loading: false, ...data });
-
-      // If not logged in, force user to Account/Login tab
-      if (!data.loggedIn) setActiveTab("account");
-    } catch (e) {
-      console.error("Failed to fetch auth status:", e);
-      setAuth({ loading: false, loggedIn: false, isAdmin: false, role: null, user: null });
-      setActiveTab("account");
-    }
-  };
-
-  useEffect(() => {
-    fetchAuth();
-  }, []);
+  const [activeTab, setActiveTab] = useState(
+    loggedIn ? "home" : "account"
+  );
 
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
-    if (!auth.loggedIn && tab !== "account") {
+    if (!loggedIn && tab !== "account") {
       setActiveTab("account");
     } else {
       setActiveTab(tab);
     }
   };
-
-  if (auth.loading) {
-    return <div className="page">Loading…</div>;
-  }
 
   return (
     <>
@@ -83,13 +51,13 @@ const App = () => {
           News
         </button>
 
-        {/* Account / Login tab (right aligned) */}
+        {/* Account / Login tab */}
         <button
           className={`login-tab ${activeTab === "account" ? "active" : ""}`}
           onClick={() => setActiveTab("account")}
           type="button"
         >
-          {auth.loggedIn ? "Account" : "Login"}
+          {loggedIn ? "Account" : "Login"}
         </button>
       </div>
 
@@ -100,8 +68,8 @@ const App = () => {
         {activeTab === "news" && <News />}
 
         {activeTab === "account" && (
-          auth.loggedIn ? (
-            auth.isAdmin ? <Admin /> : <div>Account page</div>
+          loggedIn ? (
+            isAdmin ? <Admin /> : <div>Account page</div>
           ) : (
             <Login />
           )
