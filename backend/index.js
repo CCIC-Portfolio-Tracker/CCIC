@@ -198,25 +198,16 @@ app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
 });
 
 // sends user info to the frontend
-app.get("/api/auth", (req, res) => {
+app.get("/api/auth/status", (req, res) => {
   const user = req.session?.user;
-
-  if (!user) {
-    return res.json({
-      loggedIn: false,
-      user: null,
-      role: null,
-      isAdmin: false
-    });
-  }
-
-  return res.json({
-    loggedIn: true,
-    user: { pk: user.pk, name: user.name },
-    role: user.role,
-    isAdmin: user.role === "admin"
+  res.json({
+    loggedIn: !!user,
+    role: user?.role ?? null,
+    isAdmin: user?.role === "admin",
+    name: user?.name ?? null
   });
 });
+
 
 
 // Fetch activity logs
