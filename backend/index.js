@@ -119,7 +119,10 @@ app.get("/api/auth/login", async (req, res) => {
 // where school sends user with a code after login, sends school code and client secret to get necessary information
 app.get("/api/auth/callback", async (req, res) => {
   try {
-    const currentUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.get('host');
+    const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
+
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
       pkceCodeVerifier: code_verifier,
       expectedState: state
@@ -155,7 +158,7 @@ app.get("/api/auth/callback", async (req, res) => {
       role: userData.user_role 
     };
 
-    res.redirect("https://ccic-portfolio-tracker.vercel.app/holdings");
+    res.redirect("https://ccic-phi.vercel.app");
   } catch (err) {
     console.error("Callback Error:", err);
     res.status(500).send("Authentication failed");
