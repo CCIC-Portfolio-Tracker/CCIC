@@ -21,10 +21,7 @@ const app = express();
 app.set('trust proxy', 1);
 const SQLiteStore = SQLiteStoreFactory(session); 
 
-app.use(cors({
-  origin: "https://ccic-portfolio-tracker.vercel.app", 
-  credentials: true
-}));
+app.use(cors);
 app.use(express.json());
 
 app.use(session({
@@ -88,7 +85,6 @@ app.get("/api/auth/login", (req, res) => {
     scope: 'openid profile email',
   };
   
-  // config is the object returned by discovery in v6
   const url = oidc.calculateAuthorizationUrl(config, parameters);
   res.redirect(url.href);
 });
