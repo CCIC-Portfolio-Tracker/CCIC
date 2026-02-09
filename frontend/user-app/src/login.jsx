@@ -50,7 +50,7 @@ function Login() {
 
 function Login() {
     const handleOIDCLogin = () => {
-        window.location.href = "http://localhost:3000/api/auth/login";
+        window.location.href = "https://ccic.onrender.com/api/auth/login";
     };
 
     return (

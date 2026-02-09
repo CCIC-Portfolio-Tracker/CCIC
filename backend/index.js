@@ -5,7 +5,7 @@ import getStockNews from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
 import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
-import { Issuer, custom } from 'openid-client';
+import * as oidc from 'openid-client';
 import session from 'express-session';
 import SQLiteStoreFactory from 'connect-sqlite3'; //
 import cron from 'node-cron';
@@ -13,17 +13,21 @@ import getUpdatedPrices from "./src/update_holdings.js";
 import updateTotalValue from "./src/update_total_value.js";
 
 let client;
-const discoverIssuer = async () => {
-  const schoolIssuer = await Issuer.discover('https://cas.coloradocollege.edu/cas/oidc');
-  client = new schoolIssuer.Client({
-    client_id: process.env.OIDC_CLIENT_ID,
-    client_secret: process.env.OIDC_CLIENT_SECRET,
-    redirect_uris: ['http://localhost:3000/api/auth/callback'],
-    response_types: ['code'],
-  });
-};
+const initOIDC = async () => {
+  try {
+    const config = await oidc.discovery(
+      new URL('https://cas.coloradocollege.edu/cas/oidc'),
+      process.env.OIDC_CLIENT_ID,
+      process.env.OIDC_CLIENT_SECRET
+    );
 
-discoverIssuer();
+    client = config; 
+    console.log("OIDC Client initialized successfully.");
+  } catch (error) {
+    console.error("Failed to discover OIDC provider:", error);
+  }
+};
+initOIDC();
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); //
@@ -71,16 +75,16 @@ app.get("/api/auth/login", (req, res) => {
 app.get("/api/auth/callback", async (req, res) => {
   const params = client.callbackParams(req);
   try {
-    const tokenSet = await client.callback('http://localhost:3000/api/auth/callback', params);
+    const tokenSet = await client.callback(process.env.OIDC_REDIRECT_URI, params);
     const userClaims = tokenSet.claims();
 
-    // Check if user exists in your Turso database
+    // Check database for user
     let userResult = await db.execute({
         sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
         args: [userClaims.sub]
     });
 
-    // Register new users automatically
+    // Auto-register as 'viewer' if new
     if (userResult.rows.length === 0) {
         await db.execute({
             sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'viewer')",
@@ -96,7 +100,7 @@ app.get("/api/auth/callback", async (req, res) => {
     req.session.user = {
       pk: userData.user_pk,
       name: userData.user_name,
-      role: userData.user_role // Persistent role (admin, member, or viewer)
+      role: userData.user_role 
     };
 
     res.redirect("https://ccic-portfolio-tracker.vercel.app/holdings");
