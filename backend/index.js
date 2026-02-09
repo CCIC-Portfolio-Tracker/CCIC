@@ -101,7 +101,7 @@ app.get("/api/auth/login", async (req, res) => {
   req.session.code_verifier = code_verifier;
   req.session.state = state;
 
-  const code_challenge = await client.calculatePKCECodeChallenge(code_verifier)
+  const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier)
   
   let parameters =  {
     redirect_uri: process.env.OIDC_REDIRECT_URI,
