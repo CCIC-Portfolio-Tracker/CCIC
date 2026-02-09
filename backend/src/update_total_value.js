@@ -16,16 +16,22 @@ async function getTotalValue(timestamp) {
     try {
         const tickerPKs = await importTickerPK();
 
+        if (tickerPKs.length === 0) return 0;
+
+        const placeholders = tickerPKs.map(() => '?').join(',');
+
         const query = `
             SELECT p.price_price, p.price_date, h.tot_holdings
             FROM price_table p
             INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
             INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
-            WHERE p.ticker_fk IN (${tickerPKs.join(',')}) AND p.price_date = ${timestamp}
+            WHERE p.ticker_fk IN (${placeholders}) AND p.price_date = ?
         `;
 
-        const result = await db.execute(query);
+        const result = await db.execute(query, [...tickerPKs, timestamp]);
+        console.log(result.rows.length);
         let totalValue = 0;
+
 
         result.rows.forEach(row => {
             totalValue += row.price_price * row.tot_holdings;
@@ -44,6 +50,8 @@ async function updateTotalValue() {
         timeZone: 'America/Denver' 
     });
 
+    console.log("time:", timestamp);
+
     const totalValue = await getTotalValue(timestamp);
 
     const query = `
@@ -53,4 +61,5 @@ async function updateTotalValue() {
     await db.execute(query, [totalValue]);
 }
 
-export default updateTotalValue;
+//export default updateTotalValue;
+await updateTotalValue();
