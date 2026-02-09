@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./login.css";   
 
+/*
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -44,6 +45,24 @@ function Login() {
          </div>
     </div>
   );
+}
+*/
+
+function Login() {
+    const handleOIDCLogin = () => {
+        window.location.href = "http://localhost:3000/api/auth/login";
+    };
+
+    return (
+        <div className="login-page">
+            <div className="login-box">
+                <h2>Colorado College Login</h2>
+                <button className="button" onClick={handleOIDCLogin}>
+                    Sign in with School ID
+                </button>
+            </div>
+        </div>
+    );
 }
 
 export default Login;
