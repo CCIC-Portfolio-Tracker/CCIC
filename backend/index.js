@@ -51,8 +51,9 @@ let state;
 let code_verifier;
 const initializeOIDC = async () => {
   try {
+    const issuerURL = new URL(process.env.OIDC_ISSUER_URL);
     config = await oidc.discovery(
-      process.env.OIDC_ISSUER_URL,
+      issuerURL,
       process.env.OIDC_CLIENT_ID,
       process.env.OIDC_CLIENT_SECRET
     );
