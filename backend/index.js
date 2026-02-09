@@ -107,22 +107,26 @@ app.get("/api/auth/login", (req, res) => {
 app.get("/api/auth/callback", async (req, res) => {
   try {
     const currentUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
-    const tokens = await oidc.authorizationCodeGrant(config, currentUrl);
+    const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
+      expectedState: req.session.state 
+    });
     const claims = tokens.claims();
+    console.log("Logged in user:", claims.sub);
 
-    // Check if user exists in table
+    // check if user exists in table
     let userResult = await db.execute({
       sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
       args: [claims.sub]
     });
 
-    // If new user, register them as 'viewer'
+    // if new user, register them as 'viewer'
     if (userResult.rows.length === 0) {
       await db.execute({
         sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'viewer')",
         args: [claims.sub, claims.name || claims.email]
       });
-      // Refetch to get the user_pk
+
+      // refetch to get the user_pk
       userResult = await db.execute({
         sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
         args: [claims.sub]
