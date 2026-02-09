@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import db from "./src/db.js";
 import importHoldings from "./src/import_holdings.js"
 import getStockNews from "./src/company_news.js"
 import deleteHolding from "./src/delete_holding.js"
@@ -7,7 +8,7 @@ import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
 import * as oidc from 'openid-client';
 import session from 'express-session';
-import SQLiteStoreFactory from 'connect-sqlite3'; //
+import SQLiteStoreFactory from 'connect-sqlite3'; 
 import cron from 'node-cron';
 import getUpdatedPrices from "./src/update_holdings.js";
 import updateTotalValue from "./src/update_total_value.js";
@@ -20,7 +21,10 @@ const app = express();
 app.set('trust proxy', 1);
 const SQLiteStore = SQLiteStoreFactory(session); 
 
-app.use(cors());
+app.use(cors({
+  origin: "https://ccic-portfolio-tracker.vercel.app", 
+  credentials: true
+}));
 app.use(express.json());
 
 app.use(session({
@@ -28,10 +32,15 @@ app.use(session({
     db: 'sessions.sqlite', 
     dir: './' 
   }),
-  secret: process.env.OIDC_CLIENT_SECRET,
+  secret: process.env.SESSION_SECRET || "a-long-random-string",
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true, httpOnly: true }
+  saveUninitialized: false, 
+  cookie: { 
+    secure: true,      
+    httpOnly: true, 
+    sameSite: 'none',  
+    maxAge: 24 * 60 * 60 * 1000 
+  }
 }));
 
 let config;
@@ -70,10 +79,16 @@ cron.schedule('31 09 * * 1-5', async () => {
 
 // Redirects user to school login page
 app.get("/api/auth/login", (req, res) => {
+  if (!config) {
+    return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
+  }
+
   const parameters = {
     redirect_uri: process.env.OIDC_REDIRECT_URI,
     scope: 'openid profile email',
   };
+  
+  // config is the object returned by discovery in v6
   const url = oidc.calculateAuthorizationUrl(config, parameters);
   res.redirect(url.href);
 });
