@@ -8,6 +8,11 @@
   padding-left: 20px;          
 }
 
+/* Push Login to the far right */
+.login-tab {
+  margin-left: auto;
+}
+
 /* Tab button */
 .tab button {
   background: none;

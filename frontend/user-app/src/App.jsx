@@ -60,7 +60,7 @@ const App = () => {
         )}
 
         <button
-          className={activeTab === "login" ? "active" : ""}
+          className={`login-tab ${activeTab === "login" ? "active" : ""}`}
           onClick={() => setActiveTab("login")}
           type="button"
         >
