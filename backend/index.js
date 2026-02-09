@@ -91,21 +91,26 @@ app.get("/api/auth/login", async (req, res) => {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  const code_verifier = oidc.generateCodeVerifier();
-  const state = oidc.generateState();
+  const code_verifier = oidc.random(); 
+  const state = oidc.random();
+
+  req.session.code_verifier = code_verifier;
+  req.session.state = state;
+
+  const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier);
   
   const url = oidc.buildAuthorizationUrl(config, {
     redirect_uri: process.env.OIDC_REDIRECT_URI,
     scope: 'openid profile email',
     state: state,
-    code_challenge: await oidc.calculateCodeChallenge(code_verifier),
+    code_challenge: code_challenge,
     code_challenge_method: 'S256',
   });
 
   res.redirect(url.href);
 });
 
-// where school sends user with a code after login
+// where school sends user with a code after login, sends school code and client secret to get necessary information
 app.get("/api/auth/callback", async (req, res) => {
   try {
     const currentUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
