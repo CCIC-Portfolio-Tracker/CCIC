@@ -60,6 +60,8 @@ const initializeOIDC = async () => {
 };
 initializeOIDC();
 
+console.log(config);
+
 // Calls updates every day at 9:31 est
 cron.schedule('31 09 * * 1-5', async () => {
   console.log("Running scheduled daily portfolio update at 09:31 EST...");
@@ -94,7 +96,10 @@ app.get("/api/auth/login", (req, res) => {
     scope: 'openid profile email',
   };
   
-  const url = oidc.calculateAuthorizationUrl(config, parameters);
+  const url = oidc.buildAuthorizationUrl(config, {
+    redirect_uri: process.env.OIDC_REDIRECT_URI,
+    scope: 'openid profile email',
+  });
   res.redirect(url.href);
 });
 
@@ -185,7 +190,6 @@ app.get("/api/admin/activities", isAdmin, async (req, res) => {
 app.get("/api/holdings", async (req, res) => {
   try {
     const holdings = await importHoldings();
-    console.log(holdings);
 
     res.json(holdings);
   } catch (error) {
