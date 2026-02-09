@@ -16,25 +16,9 @@ import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
 
-let client;
-const initOIDC = async () => {
-  try {
-    const config = await oidc.discovery(
-      new URL('https://cas.coloradocollege.edu/cas/oidc'),
-      process.env.OIDC_CLIENT_ID,
-      process.env.OIDC_CLIENT_SECRET
-    );
-
-    client = config; 
-    console.log("OIDC Client initialized successfully.");
-  } catch (error) {
-    console.error("Failed to discover OIDC provider:", error);
-  }
-};
-initOIDC();
-
 const app = express();
-const SQLiteStore = SQLiteStoreFactory(session); //
+app.set('trust proxy', 1);
+const SQLiteStore = SQLiteStoreFactory(session); 
 
 app.use(cors());
 app.use(express.json());
@@ -49,6 +33,21 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: true, httpOnly: true }
 }));
+
+let config;
+const initializeOIDC = async () => {
+  try {
+    config = await oidc.discovery(
+      new URL('https://cas.coloradocollege.edu/cas/oidc'),
+      process.env.OIDC_CLIENT_ID,
+      process.env.OIDC_CLIENT_SECRET
+    );
+    console.log("OIDC Discovery successful");
+  } catch (err) {
+    console.error("OIDC Init Error:", err);
+  }
+};
+initializeOIDC();
 
 // Calls updates every day at 9:31 est
 cron.schedule('31 09 * * 1-5', async () => {
@@ -71,36 +70,42 @@ cron.schedule('31 09 * * 1-5', async () => {
 
 // Redirects user to school login page
 app.get("/api/auth/login", (req, res) => {
-  const url = client.authorizationUrl({ scope: 'openid profile email' });
-  res.redirect(url);
+  const parameters = {
+    redirect_uri: process.env.OIDC_REDIRECT_URI,
+    scope: 'openid profile email',
+  };
+  const url = oidc.calculateAuthorizationUrl(config, parameters);
+  res.redirect(url.href);
 });
 
 // where school sends user with a code after login
 app.get("/api/auth/callback", async (req, res) => {
-  const params = client.callbackParams(req);
   try {
-    const tokenSet = await client.callback(process.env.OIDC_REDIRECT_URI, params);
-    const userClaims = tokenSet.claims();
+    const currentUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    const tokens = await oidc.authorizationCodeGrant(config, currentUrl);
+    const claims = tokens.claims();
 
-    // Check database for user
+    // Check if user exists in table
     let userResult = await db.execute({
-        sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
-        args: [userClaims.sub]
+      sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
+      args: [claims.sub]
     });
 
-    // Auto-register as 'viewer' if new
+    // If new user, register them as 'viewer'
     if (userResult.rows.length === 0) {
-        await db.execute({
-            sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'viewer')",
-            args: [userClaims.sub, userClaims.name || userClaims.email, 'viewer']
-        });
-        userResult = await db.execute({
-            sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
-            args: [userClaims.sub]
-        });
+      await db.execute({
+        sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'viewer')",
+        args: [claims.sub, claims.name || claims.email]
+      });
+      // Refetch to get the user_pk
+      userResult = await db.execute({
+        sql: "SELECT * FROM user_table WHERE user_oidc_sub = ?",
+        args: [claims.sub]
+      });
     }
 
     const userData = userResult.rows[0];
+
     req.session.user = {
       pk: userData.user_pk,
       name: userData.user_name,
@@ -109,7 +114,8 @@ app.get("/api/auth/callback", async (req, res) => {
 
     res.redirect("https://ccic-portfolio-tracker.vercel.app/holdings");
   } catch (err) {
-    res.status(500).send('Authentication failed');
+    console.error("Callback Error:", err);
+    res.status(500).send("Authentication failed");
   }
 });
 
