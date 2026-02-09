@@ -44,7 +44,7 @@ app.use(session({
   }
 }));
 
-// connects with CC CAS to get necessary data
+// connects with CC CAS to get necessary data like authorized endpoint
 let config;
 const initializeOIDC = async () => {
   try {
@@ -86,20 +86,22 @@ app.get("/", (req, res) => {
 })
 
 // Redirects user to school login page
-app.get("/api/auth/login", (req, res) => {
+app.get("/api/auth/login", async (req, res) => {
   if (!config) {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  const parameters = {
-    redirect_uri: process.env.OIDC_REDIRECT_URI,
-    scope: 'openid profile email',
-  };
+  const code_verifier = oidc.generateCodeVerifier();
+  const state = oidc.generateState();
   
   const url = oidc.buildAuthorizationUrl(config, {
     redirect_uri: process.env.OIDC_REDIRECT_URI,
     scope: 'openid profile email',
+    state: state,
+    code_challenge: await oidc.calculateCodeChallenge(code_verifier),
+    code_challenge_method: 'S256',
   });
+
   res.redirect(url.href);
 });
 
