@@ -27,6 +27,7 @@ app.use(cors({
 
 app.use(express.json());
 
+// stops memory leaks, creates secure session cookie for users
 app.use(session({
   store: new SQLiteStore({
     db: 'sessions.sqlite', 
@@ -43,6 +44,7 @@ app.use(session({
   }
 }));
 
+// connects with CC CAS to get necessary data
 let config;
 const initializeOIDC = async () => {
   try {

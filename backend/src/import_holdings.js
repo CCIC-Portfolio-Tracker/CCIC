@@ -14,7 +14,7 @@ async function importHoldings() {
     WHERE p.tot_holdings > 0 AND p.price_date = (SELECT MAX(price_date) FROM price_table)
     `;
 
-    const result = await db.execute(query, [timestamp]);
+    const result = await db.execute(query);
     const rows = result.rows;
     if (rows.length === 0) console.log("(Table is currently empty)");
 
