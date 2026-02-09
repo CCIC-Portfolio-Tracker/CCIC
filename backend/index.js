@@ -11,6 +11,10 @@ import SQLiteStoreFactory from 'connect-sqlite3'; //
 import cron from 'node-cron';
 import getUpdatedPrices from "./src/update_holdings.js";
 import updateTotalValue from "./src/update_total_value.js";
+import importOneYearValue from "./src/import_one_year_value.js";
+import importSixMonthValue from "./src/import_six_month_value.js";
+import importThreeMonthValue from "./src/import_three_month_value.js";
+import importYTDValue from "./src/import_ytd_value.js";
 
 let client;
 const initOIDC = async () => {

@@ -61,4 +61,5 @@ async function updateTotalValue() {
     await db.execute(query, [totalValue]);
 }
 
-export default updateTotalValue;
+//export default updateTotalValue;
+await updateTotalValue();
