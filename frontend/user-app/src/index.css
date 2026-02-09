@@ -5,7 +5,8 @@
   background-color: #f1f1f1;
 
   justify-content: flex-start; 
-  padding: 20px;          
+  padding-left: 20px;
+  padding-right: 20px;    
 }
 
 /* Push Login to the far right */
