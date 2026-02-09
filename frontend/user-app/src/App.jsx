@@ -6,7 +6,7 @@ import Graphics from "./graphics";
 import Admin from "./admin";
 import "./App.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://YOUR_BACKEND_DOMAIN";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://ccic.onrender.com";
 
 const App = () => {
   const [auth, setAuth] = useState({
@@ -21,7 +21,7 @@ const App = () => {
 
   const fetchAuth = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/auth/me`, {
+      const res = await fetch(`${API_BASE}/api/auth`, {
         method: "GET",
         credentials: "include", 
       });
