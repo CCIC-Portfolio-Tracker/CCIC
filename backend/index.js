@@ -179,6 +179,7 @@ app.get("/api/admin/activities", isAdmin, async (req, res) => {
 app.get("/api/holdings", async (req, res) => {
   try {
     const holdings = await importHoldings();
+    console.log(holdings);
 
     res.json(holdings);
   } catch (error) {
