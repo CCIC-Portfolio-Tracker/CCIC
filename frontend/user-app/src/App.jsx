@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useState } from "react";
 import Holdings from "./holdings";
 import Login from "./login";
@@ -8,14 +7,17 @@ import Admin from "./admin";
 import "./App.css";
 
 const App = () => {
-  const isAdmin = false; // Placeholder for user role check
-  const loggedIn = true; // Placeholder for login status
+  const loggedIn = true;   // placeholder: replace with real auth later
+  const isAdmin = true;   // placeholder: role check if needed later
 
-  const [activeTab, setActiveTab] = useState(loggedIn ? "home" : "login");
+  const [activeTab, setActiveTab] = useState(
+    loggedIn ? "home" : "account"
+  );
 
   const goToTab = (tab) => {
-    if (!loggedIn && tab !== "login") {
-      setActiveTab("login");
+    // Prevent access to protected tabs when logged out
+    if (!loggedIn && tab !== "account") {
+      setActiveTab("account");
     } else {
       setActiveTab(tab);
     }
@@ -49,36 +51,29 @@ const App = () => {
           News
         </button>
 
-        {isAdmin && (
-          <button
-            className={activeTab === "admin" ? "active" : ""}
-            onClick={() => goToTab("admin")}
-            type="button"
-          >
-            Admin
-          </button>
-        )}
-
+        {/* Account / Login tab */}
         <button
-          className={`login-tab ${activeTab === "login" ? "active" : ""}`}
-          onClick={() => setActiveTab("login")}
+          className={`login-tab ${activeTab === "account" ? "active" : ""}`}
+          onClick={() => setActiveTab("account")}
           type="button"
         >
-          Login
+          {loggedIn ? "Account" : "Login"}
         </button>
       </div>
 
       {/* Page content */}
       <main className="page">
-        {activeTab === "home" && (
-          <>
-            <Graphics />
-          </>
-        )}
+        {activeTab === "home" && <Graphics />}
         {activeTab === "portfolio" && <Holdings />}
         {activeTab === "news" && <News />}
-        {isAdmin && activeTab === "admin" && <Admin />}
-        {activeTab === "login" && <Login />}
+
+        {activeTab === "account" && (
+          loggedIn ? (
+            isAdmin ? <Admin /> : <div>Account page</div>
+          ) : (
+            <Login />
+          )
+        )}
       </main>
     </>
   );

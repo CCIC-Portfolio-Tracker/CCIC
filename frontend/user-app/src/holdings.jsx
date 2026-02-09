@@ -5,7 +5,7 @@ import "gridjs/dist/theme/mermaid.css";
 
 function Holdings({ onSelectTicker }) {
   const [rows, setRows] = useState([]);
-  const isAdmin = false; // Placeholder for user role check
+  const isAdmin = true; // Placeholder for user role check
   const user = null; // Placeholder for userid if edits
 
   // load from backend function
