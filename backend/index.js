@@ -18,10 +18,9 @@ import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
 
 const app = express();
-app.set('trust proxy', 1);
 const SQLiteStore = SQLiteStoreFactory(session); 
 
-app.use(cors);
+app.use(cors());
 app.use(express.json());
 
 app.use(session({
@@ -73,6 +72,10 @@ cron.schedule('31 09 * * 1-5', async () => {
   scheduled: true,
   timezone: "America/New_York" // This ensures it hits 9:31 AM EST regardless of server location
 });
+
+app.get("/", (req, res) => {
+  res.send("Server is ready!");
+})
 
 // Redirects user to school login page
 app.get("/api/auth/login", (req, res) => {
@@ -145,11 +148,6 @@ const isMember = (req, res, next) => {
   }
   res.status(403).json({ error: "Unauthorized: Members only" });
 };
-
-
-app.get("/", (req, res) => {
-  res.send("Server is ready!");
-})
 
 // Fetch all users for management
 app.get("/api/admin/users", isAdmin, async (req, res) => {
