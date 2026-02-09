@@ -26,6 +26,7 @@ app.use(cors({
   credentials: true
 }));
 
+app.set("trust proxy", 1); //
 app.use(express.json());
 
 // stops memory leaks, creates secure session cookie for users
@@ -165,6 +166,22 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
+// logs out user by destroying session and cookie
+app.post("/api/auth/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) return res.status(500).json({ error: "Failed to logout" });
+
+    // If you set a custom cookie name, use that name here
+    res.clearCookie("connect.sid", {
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+    });
+
+    res.json({ ok: true });
+  });
+});
+
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session.user && req.session.user.role === 'admin') {
@@ -195,6 +212,28 @@ app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
   });
   res.json({ ok: true });
 });
+
+// sends user info to the frontend
+app.get("/api/auth", (req, res) => {
+  const user = req.session?.user;
+
+  if (!user) {
+    return res.json({
+      loggedIn: false,
+      user: null,
+      role: null,
+      isAdmin: false
+    });
+  }
+
+  return res.json({
+    loggedIn: true,
+    user: { pk: user.pk, name: user.name },
+    role: user.role,
+    isAdmin: user.role === "admin"
+  });
+});
+
 
 // Fetch activity logs
 app.get("/api/admin/activities", isAdmin, async (req, res) => {
