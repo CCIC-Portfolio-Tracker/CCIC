@@ -21,9 +21,10 @@ const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
 
 app.use(cors({
-  origin: "https://ccic-phi.vercel.app/",
+  origin: "https://ccic-phi.vercel.app",
   credentials: true
 }));
+
 app.use(express.json());
 
 app.use(session({
@@ -31,7 +32,7 @@ app.use(session({
     db: 'sessions.sqlite', 
     dir: './' 
   }),
-  secret: process.env.SESSION_SECRET || "a-long-random-string",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false, 
   cookie: { 
