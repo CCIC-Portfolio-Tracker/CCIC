@@ -16,6 +16,7 @@ import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
+import crypto from 'crypto';
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -46,10 +47,12 @@ app.use(session({
 
 // connects with CC CAS to get necessary data like authorized endpoint
 let config;
+let state;
+let code_verifier;
 const initializeOIDC = async () => {
   try {
     config = await oidc.discovery(
-      new URL('https://cas.coloradocollege.edu/cas/oidc'),
+      process.env.OIDC_ISSUER_URL,
       process.env.OIDC_CLIENT_ID,
       process.env.OIDC_CLIENT_SECRET
     );
@@ -91,21 +94,23 @@ app.get("/api/auth/login", async (req, res) => {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  const code_verifier = oidc.random(); 
-  const state = oidc.random();
+  code_verifier = oidc.randomPKCECodeVerifier();
+  state = oidc.randomState();
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
 
-  const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier);
+  const code_challenge = await client.calculatePKCECodeChallenge(code_verifier)
   
-  const url = oidc.buildAuthorizationUrl(config, {
+  let parameters =  {
     redirect_uri: process.env.OIDC_REDIRECT_URI,
     scope: 'openid profile email',
     state: state,
     code_challenge: code_challenge,
     code_challenge_method: 'S256',
-  });
+  };
+
+  const url = oidc.buildAuthorizationUrl(config, parameters);
 
   res.redirect(url.href);
 });
@@ -115,7 +120,8 @@ app.get("/api/auth/callback", async (req, res) => {
   try {
     const currentUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
-      expectedState: req.session.state 
+      pkceCodeVerifier: code_verifier,
+      expectedState: state
     });
     const claims = tokens.claims();
     console.log("Logged in user:", claims.sub);
