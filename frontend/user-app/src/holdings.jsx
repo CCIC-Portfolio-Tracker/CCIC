@@ -10,7 +10,7 @@ function Holdings({ onSelectTicker }) {
 
   // load from backend function
   const loadHoldings = useCallback(() => {
-    fetch("/api/holdings")
+    fetch("https://ccic.onrender.com/api/holdings")
       .then((res) => res.json())
       .then((json) => {
         const mapped = (json || []).map((d) => [
@@ -53,7 +53,7 @@ function Holdings({ onSelectTicker }) {
     if (!sector) return;
 
     try {
-      const res = await fetch("/api/holdings", {
+      const res = await fetch("https://ccic.onrender.com/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticker, shares, sector }),
@@ -86,7 +86,7 @@ function Holdings({ onSelectTicker }) {
       if (Object.keys(updates).length === 0) return;
 
       try {
-        const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
+        const res = await fetch(`https://ccic.onrender.com/api/holdings${encodeURIComponent(ticker)}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updates),
@@ -115,7 +115,7 @@ function Holdings({ onSelectTicker }) {
       if (!ok) return;
 
       try {
-        const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
+        const res = await fetch(`https://ccic.onrender.com/api/holdings${encodeURIComponent(ticker)}`, {
           method: "DELETE",
         });
 

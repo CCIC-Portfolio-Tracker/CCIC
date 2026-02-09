@@ -20,7 +20,10 @@ import importYTDValue from "./src/import_ytd_value.js";
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
 
-app.use(cors());
+app.use(cors({
+  origin: "https://ccic-phi.vercel.app/",
+  credentials: true
+}));
 app.use(express.json());
 
 app.use(session({
