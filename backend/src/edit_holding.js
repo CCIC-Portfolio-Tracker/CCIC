@@ -1,6 +1,6 @@
 import db from "./db.js";
 
-async function editHolding(ticker, amount, sector) {
+async function editHolding(ticker, amount, sector, userPK) {
     const tickerResult = await db.execute({
         sql: `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`,
         args: [ticker]
@@ -17,6 +17,11 @@ async function editHolding(ticker, amount, sector) {
     await db.execute({
         sql: `UPDATE ticker_table SET ticker_sector = ? WHERE ticker_pk = ?`,
         args: [sector, tickerPK]
+    });
+
+    await db.execute({
+        sql: `INSERT INTO activity_table (user_fk, ticker_fk, log_action) VALUES (?, ?, ?)`,
+        args: [userPK, tickerPK, `EDIT`]
     });
 
     console.log(`Successfully updated ${ticker} to ${amount} shares and sector ${sector}`);

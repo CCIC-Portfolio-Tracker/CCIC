@@ -2,7 +2,7 @@ import db from "./db.js";
 import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
-async function addHolding(ticker, amount, sector) {
+async function addHolding(ticker, amount, sector, userPK) {
     const result = await yahooFinance.quote(ticker);
 
     if (!result || result.regularMarketOpen === undefined) {
@@ -30,6 +30,11 @@ async function addHolding(ticker, amount, sector) {
     await db.execute({
         sql: holdingQuery,
         args: [tickerPK, amount, result.regularMarketOpen]
+    });
+
+    await db.execute({
+        sql: `INSERT INTO activity_table (user_fk, ticker_fk, log_action) VALUES (?, ?, ?)`,
+        args: [userPK, tickerPK, `ADD`]
     });
 
     console.log(`Successfully added ${amount} shares of ${result.symbol}`);

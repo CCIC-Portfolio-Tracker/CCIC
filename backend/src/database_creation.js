@@ -45,6 +45,21 @@ export async function createDatabase() {
         value_date text unique not null
     )`);
 
+    await db.execute(`CREATE TABLE IF NOT EXISTS user_table (
+        user_pk INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_oidc_sub TEXT UNIQUE NOT NULL,
+        user_name TEXT NOT NULL,
+        user_role TEXT NOT NULL DEFAULT 'viewer' -- Roles: admin, member, viewer
+    )`);
+
+    await db.execute(`CREATE TABLE IF NOT EXISTS activity_table (
+        activity_pk INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_fk INTEGER NOT NULL,
+        ticker_fk INTEGER,
+        log_action TEXT NOT NULL, 
+        log_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
     console.log("Tables created successfully.");
 
 
