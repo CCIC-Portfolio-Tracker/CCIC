@@ -174,13 +174,13 @@ const isMember = (req, res, next) => {
 */
 
 // Fetch all users for management
-app.get("/api/admin/users", isAdmin, async (req, res) => {
+app.get("/api/admin/users", async (req, res) => {
   const result = await db.execute("SELECT * FROM user_table");
   res.json(result.rows);
 });
 
 // Update a user's role
-app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
+app.put("/api/admin/users/:pk/role", async (req, res) => {
   await db.execute({
       sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
       args: [req.body.role, req.params.pk]
