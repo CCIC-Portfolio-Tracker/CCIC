@@ -1,7 +1,3 @@
-// make a list of users and a list of their permissions
-// be able to edit permissions and remove users
-// makes a log of edits users have given to the portfolio
-
 import React, { useEffect, useState } from "react";
 import "./admin.css";
 
@@ -13,35 +9,52 @@ function Admin() {
   const isAdmin = true; // hardcoded for now
 
   useEffect(() => {
-    // fake users (no backend)
-    const fakeUsers = [
-      { user_pk: 1, user_name: "noe", user_role: "admin" },
-      { user_pk: 2, user_name: "james", user_role: "admin" },
-      { user_pk: 3, user_name: "testuser", user_role: "viewer" },
-    ];
+    let cancelled = false;
 
-    setUsers(fakeUsers);
-    setLoading(false);
-  }, []);
+    async function loadUsers() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const usersRes = await fetch("https://ccic.onrender.com/api/admin/users", {
+          method: "GET",
+          credentials: "include", // important if auth uses cookies/sessions
+          headers: { Accept: "application/json" },
+        });
+
+        if (!usersRes.ok) {
+          const text = await usersRes.text();
+          throw new Error(text || `HTTP ${usersRes.status}`);
+        }
+
+        const usersJson = await usersRes.json();
+        if (!cancelled) setUsers(Array.isArray(usersJson) ? usersJson : []);
+      } catch (e) {
+        if (!cancelled) setError(e?.message || "Failed to fetch users.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    if (isAdmin) loadUsers();
+    else setLoading(false);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin]);
 
   const removeUser = (user_pk) => {
     const ok = window.confirm("Are you sure you want to delete this user?");
     if (!ok) return;
 
+    // client-side remove for now
     setUsers((prev) => prev.filter((u) => u.user_pk !== user_pk));
   };
 
-  if (loading) {
-    return <div>Loading…</div>;
-  }
-
-  if (!isAdmin) {
-    return <div>Unauthorized.</div>;
-  }
-
-  if (error) {
-    return <div className="admin-error">{error}</div>;
-  }
+  if (loading) return <div>Loading…</div>;
+  if (!isAdmin) return <div>Unauthorized.</div>;
+  if (error) return <div className="admin-error">{error}</div>;
 
   return (
     <div className="admin-page">
@@ -86,7 +99,7 @@ export default Admin;
 
 
 
-      /*// make a list of users and a list of their permissions
+/*// make a list of users and a list of their permissions
 // be able to edit permissions and remove users
 // makes a log of edits users have given to the portfolio
 
