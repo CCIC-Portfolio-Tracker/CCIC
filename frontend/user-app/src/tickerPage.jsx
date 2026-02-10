@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function tickerPage({ ticker }) {
+export default function TickerPage({ ticker }) {
   return (
     <div style={{ padding: 24 }}>
       <div
