@@ -41,7 +41,7 @@ async function deleteHolding(ticker) {
         args: [timestamp, ticker]
     });
 
-    let cashAmt;
+    let cashAmt = new Decimal(0);
 
     result.rows.forEach(row => {
         const price = new Decimal(row.price_price);
@@ -55,11 +55,9 @@ async function deleteHolding(ticker) {
                 INSERT INTO cash_table (cash_amount, cash_date) VALUES (?, ?)
             `;
 
-    
-
     await db.execute({
         sql: cashQuery,
-        args: [0, cashAmt]
+        args: [cashAmt, timestamp]
     });
 
     const priceQuery = `
