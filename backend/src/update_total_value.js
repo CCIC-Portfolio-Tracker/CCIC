@@ -36,10 +36,10 @@ async function importTickerPK() {
 
 async function getTotalValue(timestamp) {
     try {
-
-        const oldestDate = importOldestValueDate();
+        const currentDate = new Date(timestamp);
+        const oldestDate = await importOldestValueDate();
         const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
-        const endDate = timestamp - 1;
+        const endDate = currentDate - 1;
         console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
         await loadHistoricalValue(startDate, endDate);
 
