@@ -27,7 +27,7 @@ async function editHolding(ticker, amount, sector) {
     } else {
         throw new error ("Sector not valid");
     }
-    
+
     const tickerResult = await db.execute({
         sql: `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`,
         args: [ticker]
@@ -45,6 +45,15 @@ async function editHolding(ticker, amount, sector) {
         sql: `UPDATE ticker_table SET ticker_portfolio = ? WHERE ticker_pk = ?`,
         args: [sectorID, tickerPK]
     });
+
+    await db.execute({
+        sql :`UPDATE price_table
+                SET tot_holdings = ?
+                WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?)
+                AND price_date = (SELECT MAX(price_date) FROM price_table WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?))`,
+        args: [amount, ticker, ticker]
+
+    })
 
     /*
     await db.execute({
