@@ -100,9 +100,12 @@ const App = () => {
       {/* Page content */}
       <main className="page">
         {activeTab === "home" && <Graphics />}
-        {activeTab === "portfolio" && (
+        {/*{activeTab === "portfolio" && (
           <Holdings isAdmin={isAdmin} loggedIn={loggedIn} />
         )}
+          */}
+        {activeTab === "portfolio" && <Holdings/>}
+
         {activeTab === "news" && <News />}
 
         {activeTab === "account" &&
