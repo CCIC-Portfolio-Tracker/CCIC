@@ -186,7 +186,11 @@ const isMember = (req, res, next) => {
 
 // Fetch all users for management
 app.get("/api/admin/users", isAdmin, async (req, res) => {
-  const result = await db.execute("SELECT * FROM user_table");
+  const result = await db.execute(`
+    SELECT user_pk, user_name, user_role
+    FROM user_table
+    ORDER BY user_name
+  `);
   res.json(result.rows);
 });
 
