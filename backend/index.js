@@ -54,6 +54,8 @@ const initializeOIDC = async () => {
       process.env.OIDC_CLIENT_ID,
       process.env.OIDC_CLIENT_SECRET
     );
+
+    console.log("Issuer URL:", issuerURL);
     
     if (!discoveredConfig.authorization_endpoint) {
       throw new Error("Discovery succeeded but authorization_endpoint is missing!");
