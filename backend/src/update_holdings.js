@@ -80,8 +80,8 @@ async function getUpdatedPrices(timestamp) {
             const matchPK = outdatedTickerPKs[index];
             const holdings = currentHoldings[index];
 
-            const oldestDate = importOldestPriceDate(matchPK);
-            const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
+            const oldestDate = new Date(importOldestPriceDate(matchPK)).toLocaleDateString('en-CA');
+            const startDate = oldestDate + 1;
             const endDate = timestamp - 1;
             loadHistoricalPrices(startDate, endDate, matchPK);
 

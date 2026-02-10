@@ -2,7 +2,7 @@ import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 
-async function load2025Price(startDate, endDate) {
+async function load2025Price() {
     try {
         const tickerData = await db.execute(`
             SELECT t.ticker_pk, t.ticker_text, h.tot_holdings 
@@ -11,6 +11,9 @@ async function load2025Price(startDate, endDate) {
         `);
 
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
+
+        const startDate = new Date('2025-01-02');
+        const endDate = new Date('2025-01-03');
 
         for (const row of tickerData.rows) {
             const { ticker_pk, ticker_text, tot_holdings } = row;
@@ -56,4 +59,4 @@ async function load2025Price(startDate, endDate) {
     }
 }
 
-export default loadHistoricalPrices;
+export default load2025Price;

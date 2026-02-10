@@ -2,10 +2,8 @@ import { createDatabase } from './database_creation.js';
 import { createTickerDatabase } from './ticker_database_creation.js';
 import { createPortfolioDatabase } from './portfolio_database_creation.js';
 import { createHoldingDatabase } from './brute_holding_database_creation.js';
-import loadHistoricalPrices from './brute_price_table.js';
-import getUpdatedPrices from './update_holdings.js';
-import updateTotalValue from './update_total_value.js';
-import loadHistoricalValue from './brute_total_value.js';
+import load2025Price from './brute_price_table.js';
+import load2025Value from './brute_total_value.js';
 
 async function runEverything() {
     try {
@@ -19,9 +17,9 @@ async function runEverything() {
 
         await createHoldingDatabase();
 
-        await loadHistoricalPrices();
+        await load2025Price();
 
-        await loadHistoricalValue();
+        await load2025Value();
 
 
 

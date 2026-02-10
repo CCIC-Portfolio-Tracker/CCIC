@@ -47,10 +47,10 @@ async function getTotalValue(timestamp) {
     }
 }
 
-async function loadHistoricalValue() {
+async function load2025Value() {
     try {
-        let currentDate = new Date('2025-01-01');
-        const endDate = new Date('2026-02-08');
+        let currentDate = new Date('2025-01-02');
+        const endDate = new Date('2025-01-03');
 
         console.log("Starting historical value backfill...");
 
@@ -82,4 +82,4 @@ async function loadHistoricalValue() {
     }
 }
 
-export default loadHistoricalValue;
+export default load2025Value;

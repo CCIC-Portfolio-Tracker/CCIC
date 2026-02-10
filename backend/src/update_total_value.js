@@ -1,6 +1,7 @@
 
 import db from "./db.js";
 import { Decimal } from 'decimal.js';
+import loadHistoricalValue from "./historical_value_update.js";
 
 // Function to get oldest date from value_table for a ticker
 async function importOldestValueDate() {
