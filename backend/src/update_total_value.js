@@ -36,13 +36,12 @@ async function getTotalValue(timestamp) {
         const query = `
             SELECT p.price_price, p.price_date, h.tot_holdings
             FROM price_table p
-            INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
             INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
             WHERE p.ticker_fk IN (${placeholders}) AND p.price_date = ?
             AND h.holding_active = 1 AND h.tot_holdings > 0
         `;
 
-        const result = await db.execute(query, [...tickerPKs, timestamp]);
+        const result = await db.execute(query, [timestamp]);
         let totalValue = new Decimal(0);
 
         result.rows.forEach(row => {
@@ -55,6 +54,8 @@ async function getTotalValue(timestamp) {
             console.log(`Adding ${addPrice} to total value.`);
 
             totalValue = totalValue.plus(addPrice);
+
+            console.log(`Current total value: ${totalValue.toFixed(2)}`);
         });
 
         console.log(`Total value for ${timestamp}:`, totalValue.toFixed(2));
