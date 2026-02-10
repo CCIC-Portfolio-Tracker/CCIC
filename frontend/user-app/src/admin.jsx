@@ -12,29 +12,15 @@ function Admin() {
   const isAdmin = true; // hardcoded for now
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        // fetch users list (admin-only endpoint)
-        const usersRes = await fetch(
-          "https://ccic.onrender.com/api/userstest",
-        );
+    // fake users (no backend)
+    const fakeUsers = [
+      { user_pk: 1, user_name: "noe", user_role: "admin" },
+      { user_pk: 2, user_name: "james", user_role: "admin" },
+      { user_pk: 3, user_name: "testuser", user_role: "viewer" },
+    ];
 
-        if (!usersRes.ok) {
-          const text = await usersRes.text();
-          throw new Error(text || `HTTP ${usersRes.status}`);
-        }
-
-        const usersJson = await usersRes.json();
-        setUsers(usersJson || []);
-      } catch (e) {
-        console.error("Admin load failed:", e);
-        setError("Failed to load users.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    setUsers(fakeUsers);
+    setLoading(false);
   }, []);
 
   if (loading) {
@@ -70,6 +56,7 @@ function Admin() {
 }
 
 export default Admin;
+
 
 
       /*// make a list of users and a list of their permissions
