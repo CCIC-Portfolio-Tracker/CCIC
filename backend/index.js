@@ -206,7 +206,7 @@ app.get("/api/userstest", async (req, res) => {
 });
 
 // Update a user's role
-app.put("/api/userstest/:pk/role", async (req, res) => {
+app.put("/api/userstestupdate/:pk/role", async (req, res) => {
   await db.execute({
       sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
       args: [req.body.role, req.params.pk]
