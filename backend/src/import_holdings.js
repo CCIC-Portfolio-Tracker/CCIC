@@ -1,12 +1,11 @@
 import db from "./db.js";
-import getUpdatedPrices from "./update_holdings.js";
 
 async function importHoldings() {
   try {
     const now = new Date();
     const nyTimeString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
     const nyDate = new Date(nyTimeString);
-    const dayOfWeek = nyDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const dayOfWeek = nyDate.getDay();
 
     const cutoff = new Date(nyDate);
     cutoff.setHours(9, 30, 0, 0);
@@ -36,8 +35,6 @@ async function importHoldings() {
       yesterday.setDate(nyDate.getDate() - 1);
       targetDate = yesterday.toLocaleDateString('en-CA');
     }
-
-    await getUpdatedPrices(targetDate);
 
     const query = {
       sql: `
