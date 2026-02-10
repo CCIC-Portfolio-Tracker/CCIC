@@ -8,14 +8,16 @@ import "./App.css";
 
 const App = () => {
   // auth state populated from backend
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [authLoaded, setAuthLoaded] = useState(false);
+  //const [loggedIn, setLoggedIn] = useState(false);
+  //const [isAdmin, setIsAdmin] = useState(false);
+  //const [authLoaded, setAuthLoaded] = useState(false);
+  const isAdmin = true; // from backend
+  const loggedIn = true; // from backend
 
   const [activeTab, setActiveTab] = useState("account");
 
   // fetch auth status on app load
-  useEffect(() => {
+ /*useEffect(() => {
     const fetchAuthStatus = async () => {
       try {
         const res = await fetch(`https://ccic.onrender.com/api/auth/status`, {
@@ -41,6 +43,7 @@ const App = () => {
     fetchAuthStatus();
   }, []);
 
+  */
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
     if (!loggedIn && tab !== "account") {
@@ -49,11 +52,12 @@ const App = () => {
       setActiveTab(tab);
     }
   };
-
+/*
   // loading state while auth status is being determined
   if (!authLoaded) {
     return <div className="page">Loading…</div>;
   }
+    */
 
   return (
     <>
