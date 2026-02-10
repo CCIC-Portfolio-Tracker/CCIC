@@ -15,6 +15,7 @@ const App = () => {
   const loggedIn = true; // from backend
 
   const [activeTab, setActiveTab] = useState("account");
+  const [selectedTicker, setSelectedTicker] = useState(null);
 
   // fetch auth status on app load
  /*useEffect(() => {
@@ -46,6 +47,8 @@ const App = () => {
   */
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
+    setSelectedTicker(null);
+
     if (!loggedIn && tab !== "account") {
       setActiveTab("account");
     } else {
@@ -90,7 +93,7 @@ const App = () => {
         {/* Account / Login tab */}
         <button
           className={`login-tab ${activeTab === "account" ? "active" : ""}`}
-          onClick={() => setActiveTab("account")}
+          onClick={() => goToTab("account")}
           type="button"
         >
           {loggedIn ? "Account" : "Login"}
@@ -104,7 +107,17 @@ const App = () => {
           <Holdings isAdmin={isAdmin} loggedIn={loggedIn} />
         )}
           */}
-        {activeTab === "portfolio" && <Holdings/>}
+        {activeTab === "portfolio" && (
+          selectedTicker ? (
+            <TickerPage ticker={selectedTicker} />
+          ) : (
+            <Holdings
+              isAdmin={isAdmin}
+              loggedIn={loggedIn}
+              onSelectTicker={setSelectedTicker} 
+            />
+          )
+        )}
 
         {activeTab === "news" && <News />}
 

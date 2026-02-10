@@ -31,7 +31,7 @@ function cleanInput(rawData) {
   return { articles, error: "" };
 }
 
-function News() {
+function News({ticker}) {
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,15 @@ function News() {
 
       // try to fetch news from backend
       try {
-        const res = await fetch("https://ccic.onrender.com/api/news", {
+        const t = String(ticker || "").toUpperCase().trim();
+        if (!t) {
+          setArticles([]);
+          setError("Missing ticker.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("https://ccic.onrender.com/api/news/${encodeURIComponent(t)}", {
           headers: { Accept: "application/json" },
         });
         const rawData = await res.json();
@@ -54,6 +62,12 @@ function News() {
         const { articles: cleaned, error: cleaningError } = cleanInput(rawData);
 
         if (cancelled) return;
+
+        if (!res.ok) {
+          setError(cleaningError || `Failed to load news (HTTP ${res.status}).`);
+          setArticles([]);
+          return;
+        }
 
         // Update state based on cleaning result
         if (cleaningError) {
@@ -78,7 +92,7 @@ function News() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [ticker]);
 
   return (
     <div className="news-pane">
