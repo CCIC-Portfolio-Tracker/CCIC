@@ -19,7 +19,7 @@ function Graphics() {
 
   // dropdown state for charts
   const [sel1, setSel1] = useState("1y");
-  const [sel2, setSel2] = useState("6m");
+  const [sel2, setSel2] = useState("1y");
 
   // chart series state
   const [chart1Series, setChart1Series] = useState({ labels: [], data: [] });
