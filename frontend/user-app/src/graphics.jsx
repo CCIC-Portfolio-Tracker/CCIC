@@ -137,7 +137,7 @@ function Graphics() {
     chartRef3.current = new Chart(canvasRef3.current, {
       type: "bar",
       data: {
-        labels: ["Year1", "Year2", "Year3", "Year4", "Year5"],
+        labels: ["2022", "2023", "2024", "2025", "2026"],
         datasets: [
           {
             label: "Tech",
