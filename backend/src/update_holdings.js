@@ -75,7 +75,7 @@ async function getUpdatedPrices(timestamp) {
 
         const batchQueries = [];
 
-        resultsArray.forEach(stock => {
+        for (const stock of resultsArray) {
             const index = outdatedTickers.findIndex(t => t.toUpperCase() === stock.symbol.toUpperCase());
             const matchPK = outdatedTickerPKs[index];
             const holdings = currentHoldings[index];
@@ -83,7 +83,8 @@ async function getUpdatedPrices(timestamp) {
             const oldestDate = new Date(importOldestPriceDate(matchPK)).toLocaleDateString('en-CA');
             const startDate = oldestDate + 1;
             const endDate = timestamp - 1;
-            loadHistoricalPrices(startDate, endDate, matchPK);
+            console.log(`Updating ${stock.symbol} with historical backfill from ${startDate} to ${endDate}...`);
+            await loadHistoricalPrices(startDate, endDate, matchPK);
 
 
             if (matchPK) {
@@ -92,7 +93,7 @@ async function getUpdatedPrices(timestamp) {
                     args: [matchPK, stock.regularMarketOpen, timestamp, holdings]
                 });
             }
-        });
+        }
 
 
         if (batchQueries.length > 0) {

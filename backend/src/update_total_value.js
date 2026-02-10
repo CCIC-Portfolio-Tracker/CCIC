@@ -40,7 +40,8 @@ async function getTotalValue(timestamp) {
         const oldestDate = importOldestValueDate();
         const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
         const endDate = timestamp - 1;
-        loadHistoricalValue(startDate, endDate);
+        console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
+        await loadHistoricalValue(startDate, endDate);
 
         const tickerPKs = await importTickerPK();
 
@@ -63,14 +64,10 @@ async function getTotalValue(timestamp) {
             const price = new Decimal(row.price_price);
             const holdings = new Decimal(row.tot_holdings);
 
-            console.log(`Calculating value for price: ${price}, holdings: ${holdings}`);
             const addPrice = price.times(holdings);
-
-            console.log(`Adding ${addPrice} to total value.`);
 
             totalValue = totalValue.plus(addPrice);
 
-            console.log(`Current total value: ${totalValue.toFixed(2)}`);
         });
 
         console.log(`Total value for ${timestamp}:`, totalValue.toFixed(2));
