@@ -67,6 +67,31 @@ const App = () => {
   }
     */
 
+  const DebugToggles = () => (
+    <div style={{ marginBottom: 12 }}>
+      <button
+        type="button"
+        onClick={() => {
+          setDebugLoggedIn((v) => !v);
+          // if logging out, also clear admin
+          setDebugIsAdmin(false);
+        }}
+        style={{ marginRight: 8 }}
+      >
+        Toggle Logged In (debug): {debugLoggedIn ? "ON" : "OFF"}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setDebugIsAdmin((v) => !v)}
+        disabled={!debugLoggedIn}
+        title={!debugLoggedIn ? "Log in (debug) first" : ""}
+      >
+        Toggle Admin (debug): {debugIsAdmin ? "ON" : "OFF"}
+      </button>
+    </div>
+  );
+
   return (
     <>
       {/* Navigation tabs */}
@@ -99,36 +124,8 @@ const App = () => {
 
       {/* Page content */}
       <main className="page">
-        {activeTab === "account" && !debugLoggedIn && (
-          <div style={{ marginBottom: 12 }}>
-            <button
-              type="button"
-              onClick={() => {
-                setDebugLoggedIn((v) => !v);
-                // if logging out, also clear admin
-                setDebugIsAdmin(false);
-              }}
-              style={{ marginRight: 8 }}
-            >
-              Toggle Logged In (debug): {debugLoggedIn ? "ON" : "OFF"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDebugIsAdmin((v) => !v)}
-              disabled={!debugLoggedIn}
-              title={!debugLoggedIn ? "Log in (debug) first" : ""}
-            >
-              Toggle Admin (debug): {debugIsAdmin ? "ON" : "OFF"}
-            </button>
-          </div>
-        )}
-
         {activeTab === "home" && <Graphics />}
-        {/*{activeTab === "portfolio" && (
-          <Holdings isAdmin={isAdmin} loggedIn={loggedIn} />
-        )}
-          */}
+
         {activeTab === "portfolio" &&
           (selectedTicker ? (
             <TickerPage ticker={selectedTicker} />
@@ -139,6 +136,10 @@ const App = () => {
               onSelectTicker={setSelectedTicker}
             />
           ))}
+
+        {activeTab === "account" && (!debugLoggedIn || debugIsAdmin) && (
+          <DebugToggles />
+        )}
 
         {activeTab === "account" &&
           (debugLoggedIn ? (
