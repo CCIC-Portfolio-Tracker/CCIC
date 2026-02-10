@@ -1,4 +1,5 @@
 import db from "./db.js";
+import updatePriceAndValue from "./update_call.js";
 import { Decimal } from 'decimal.js';
 
 async function deleteHolding(ticker) {
@@ -71,6 +72,8 @@ async function deleteHolding(ticker) {
         sql: priceQuery,
         args: [0, ticker, ticker]
     });
+
+    await updatePriceAndValue();
 
 }
 

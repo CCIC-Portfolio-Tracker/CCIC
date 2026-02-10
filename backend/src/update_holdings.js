@@ -1,6 +1,15 @@
 import YahooFinance from 'yahoo-finance2'
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
+import loadHistoricalPrices from './historical_price_update.js';
+
+// Function to get oldest date from price_table for a ticker
+async function importOldestPriceDate(tickerPK) {
+    const query = `SELECT price_date FROM price_table WHERE ticker_fk = ? ORDER BY price_date DESC LIMIT 1`;
+    const result = await db.execute(query, [tickerPK]);
+    console.log("Oldest price data for ticker PK", tickerPK, ":", result.rows.map(row => row.price_date));
+    return result.rows.map(row => row.price_date);
+}
 
 // Function to get all tickers from ticker_table
 async function importTickerPK() {
@@ -70,6 +79,12 @@ async function getUpdatedPrices(timestamp) {
             const index = outdatedTickers.findIndex(t => t.toUpperCase() === stock.symbol.toUpperCase());
             const matchPK = outdatedTickerPKs[index];
             const holdings = currentHoldings[index];
+
+            const oldestDate = importOldestPriceDate(matchPK);
+            const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
+            const endDate = timestamp - 1;
+            loadHistoricalPrices(startDate, endDate, matchPK);
+
 
             if (matchPK) {
                 batchQueries.push({

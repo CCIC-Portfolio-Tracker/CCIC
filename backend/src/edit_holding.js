@@ -1,4 +1,5 @@
 import db from "./db.js";
+import updatePriceAndValue from "./update_call.js";
 
 async function editHolding(ticker, amount, sector) {
 

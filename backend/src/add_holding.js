@@ -1,5 +1,6 @@
 import db from "./db.js";
 import YahooFinance from 'yahoo-finance2';
+import updatePriceAndValue from "./update_call.js";
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 async function addHolding(ticker, amount, sector) {
@@ -65,6 +66,8 @@ async function addHolding(ticker, amount, sector) {
         args: [userPK, tickerPK, `ADD`]
     });
     */
+
+    await updatePriceAndValue();
 
     console.log(`Successfully added ${amount} shares of ${result.symbol}`);
     return { success: true, tickerPK };
