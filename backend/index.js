@@ -16,6 +16,7 @@ import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
+import crypto from 'crypto';
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -24,8 +25,6 @@ app.use(cors({
   origin: "https://ccic-phi.vercel.app",
   credentials: true
 }));
-
-//app.set("trust proxy", 1);
 
 app.use(express.json());
 
@@ -91,11 +90,12 @@ app.get("/", (req, res) => {
 // Redirects user to school login page
 app.get("/api/auth/login", async (req, res) => {
   if (!config) {
+    console.log("config is undefined");
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  const code_verifier = oidc.randomPKCECodeVerifier();
-  const state = oidc.randomState();
+  code_verifier = oidc.randomPKCECodeVerifier();
+  state = oidc.randomState();
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
@@ -110,14 +110,7 @@ app.get("/api/auth/login", async (req, res) => {
     code_challenge_method: 'S256',
   };
 
-  console.log("--- DEBUG LOGIN ---");
-  console.log("Registered Redirect URI:", process.env.OIDC_REDIRECT_URI);
-  console.log("Current Client ID:", process.env.OIDC_CLIENT_ID);
-
   const url = oidc.buildAuthorizationUrl(config, parameters);
-
-  console.log("Final CAS URL:", url.href);
-  console.log("-------------------");
 
   res.redirect(url.href);
 });
@@ -171,7 +164,6 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
-
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session.user && req.session.user.role === 'admin') {
@@ -190,11 +182,7 @@ const isMember = (req, res, next) => {
 
 // Fetch all users for management
 app.get("/api/admin/users", isAdmin, async (req, res) => {
-  const result = await db.execute(`
-    SELECT user_pk, user_name, user_role
-    FROM user_table
-    ORDER BY user_name
-  `);
+  const result = await db.execute("SELECT * FROM user_table");
   res.json(result.rows);
 });
 
@@ -205,17 +193,6 @@ app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
       args: [req.body.role, req.params.pk]
   });
   res.json({ ok: true });
-});
-
-// sends user info to the frontend
-app.get("/api/auth/status", (req, res) => {
-  const user = req.session?.user;
-  res.json({
-    loggedIn: !!user,
-    role: user?.role ?? null,
-    isAdmin: user?.role === "admin",
-    name: user?.name ?? null
-  });
 });
 
 // Fetch activity logs
