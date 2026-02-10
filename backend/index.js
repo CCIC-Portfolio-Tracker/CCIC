@@ -50,8 +50,6 @@ app.use(session({
 
 // connects with CC CAS to get necessary data like authorized endpoint
 let config;
-let state;
-let code_verifier;
 const initializeOIDC = async () => {
   try {
     const issuerURL = new URL(process.env.OIDC_ISSUER_URL);
@@ -62,34 +60,11 @@ const initializeOIDC = async () => {
     );
     console.log("OIDC Discovery successful");
 
-    const metadata = config.serverMetadata ? config.serverMetadata : config;
-    console.log("Authorization endpoint:", metadata.authorization_endpoint);
-    console.log("Token endpoint:", metadata.token_endpoint);
-
   } catch (err) {
     console.error("OIDC Init Error:", err);
   }
 };
-initializeOIDC();
-
-// Calls updates every day at 9:31 est
-cron.schedule('31 09 * * 1-5', async () => {
-  console.log("Running scheduled daily portfolio update at 09:31 EST...");
-  try {
-    // Update individual stock prices
-    await getUpdatedPrices(); 
-    
-    // Calculate and store the new total portfolio value
-    await updateTotalValue(); 
-    
-    console.log("Scheduled update completed successfully.");
-  } catch (error) {
-    console.error("Scheduled update failed:", error);
-  }
-}, {
-  scheduled: true,
-  timezone: "America/New_York" // This ensures it hits 9:31 AM EST regardless of server location
-});
+await initializeOIDC();
 
 app.get("/", (req, res) => {
   res.send("Server is ready!");
@@ -101,8 +76,8 @@ app.get("/api/auth/login", async (req, res) => {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  code_verifier = oidc.randomPKCECodeVerifier();
-  state = oidc.randomState();
+  const code_verifier = oidc.randomPKCECodeVerifier();
+  const state = oidc.randomState();
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
@@ -130,8 +105,8 @@ app.get("/api/auth/callback", async (req, res) => {
     const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
 
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
-      pkceCodeVerifier: code_verifier,
-      expectedState: state
+      pkceCodeVerifier: req.session.code_verifier,
+      expectedState: req.session.state
     });
     const claims = tokens.claims();
     console.log("Logged in user:", claims.sub);
@@ -270,10 +245,10 @@ app.post("/api/holdings", isAdmin, async (req, res) => {
 });
 
 // for editing holdings
-app.put("/api/holdings/:ticker", isAdmin, (req, res) => {
+app.put("/api/holdings/:ticker", isAdmin, async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
-    editHolding(ticker, req.body.shares, req.body.sector);
+    await editHolding(ticker, req.body.shares, req.body.sector);
     // can configure req.body to better fit db needs
     res.json({ ok: true });
   } catch (error) {

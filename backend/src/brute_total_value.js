@@ -53,7 +53,7 @@ async function loadHistoricalValue() {
 
         while (currentDate <= endDate) {
             const timestamp = currentDate.toLocaleDateString('en-CA', {
-                timeZone: 'America/Denver' 
+                timeZone: 'America/New_York' 
             });
 
             console.log(`Processing: ${timestamp}`);
