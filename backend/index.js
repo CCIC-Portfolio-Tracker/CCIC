@@ -219,9 +219,13 @@ app.get("/api/holdings", async (req, res) => {
   }
 });
 
-app.get("/api/news", async (req, res) => {
+app.get("/api/news/:ticker", async (req, res) => {
   try {
-    const news = await getStockNews('AAPL');
+    const ticker = (req.params.ticker || "").toUpperCase();
+    if(!ticker) {
+      return res.status(400).json({ error: "Bad Request: Missing ticker parameter" });
+    }
+    const news = await getStockNews(ticker);
 
     res.json(news);
   } catch (error) {
