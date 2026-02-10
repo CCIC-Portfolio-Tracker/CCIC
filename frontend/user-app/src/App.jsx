@@ -106,7 +106,7 @@ const App = () => {
         {activeTab === "news" && <News />}
 
         {activeTab === "account" &&
-          (loggedIn ? (isAdmin ? <Admin /> : <div>Account page</div>) : <Login />)}
+          (loggedIn ? (isAdmin ? <Login /> : <div>Account page</div>) : <Login />)}
       </main>
     </>
   );

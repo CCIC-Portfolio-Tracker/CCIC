@@ -1,7 +1,7 @@
 // make a list of users and a list of their permissions
 // be able to edit permissions and remove users
 // makes a log of edits users have given to the portfolio
-import React, { useEffect, useState } from "react";
+/*import React, { useEffect, useState } from "react";
 
 function Admin() {
   const [loading, setLoading] = useState(true);
@@ -80,4 +80,5 @@ function Admin() {
 }
 
 export default Admin;
+*/
 
