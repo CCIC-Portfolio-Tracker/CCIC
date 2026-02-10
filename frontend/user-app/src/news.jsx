@@ -56,10 +56,25 @@ function News({ticker}) {
         }
 
         // fetch news from backend API 
-        const res = await fetch("https://ccic.onrender.com/api/news/${encodeURIComponent(t)}", {
-          headers: { Accept: "application/json" },
-        });
-        const rawData = await res.json();
+        const url = `https://ccic.onrender.com/api/news/${encodeURIComponent(t)}`;
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
+
+
+        const contentType = res.headers.get("content-type") || "";
+        const bodyText = await res.text();
+
+        if (!res.ok) {
+          // show real server error page/text
+          throw new Error(`HTTP ${res.status} from ${url}: ${bodyText.slice(0, 200)}`);
+        }
+
+        if (!contentType.includes("application/json")) {
+          // HTML came back (often index.html or an error page)
+          throw new Error(`Non-JSON response from ${url}: ${bodyText.slice(0, 200)}`);
+        }
+
+        const rawData = JSON.parse(bodyText);
+        //const rawData = await res.json();
 
         // Normalize backend response into UI-friendly articles list
         const { articles: cleaned, error: cleaningError } = cleanInput(rawData);
