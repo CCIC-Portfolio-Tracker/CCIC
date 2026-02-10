@@ -110,7 +110,14 @@ app.get("/api/auth/login", async (req, res) => {
     code_challenge_method: 'S256',
   };
 
+  console.log("--- DEBUG LOGIN ---");
+  console.log("Registered Redirect URI:", process.env.OIDC_REDIRECT_URI);
+  console.log("Current Client ID:", process.env.OIDC_CLIENT_ID);
+
   const url = oidc.buildAuthorizationUrl(config, parameters);
+
+  console.log("Final CAS URL:", url.href);
+  console.log("-------------------");
 
   res.redirect(url.href);
 });
