@@ -14,11 +14,14 @@ const App = () => {
   const isAdmin = true; // from backend
   const loggedIn = false; // from backend
 
+  const [debugLoggedIn, setDebugLoggedIn] = useState(loggedIn);
+  const [debugIsAdmin, setDebugIsAdmin] = useState(isAdmin);
+
   const [activeTab, setActiveTab] = useState("account");
   const [selectedTicker, setSelectedTicker] = useState(null);
 
   // fetch auth status on app load
- /*useEffect(() => {
+  /*useEffect(() => {
     const fetchAuthStatus = async () => {
       try {
         const res = await fetch(`https://ccic.onrender.com/api/auth/status`, {
@@ -45,17 +48,19 @@ const App = () => {
   }, []);
 
   */
+
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
     setSelectedTicker(null);
 
-    if (!loggedIn && tab !== "account") {
+    if (!debugLoggedIn && tab !== "account") {
       setActiveTab("account");
     } else {
       setActiveTab(tab);
     }
   };
-/*
+
+  /*
   // loading state while auth status is being determined
   if (!authLoaded) {
     return <div className="page">Loading…</div>;
@@ -88,31 +93,63 @@ const App = () => {
           onClick={() => goToTab("account")}
           type="button"
         >
-          {loggedIn ? "Account" : "Login"}
+          {debugLoggedIn ? "Account" : "Login"}
         </button>
       </div>
 
       {/* Page content */}
       <main className="page">
+        {activeTab === "account" && !debugLoggedIn && (
+          <div style={{ marginBottom: 12 }}>
+            <button
+              type="button"
+              onClick={() => {
+                setDebugLoggedIn((v) => !v);
+                // if logging out, also clear admin
+                setDebugIsAdmin(false);
+              }}
+              style={{ marginRight: 8 }}
+            >
+              Toggle Logged In (debug): {debugLoggedIn ? "ON" : "OFF"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDebugIsAdmin((v) => !v)}
+              disabled={!debugLoggedIn}
+              title={!debugLoggedIn ? "Log in (debug) first" : ""}
+            >
+              Toggle Admin (debug): {debugIsAdmin ? "ON" : "OFF"}
+            </button>
+          </div>
+        )}
+
         {activeTab === "home" && <Graphics />}
         {/*{activeTab === "portfolio" && (
           <Holdings isAdmin={isAdmin} loggedIn={loggedIn} />
         )}
           */}
-        {activeTab === "portfolio" && (
-          selectedTicker ? (
+        {activeTab === "portfolio" &&
+          (selectedTicker ? (
             <TickerPage ticker={selectedTicker} />
           ) : (
             <Holdings
-              isAdmin={isAdmin}
-              loggedIn={loggedIn}
-              onSelectTicker={setSelectedTicker} 
+              isAdmin={debugIsAdmin}
+              loggedIn={debugLoggedIn}
+              onSelectTicker={setSelectedTicker}
             />
-          )
-        )}
+          ))}
 
         {activeTab === "account" &&
-          (loggedIn ? (isAdmin ? <Admin /> : <div>Account page</div>) : <Login />)}
+          (debugLoggedIn ? (
+            debugIsAdmin ? (
+              <Admin />
+            ) : (
+              <div>Account page</div>
+            )
+          ) : (
+            <Login />
+          ))}
       </main>
     </>
   );
