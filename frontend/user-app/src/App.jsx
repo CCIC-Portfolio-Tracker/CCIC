@@ -120,7 +120,7 @@ const App = () => {
           )
         )}
 
-        {activeTab === "news" && <News />}
+        {activeTab === "news" && <News ticker="APPL" />}
 
         {activeTab === "account" &&
           (loggedIn ? (isAdmin ? <Login /> : <div>Account page</div>) : <Login />)}
