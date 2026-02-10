@@ -15,8 +15,8 @@ async function editHolding(ticker, amount, sector) {
     });
 
     await db.execute({
-        sql: `UPDATE ticker_table SET ticker_sector = ? WHERE ticker_pk = ?`,
-        args: [sector, tickerPK]
+        sql: `UPDATE ticker_table SET ticker_portfolio = ? WHERE ticker_pk = ?`,
+        args: [sectorID, tickerPK]
     });
 
     /*

@@ -7,7 +7,7 @@ async function printAllTables() {
         if (err) return console.error(err.message);
         console.log("\n--- Ticker Table ---");
         console.log("PK\tTICKER\tCOMPANY\tSECTOR");
-        rows.forEach(row => console.log(`${row.ticker_pk}\t${row.ticker_text}\t${row.ticker_co}\t${row.ticker_sector}`));
+        rows.forEach(row => console.log(`${row.ticker_pk}\t${row.ticker_text}\t${row.ticker_co}\t${row.ticker_portfolio}`));
         //rows.forEach(row => console.log(row));
 
     });

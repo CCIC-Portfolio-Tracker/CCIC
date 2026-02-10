@@ -37,7 +37,7 @@ async function addHolding(ticker, amount, sector) {
 
 
     await db.execute({
-        sql: `INSERT OR IGNORE INTO ticker_table (ticker_text, ticker_co, ticker_sector) VALUES (?, ?, ?)`,
+        sql: `INSERT OR IGNORE INTO ticker_table (ticker_text, ticker_co, ticker_portfolio) VALUES (?, ?, ?)`,
         args: [result.symbol, result.shortName, sectorID]
     });
 
