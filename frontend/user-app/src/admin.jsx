@@ -17,7 +17,6 @@ function Admin() {
         // fetch users list (admin-only endpoint)
         const usersRes = await fetch(
           "https://ccic.onrender.com/api/admin/users",
-          { credentials: "include" }
         );
 
         if (!usersRes.ok) {
