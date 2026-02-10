@@ -3,11 +3,10 @@ import { Grid } from "gridjs-react";
 import { html } from "gridjs";
 import "gridjs/dist/theme/mermaid.css";
 
-function Holdings({ onSelectTicker }) {
+function Holdings({ onSelectTicker, isAdmin }) {
   //const [rows, setRows] = useState([]);
   //const [isAdmin, setIsAdmin] = useState(false); // from backend
   const [rows, setRows] = useState([]);
-  const isAdmin = true; // from backend
 
   // get isAdmin from backend session
   /*useEffect(() => {
@@ -71,7 +70,7 @@ function Holdings({ onSelectTicker }) {
       const res = await fetch("https://ccic.onrender.com/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify({ ticker, shares, sector }),
       });
 
@@ -103,11 +102,11 @@ function Holdings({ onSelectTicker }) {
 
       try {
         const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, 
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            credentials: "include", 
+            credentials: "include",
             body: JSON.stringify(updates),
           }
         );
@@ -136,7 +135,7 @@ function Holdings({ onSelectTicker }) {
 
       try {
         const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, 
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
           {
             method: "DELETE",
             credentials: "include",
