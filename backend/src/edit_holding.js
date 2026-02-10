@@ -1,6 +1,33 @@
 import db from "./db.js";
 
 async function editHolding(ticker, amount, sector) {
+
+    let sectorID = 0;
+
+    if(sector == 'Technology') {
+        sectorID = 1;
+    } else if (sector == 'Healthcare') {
+        sectorID = 2;
+    } else if (sector == 'Energy/Infrastructure') {
+        sectorID = 3;
+    } else if (sector == 'Consumer') {
+        sectorID = 4;
+    } else if (sector == 'Financials') {
+        sectorID = 5;
+    } else if (sector == 'Aerospace & Defense') {
+        sectorID = 6;
+    } else if (sector == 'Real Estate') {
+        sectorID = 7;
+    } else if (sector == 'Emerging Markets') {
+        sectorID = 8;
+    } else if (sector == 'ETF') {
+        sectorID = 9;
+    } else if (sector == 'Bankruptcy') {
+        sectorID = 10;
+    } else {
+        throw new error ("Sector not valid");
+    }
+    
     const tickerResult = await db.execute({
         sql: `SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?`,
         args: [ticker]
