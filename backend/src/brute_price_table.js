@@ -4,16 +4,14 @@ import db from "./db.js";
 
 async function loadHistoricalPrices() {
     try {
-        // 1. Get all tickers and their current holdings
         const tickerData = await db.execute(`
             SELECT t.ticker_pk, t.ticker_text, h.tot_holdings 
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
         `);
 
-        // 2. Define the date range using explicit Date objects
-        const startDate = new Date('2025-02-09');
-        const endDate = new Date(); // Today
+        const startDate = new Date('2025-01-01');
+        const endDate = new Date('2025-02-08'); 
 
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
 
@@ -21,7 +19,6 @@ async function loadHistoricalPrices() {
             const { ticker_pk, ticker_text, tot_holdings } = row;
 
             try {
-                // 3. Fetch historical data with explicit period2 to avoid validation errors
                 const results = await yahooFinance.historical(ticker_text, {
                     period1: startDate,
                     period2: endDate, 
@@ -33,7 +30,6 @@ async function loadHistoricalPrices() {
                     continue;
                 }
 
-                // 4. Map results and filter out null prices (holidays/weekends)
                 const batchQueries = results
                     .filter(day => day.open != null) 
                     .map(day => {
@@ -47,14 +43,12 @@ async function loadHistoricalPrices() {
                         };
                     });
 
-                // 5. Batch insert into the database
                 if (batchQueries.length > 0) {
                     await db.batch(batchQueries, "write");
                     console.log(`Loaded ${batchQueries.length} entries for ${ticker_text}`);
                 }
 
             } catch (yahooError) {
-                // If a specific ticker fails (e.g. symbol mismatch), log and continue
                 console.error(`Skipping ${ticker_text}: ${yahooError.message}`);
             }
         }

@@ -9,9 +9,6 @@ import editHolding from "./src/edit_holding.js"
 import * as oidc from 'openid-client';
 import session from 'express-session';
 import SQLiteStoreFactory from 'connect-sqlite3'; 
-import cron from 'node-cron';
-import getUpdatedPrices from "./src/update_holdings.js";
-import updateTotalValue from "./src/update_total_value.js";
 import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
@@ -20,6 +17,7 @@ import importOneYearTWR from "./src/import_one_year_twr.js";
 import importSixMonthTWR from "./src/import_six_month_twr.js";
 import importThreeMonthTWR from "./src/import_three_month_twr.js";
 import importYTDTWR from "./src/import_ytd_twr.js";
+import updatePriceAndValue from "./src/update_call.js";
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -202,6 +200,16 @@ app.get("/api/admin/activities", isAdmin, async (req, res) => {
       ORDER BY log_timestamp DESC
   `);
   res.json(result.rows);
+});
+
+app.post("/api/app-open", async (req, res) => {
+  try {
+    await updatePriceAndValue();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Failed to update prices and values:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.get("/api/holdings", async (req, res) => {

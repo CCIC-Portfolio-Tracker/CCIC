@@ -46,8 +46,8 @@ async function getTotalValue(timestamp) {
 
 async function loadHistoricalValue() {
     try {
-        let currentDate = new Date('2025-02-09');
-        const endDate = new Date();
+        let currentDate = new Date('2025-01-01');
+        const endDate = new Date('2025-02-08');
 
         console.log("Starting historical value backfill...");
 
