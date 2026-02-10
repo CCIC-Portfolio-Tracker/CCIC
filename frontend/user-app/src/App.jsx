@@ -20,6 +20,16 @@ const App = () => {
   const [activeTab, setActiveTab] = useState("account");
   const [selectedTicker, setSelectedTicker] = useState(null);
 
+  // log that someone opened the app 
+  useEffect(() => {
+    fetch("https://ccic.onrender.com/api/app-open", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }).catch((err) => {
+      console.error("Failed to POST /api/app-open:", err);
+    });
+  }, []);
+
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
     setSelectedTicker(null);
