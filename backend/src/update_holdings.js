@@ -49,11 +49,8 @@ async function getOutdatedTickers(timestamp) {
     };
 }
 
-async function getUpdatedPrices() {
+async function getUpdatedPrices(timestamp) {
     try {
-        const timestamp = new Date().toLocaleDateString('en-CA', {
-            timeZone: 'America/Denver' 
-        });
 
         const { outdatedTickers, outdatedTickerPKs, currentHoldings } = await getOutdatedTickers(timestamp);
 

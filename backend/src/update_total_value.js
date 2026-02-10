@@ -47,7 +47,7 @@ async function getTotalValue(timestamp) {
 
 async function updateTotalValue() {
     const timestamp = new Date().toLocaleDateString('en-CA', {
-        timeZone: 'America/Denver' 
+        timeZone: 'America/New_York' 
     });
 
     console.log("time:", timestamp);
