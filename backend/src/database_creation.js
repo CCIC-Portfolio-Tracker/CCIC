@@ -5,7 +5,7 @@ export async function createDatabase() {
         ticker_pk integer primary key autoincrement,
         ticker_text text unique not null,
         ticker_co text not null,
-        ticker_sector text not null default 'Unknown'
+        ticker_portfolio number not null
     )`);
 
     await db.execute(`create table if not exists price_table (
@@ -49,7 +49,7 @@ export async function createDatabase() {
         user_pk INTEGER PRIMARY KEY AUTOINCREMENT,
         user_oidc_sub TEXT UNIQUE NOT NULL,
         user_name TEXT NOT NULL,
-        user_role TEXT NOT NULL DEFAULT 'viewer' -- Roles: admin, member, viewer
+        user_role TEXT NOT NULL DEFAULT 'viewer' -- Roles: owner, admin, member, viewer
     )`);
 
     await db.execute(`CREATE TABLE IF NOT EXISTS activity_table (

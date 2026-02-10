@@ -26,6 +26,8 @@ app.use(cors({
   credentials: true
 }));
 
+app.set("trust proxy", 1);
+
 app.use(express.json());
 
 // stops memory leaks, creates secure session cookie for users
@@ -165,6 +167,7 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
+
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session.user && req.session.user.role === 'admin') {
@@ -183,7 +186,11 @@ const isMember = (req, res, next) => {
 
 // Fetch all users for management
 app.get("/api/admin/users", isAdmin, async (req, res) => {
-  const result = await db.execute("SELECT * FROM user_table");
+  const result = await db.execute(`
+    SELECT user_pk, user_name, user_role
+    FROM user_table
+    ORDER BY user_name
+  `);
   res.json(result.rows);
 });
 
@@ -194,6 +201,17 @@ app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
       args: [req.body.role, req.params.pk]
   });
   res.json({ ok: true });
+});
+
+// sends user info to the frontend
+app.get("/api/auth/status", (req, res) => {
+  const user = req.session?.user;
+  res.json({
+    loggedIn: !!user,
+    role: user?.role ?? null,
+    isAdmin: user?.role === "admin",
+    name: user?.name ?? null
+  });
 });
 
 // Fetch activity logs
