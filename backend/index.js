@@ -208,8 +208,6 @@ app.get("/api/auth/status", (req, res) => {
   });
 });
 
-
-
 // Fetch activity logs
 app.get("/api/admin/activities", isAdmin, async (req, res) => {
   const result = await db.execute(`
