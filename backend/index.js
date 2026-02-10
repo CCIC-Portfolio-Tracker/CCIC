@@ -22,6 +22,8 @@ import updatePriceAndValue from "./src/update_call.js";
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
 
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: "https://ccic-phi.vercel.app",
   credentials: true
