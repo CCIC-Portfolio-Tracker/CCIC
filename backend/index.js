@@ -321,6 +321,28 @@ app.get("/api/ytd", async (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Server at http://localhost:${port}`);
-})
+// startup sequence
+const startServer = async () => {
+  try {
+    console.log("Starting OIDC Discovery...");
+    await initializeOIDC(); 
+
+    if (!config) {
+      throw new Error("OIDC configuration failed to load.");
+    }
+
+    console.log("OIDC Discovery successful. Config is ready.");
+    console.log("Config:", config)
+
+    app.listen(port, () => {
+      console.log(`Server is officially ready at http://localhost:${port}`);
+    });
+    
+  } catch (error) {
+    console.error("CRITICAL ERROR: Could not start server:", error.message);
+    process.exit(1); 
+  }
+};
+
+// 4. Run the startup sequence
+startServer();
