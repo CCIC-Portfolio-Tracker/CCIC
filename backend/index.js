@@ -94,8 +94,11 @@ app.get("/api/auth/login", async (req, res) => {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  code_verifier = oidc.randomPKCECodeVerifier();
-  state = oidc.randomState();
+  console.log(config);
+
+
+  const code_verifier = oidc.randomPKCECodeVerifier();
+  const state = oidc.randomState();
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
