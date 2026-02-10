@@ -12,7 +12,7 @@ export async function createPortfolioDatabase() {
         ('Real Estate'),
         ('Emerging Markets'),
         ('ETF'),
-        ('Bankruptcy'),`)
+        ('Bankruptcy')`);
 
 
     console.log("Database tables initialized successfully.");

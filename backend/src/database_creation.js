@@ -27,7 +27,8 @@ export async function createDatabase() {
         ticker_fk integer not null,
         tot_holdings real not null,
         holding_active boolean not null default 1,
-        purchase_price real not null default 1
+        purchase_price real not null default 1,
+        purchase_date string not null default "2025-01-01"
     )`);
 
     await db.execute(`create table if not exists holding_table (

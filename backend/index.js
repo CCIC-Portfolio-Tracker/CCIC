@@ -16,7 +16,10 @@ import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
-import crypto from 'crypto';
+import importOneYearTWR from "./src/import_one_year_twr.js";
+import importSixMonthTWR from "./src/import_six_month_twr.js";
+import importThreeMonthTWR from "./src/import_three_month_twr.js";
+import importYTDTWR from "./src/import_ytd_twr.js";
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 

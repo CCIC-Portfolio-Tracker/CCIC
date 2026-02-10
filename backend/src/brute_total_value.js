@@ -1,4 +1,3 @@
-
 import db from "./db.js";
 
 // Function to get all active tickers from ticker_table
@@ -45,20 +44,39 @@ async function getTotalValue(timestamp) {
     }
 }
 
-async function updateTotalValue() {
-    const timestamp = new Date().toLocaleDateString('en-CA', {
-        timeZone: 'America/Denver' 
-    });
+async function loadHistoricalValue() {
+    try {
+        let currentDate = new Date('2025-02-09');
+        const endDate = new Date();
 
-    console.log("time:", timestamp);
+        console.log("Starting historical value backfill...");
 
-    const totalValue = await getTotalValue(timestamp);
+        while (currentDate <= endDate) {
+            const timestamp = currentDate.toLocaleDateString('en-CA', {
+                timeZone: 'America/Denver' 
+            });
 
-    const query = `
-        INSERT or IGNORE INTO value_table (tot_value, value_date) VALUES (?, '${timestamp}')
-    `;
+            console.log(`Processing: ${timestamp}`);
 
-    await db.execute(query, [totalValue]);
+            const totalValue = await getTotalValue(timestamp);
+
+            if (totalValue > 0) {
+                const query = `
+                    INSERT OR IGNORE INTO value_table (tot_value, value_date) 
+                    VALUES (?, ?)
+                `;
+                await db.execute(query, [totalValue, timestamp]);
+            } else {
+                console.log(`No price data found for ${timestamp}, skipping.`);
+            }
+
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        console.log("Total value backfill");
+    } catch (error) {
+        console.error("Error in loadHistoricalValue:", error);
+    }
 }
 
-export default updateTotalValue;
+export default loadHistoricalValue;
