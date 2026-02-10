@@ -1,6 +1,16 @@
 
 import db from "./db.js";
 
+async function checkExistingValue(timestamp) {
+    const query = `
+        SELECT tot_value 
+        FROM value_table 
+        WHERE value_date = ?
+    `;
+    const result = await db.execute(query, [timestamp]);
+    return result.rows.length;
+}
+
 // Function to get all active tickers from ticker_table
 async function importTickerPK() {
     const query = `
@@ -46,6 +56,11 @@ async function getTotalValue(timestamp) {
 }
 
 async function updateTotalValue(timestamp) {
+
+    if(await checkExistingValue(timestamp) === 0) {
+        console.log("Value for this date already exists. Skipping update.");
+        return;
+    }
 
     console.log("time:", timestamp);
 
