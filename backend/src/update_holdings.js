@@ -35,10 +35,11 @@ async function getOutdatedTickers(timestamp) {
     }
 
     const query = `
-            SELECT t.ticker_text, t.ticker_pk, h.tot_holdings
+            SELECT DISTINCT t.ticker_text, t.ticker_pk, h.tot_holdings
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
-            WHERE ticker_pk IN (${outdatedTickerPKs.join(',')});
+            WHERE ticker_pk IN (${outdatedTickerPKs.join(',')})
+            AND h.holding_active = 1;
         `;
 
     const result = await db.execute(query);

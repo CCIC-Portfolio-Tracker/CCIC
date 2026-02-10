@@ -37,6 +37,7 @@ async function getTotalValue(timestamp) {
             INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
             INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
             WHERE p.ticker_fk IN (${placeholders}) AND p.price_date = ?
+            AND h.holding_active = 1 AND h.tot_holdings > 0
         `;
 
         const result = await db.execute(query, [...tickerPKs, timestamp]);
@@ -59,7 +60,7 @@ async function getTotalValue(timestamp) {
 
 async function updateTotalValue(timestamp) {
 
-    if (await checkExistingValue(timestamp) === 0) {
+    if (await checkExistingValue(timestamp) > 0) {
         console.log("Value for this date already exists. Skipping update.");
         return;
     }
