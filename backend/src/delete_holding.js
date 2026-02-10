@@ -59,7 +59,7 @@ async function deleteHolding(ticker) {
 
     await db.execute({
         sql: cashQuery,
-        args: [0, cashAmt, ticker]
+        args: [0, cashAmt]
     });
 
     const priceQuery = `
