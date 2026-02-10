@@ -2,16 +2,13 @@ import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 
-async function loadHistoricalPrices() {
+async function load2025Price(startDate, endDate) {
     try {
         const tickerData = await db.execute(`
             SELECT t.ticker_pk, t.ticker_text, h.tot_holdings 
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
         `);
-
-        const startDate = new Date('2025-01-01');
-        const endDate = new Date('2026-02-08'); 
 
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
 

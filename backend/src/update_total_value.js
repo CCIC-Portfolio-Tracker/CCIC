@@ -2,6 +2,14 @@
 import db from "./db.js";
 import { Decimal } from 'decimal.js';
 
+// Function to get oldest date from value_table for a ticker
+async function importOldestValueDate() {
+    const query = `SELECT value_date FROM value_table ORDER BY value_date DESC LIMIT 1`;
+    const result = await db.execute(query);
+    console.log("Oldest value date:", result.rows.map(row => row.value_date));
+    return result.rows.map(row => row.value_date);
+}
+
 async function checkExistingValue(timestamp) {
     const query = `
         SELECT tot_value 
@@ -10,7 +18,7 @@ async function checkExistingValue(timestamp) {
     `;
     const result = await db.execute(query, [timestamp]);
     console.log(`Existing value check for ${timestamp}:`, result.rows);
-    return result.rows.length;
+    return result.rows.totalValue;
 }
 
 // Function to get all active tickers from ticker_table
@@ -27,6 +35,12 @@ async function importTickerPK() {
 
 async function getTotalValue(timestamp) {
     try {
+
+        const oldestDate = importOldestValueDate();
+        const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
+        const endDate = timestamp - 1;
+        loadHistoricalValue(startDate, endDate);
+
         const tickerPKs = await importTickerPK();
 
         if (tickerPKs.length === 0) return 0;
@@ -70,20 +84,25 @@ async function getTotalValue(timestamp) {
 
 async function updateTotalValue(timestamp) {
 
-    if (await checkExistingValue(timestamp) > 0) {
-        console.log("Value for this date already exists. Skipping update.");
-        return;
-    }
-
     console.log("time:", timestamp);
 
     const totalValue = await getTotalValue(timestamp);
 
-    const query = `
+    if (await checkExistingValue(timestamp) > 0) {
+        console.log("Value for this date already exists. Checking update necessity...");
+        const query = `
+        UPDATE value_table (tot_value) VALUES (?) WHERE value_date = '${timestamp}'
+        `;
+        await db.execute(query, [totalValue]);
+        return;
+    } else {
+
+        const query = `
         INSERT or IGNORE INTO value_table (tot_value, value_date) VALUES (?, '${timestamp}')
     `;
 
-    await db.execute(query, [totalValue]);
+        await db.execute(query, [totalValue]);
+    }
 }
 
 export default updateTotalValue;
