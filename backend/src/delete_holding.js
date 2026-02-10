@@ -25,6 +25,18 @@ async function deleteHolding(ticker) {
         args: [userPK, tickerPK, `DELETE`]
     });
     */
+
+    const query2 = `
+                UPDATE price_table
+                SET tot_holdings = ?
+                WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?)
+                AND price_date = (SELECT MAX(price_date) FROM price_table WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?))
+            `;
+
+    await db.execute({
+        sql: query2,
+        args: [0, ticker, ticker]
+    });
 }
 
 export default deleteHolding;

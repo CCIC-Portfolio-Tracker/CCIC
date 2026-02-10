@@ -5,7 +5,7 @@ export async function createDatabase() {
         ticker_pk integer primary key autoincrement,
         ticker_text text unique not null,
         ticker_co text not null,
-        ticker_portfolio number not null
+        ticker_portfolio integer not null
     )`);
 
     await db.execute(`create table if not exists price_table (
