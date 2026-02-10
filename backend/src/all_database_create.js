@@ -23,10 +23,6 @@ async function runEverything() {
 
         await loadHistoricalValue();
 
-        await getUpdatedPrices();
-
-        await updateTotalValue();
-
 
 
     } catch (error) {
@@ -34,4 +30,4 @@ async function runEverything() {
     }
 }
 
-runEverything();
+await runEverything();
