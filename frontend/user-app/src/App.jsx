@@ -12,7 +12,7 @@ const App = () => {
   //const [isAdmin, setIsAdmin] = useState(false);
   //const [authLoaded, setAuthLoaded] = useState(false);
   const isAdmin = true; // from backend
-  const loggedIn = true; // from backend
+  const loggedIn = false; // from backend
 
   const [activeTab, setActiveTab] = useState("account");
   const [selectedTicker, setSelectedTicker] = useState(null);
