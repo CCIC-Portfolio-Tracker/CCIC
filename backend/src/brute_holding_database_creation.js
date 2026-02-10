@@ -7,7 +7,7 @@ export async function createHoldingDatabase() {
         await db.execute(`insert or ignore into holding_table 
             (portfolio_fk, ticker_fk, tot_holdings, purchase_price, purchase_date)
         values 
-            (1, 1, 37.00, 45.95, '${fixedDate}'),     -- INTC (Tech)
+            (1, 1, 100.87, 45.95, '${fixedDate}'),     -- INTC (Tech)
             (2, 2, 8.00, 255.60, '${fixedDate}'),     -- ISRG (Healthcare)
             (2, 3, 74.18, 72.54, '${fixedDate}'),     -- MDT (Healthcare)
             (2, 4, 6.10, 266.23, '${fixedDate}'),     -- SYK (Healthcare)

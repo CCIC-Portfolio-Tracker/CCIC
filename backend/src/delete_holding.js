@@ -27,7 +27,7 @@ async function deleteHolding(ticker) {
     });
     */
 
-    const timestamp = currentDate.toLocaleDateString('en-CA', {
+    const timestamp = new Date().toLocaleDateString('en-CA', {
         timeZone: 'America/New_York' 
     });
 
