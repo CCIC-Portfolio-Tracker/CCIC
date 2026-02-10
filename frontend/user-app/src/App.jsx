@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Holdings from "./holdings";
 import Login from "./login";
 import News from "./news";
@@ -6,40 +6,13 @@ import Graphics from "./graphics";
 import Admin from "./admin";
 import "./App.css";
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "https://ccic.onrender.com";
-
 const App = () => {
-  // 🔹 auth state now comes from backend
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
+  const loggedIn = true;   // placeholder: replace with real auth later
+  const isAdmin = true;   // placeholder: role check if needed later
 
-  const [activeTab, setActiveTab] = useState("home");
-
-  // 🔹 fetch auth status from backend
-  useEffect(() => {
-    const fetchAuthStatus = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/status`, {
-          credentials: "include",
-        });
-
-        const data = await res.json();
-
-        setLoggedIn(data.loggedIn);
-        setIsAdmin(data.isAdmin);
-      } catch (err) {
-        console.error("Failed to fetch auth status:", err);
-        setLoggedIn(false);
-        setIsAdmin(false);
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-
-    fetchAuthStatus();
-  }, []);
+  const [activeTab, setActiveTab] = useState(
+    loggedIn ? "home" : "account"
+  );
 
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
@@ -49,11 +22,6 @@ const App = () => {
       setActiveTab(tab);
     }
   };
-
-  // Optional: avoid UI flicker before auth loads
-  if (authLoading) {
-    return <div className="page">Loading…</div>;
-  }
 
   return (
     <>
