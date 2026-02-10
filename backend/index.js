@@ -16,6 +16,7 @@ import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
+import crypto from 'crypto';
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -46,30 +47,24 @@ app.use(session({
 
 // connects with CC CAS to get necessary data like authorized endpoint
 let config;
+let state;
+let code_verifier;
 const initializeOIDC = async () => {
   try {
     const issuerURL = new URL(process.env.OIDC_ISSUER_URL);
-    const discoveredConfig = await oidc.discovery(
+    config = await oidc.discovery(
       issuerURL,
       process.env.OIDC_CLIENT_ID,
       process.env.OIDC_CLIENT_SECRET
     );
-
-    console.log("Issuer URL:", issuerURL);
-    
-    if (!discoveredConfig.authorization_endpoint) {
-      throw new Error("Discovery succeeded but authorization_endpoint is missing!");
-    }
-
-    config = discoveredConfig;
-    console.log("OIDC Discovery successful. Endpoint:", config.authorization_endpoint);
+    console.log("OIDC Discovery successful");
   } catch (err) {
     console.error("OIDC Init Error:", err);
-    throw err; 
   }
 };
+await initializeOIDC();
 
-console.log(config);
+console.log("Authorization endpoint:", config.authorization_endpoint);
 
 // Calls updates every day at 9:31 est
 cron.schedule('31 09 * * 1-5', async () => {
@@ -97,15 +92,11 @@ app.get("/", (req, res) => {
 // Redirects user to school login page
 app.get("/api/auth/login", async (req, res) => {
   if (!config) {
-    console.log("config is undefined");
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  console.log(config);
-
-
-  const code_verifier = oidc.randomPKCECodeVerifier();
-  const state = oidc.randomState();
+  code_verifier = oidc.randomPKCECodeVerifier();
+  state = oidc.randomState();
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
@@ -133,8 +124,8 @@ app.get("/api/auth/callback", async (req, res) => {
     const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
 
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
-      pkceCodeVerifier: req.session.code_verifier,
-      expectedState: req.session.state
+      pkceCodeVerifier: code_verifier,
+      expectedState: state
     });
     const claims = tokens.claims();
     console.log("Logged in user:", claims.sub);
@@ -328,27 +319,6 @@ app.get("/api/ytd", async (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-// startup sequence
-const startServer = async () => {
-  try {
-    console.log("Starting OIDC Discovery...");
-    await initializeOIDC(); 
-
-    if (!config) {
-      throw new Error("OIDC configuration failed to load.");
-    }
-
-    console.log("OIDC Discovery successful. Config is ready.");
-    console.log("Config:", config)
-
-    app.listen(port, () => {
-      console.log(`Server is officially ready at http://localhost:${port}`);
-    });
-    
-  } catch (error) {
-    console.error("CRITICAL ERROR: Could not start server:", error.message);
-    process.exit(1); 
-  }
-};
-
-startServer();
+app.listen(port, () => {
+  console.log(`Server at http://localhost:${port}`);
+})
