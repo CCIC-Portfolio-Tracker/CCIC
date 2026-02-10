@@ -27,7 +27,7 @@ export async function createDatabase() {
         ticker_fk integer not null,
         tot_holdings real not null,
         holding_active boolean not null default 1,
-        purchase_price real not null default 100
+        purchase_price real not null default 1
     )`);
 
     await db.execute(`create table if not exists holding_table (
@@ -58,6 +58,12 @@ export async function createDatabase() {
         ticker_fk INTEGER,
         log_action TEXT NOT NULL, 
         log_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await db.execute(`CREATE TABLE IF NOT EXISTS cash_table (
+        cash_pk INTEGER PRIMARY KEY AUTOINCREMENT,
+        cash_amount REAL NOT NULL, 
+        cash_date TEXT NOT NULL UNIQUE
     )`);
 
     console.log("Tables created successfully.");
