@@ -21,4 +21,4 @@ function Account() {
   );
 }
 
-export default UserProfile;
+export default Account;
