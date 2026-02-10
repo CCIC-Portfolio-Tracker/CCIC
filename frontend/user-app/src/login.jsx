@@ -1,53 +1,7 @@
 import React, { useState } from "react";
 import "./login.css";   
 
-/*
-function Login() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-
-    // add openid login logic here
-
-    const handleLogin = () => {
-        if (username === "" || password === "") {
-            alert("Please enter both username and password.");
-            return;
-        }
-
-    console.log(`Logging in with username: ${username}`);
-  };
-
-  return (
-    <div className="login-page">
-        <div className="login-box">
-            <h2>Login</h2>
-            
-
-            <input
-            className="text_area"
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            />
-
-            <input
-            className="text_area"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button className="button" onClick={handleLogin}>
-            Login
-            </button>
-         </div>
-    </div>
-  );
-}
-*/
-
+// Handles the login page and OIDC authentication flow
 function Login() {
     const handleOIDCLogin = () => {
         window.location.href = "https://ccic.onrender.com/api/auth/login";

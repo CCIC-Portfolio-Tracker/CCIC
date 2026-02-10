@@ -90,7 +90,7 @@ const App = () => {
           News
         </button>
 
-        {/* Account / Login tab */}
+        {/* Account or Login tab based on staus*/}
         <button
           className={`login-tab ${activeTab === "account" ? "active" : ""}`}
           onClick={() => goToTab("account")}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./news.css";
 
-
+// Cleans and normalizes backend response into a consistent format for the UI
 function cleanInput(rawData) {
   // If backend returned an error object
   if (rawData?.error) {
@@ -31,6 +31,7 @@ function cleanInput(rawData) {
   return { articles, error: "" };
 }
 
+// News component to display news articles related to a given ticker
 function News({ticker}) {
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState("");
@@ -39,6 +40,7 @@ function News({ticker}) {
   useEffect(() => {
     let cancelled = false;
 
+    // Load news articles from backend for the given ticker
     async function load() {
       setLoading(true);
       setError("");
@@ -53,6 +55,7 @@ function News({ticker}) {
           return;
         }
 
+        // fetch news from backend API 
         const res = await fetch("https://ccic.onrender.com/api/news/${encodeURIComponent(t)}", {
           headers: { Accept: "application/json" },
         });
@@ -62,7 +65,6 @@ function News({ticker}) {
         const { articles: cleaned, error: cleaningError } = cleanInput(rawData);
 
         if (cancelled) return;
-
         if (!res.ok) {
           setError(cleaningError || `Failed to load news (HTTP ${res.status}).`);
           setArticles([]);
