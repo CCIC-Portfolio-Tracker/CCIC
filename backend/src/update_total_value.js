@@ -9,6 +9,7 @@ async function checkExistingValue(timestamp) {
         WHERE value_date = ?
     `;
     const result = await db.execute(query, [timestamp]);
+    console.log(`Existing value check for ${timestamp}:`, result.rows);
     return result.rows.length;
 }
 
@@ -20,6 +21,7 @@ async function importTickerPK() {
         INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
         WHERE h.tot_holdings > 0 AND h.holding_active = 1`;
     const result = await db.execute(query);
+    console.log("Imported ticker PKs:", result.rows);
     return result.rows.map(row => row.ticker_pk);
 }
 
@@ -47,8 +49,15 @@ async function getTotalValue(timestamp) {
             const price = new Decimal(row.price_price);
             const holdings = new Decimal(row.tot_holdings);
 
-            totalValue = totalValue.plus(price.times(holdings));
+            console.log(`Calculating value for price: ${price}, holdings: ${holdings}`);
+            const addPrice = price.times(holdings);
+
+            console.log(`Adding ${addPrice} to total value.`);
+
+            totalValue = totalValue.plus(addPrice);
         });
+
+        console.log(`Total value for ${timestamp}:`, totalValue.toFixed(2));
 
         return totalValue;
 
