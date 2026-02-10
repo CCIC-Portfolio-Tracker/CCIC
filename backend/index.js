@@ -16,7 +16,6 @@ import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
-import crypto from 'crypto';
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -49,8 +48,6 @@ app.use(session({
 
 // connects with CC CAS to get necessary data like authorized endpoint
 let config;
-let state;
-let code_verifier;
 const initializeOIDC = async () => {
   try {
     const issuerURL = new URL(process.env.OIDC_ISSUER_URL);
@@ -97,8 +94,8 @@ app.get("/api/auth/login", async (req, res) => {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
 
-  code_verifier = oidc.randomPKCECodeVerifier();
-  state = oidc.randomState();
+  const code_verifier = oidc.randomPKCECodeVerifier();
+  const state = oidc.randomState();
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
@@ -126,8 +123,8 @@ app.get("/api/auth/callback", async (req, res) => {
     const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
 
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
-      pkceCodeVerifier: code_verifier,
-      expectedState: state
+      pkceCodeVerifier: req.session.code_verifier,
+      expectedState: req.session.state
     });
     const claims = tokens.claims();
     console.log("Logged in user:", claims.sub);
