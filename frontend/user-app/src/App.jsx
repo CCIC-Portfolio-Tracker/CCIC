@@ -96,16 +96,13 @@ const App = () => {
       {/* Page content */}
       <main className="page">
         {activeTab === "home" && <Graphics />}
-        {activeTab === "portfolio" && <Holdings />}
+        {activeTab === "portfolio" && (
+          <Holdings isAdmin={isAdmin} loggedIn={loggedIn} />
+        )}
         {activeTab === "news" && <News />}
 
-        {activeTab === "account" && (
-          loggedIn ? (
-            isAdmin ? <Admin /> : <div>Account page</div>
-          ) : (
-            <Login />
-          )
-        )}
+        {activeTab === "account" &&
+          (loggedIn ? (isAdmin ? <Admin /> : <div>Account page</div>) : <Login />)}
       </main>
     </>
   );

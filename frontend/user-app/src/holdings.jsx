@@ -5,8 +5,20 @@ import "gridjs/dist/theme/mermaid.css";
 
 function Holdings({ onSelectTicker }) {
   const [rows, setRows] = useState([]);
-  const isAdmin = true; // Placeholder for user role check
-  const user = null; // Placeholder for userid if edits
+  const [isAdmin, setIsAdmin] = useState(false); // from backend
+
+  // get isAdmin from backend session
+  useEffect(() => {
+    fetch("https://ccic.onrender.com/api/auth/status", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setIsAdmin(!!data.isAdmin))
+      .catch((err) => {
+        console.error("Failed to load /api/auth/status:", err);
+        setIsAdmin(false);
+      });
+  }, []);
 
   // load from backend function
   const loadHoldings = useCallback(() => {
@@ -56,6 +68,7 @@ function Holdings({ onSelectTicker }) {
       const res = await fetch("https://ccic.onrender.com/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ REQUIRED so backend sees session/admin
         body: JSON.stringify({ ticker, shares, sector }),
       });
 
@@ -86,11 +99,15 @@ function Holdings({ onSelectTicker }) {
       if (Object.keys(updates).length === 0) return;
 
       try {
-        const res = await fetch(`https://ccic.onrender.com/api/holdings${encodeURIComponent(ticker)}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updates),
-        });
+        const res = await fetch(
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, // ✅ FIXED URL
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // ✅ REQUIRED
+            body: JSON.stringify(updates),
+          }
+        );
 
         if (!res.ok) {
           const text = await res.text();
@@ -115,9 +132,13 @@ function Holdings({ onSelectTicker }) {
       if (!ok) return;
 
       try {
-        const res = await fetch(`https://ccic.onrender.com/api/holdings${encodeURIComponent(ticker)}`, {
-          method: "DELETE",
-        });
+        const res = await fetch(
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, // ✅ FIXED URL
+          {
+            method: "DELETE",
+            credentials: "include", // ✅ REQUIRED
+          }
+        );
 
         if (!res.ok) {
           const text = await res.text();
