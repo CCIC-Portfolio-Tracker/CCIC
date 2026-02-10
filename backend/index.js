@@ -16,7 +16,6 @@ import importOneYearValue from "./src/import_one_year_value.js";
 import importSixMonthValue from "./src/import_six_month_value.js";
 import importThreeMonthValue from "./src/import_three_month_value.js";
 import importYTDValue from "./src/import_ytd_value.js";
-import crypto from 'crypto';
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -50,17 +49,23 @@ let config;
 const initializeOIDC = async () => {
   try {
     const issuerURL = new URL(process.env.OIDC_ISSUER_URL);
-    config = await oidc.discovery(
+    const discoveredConfig = await oidc.discovery(
       issuerURL,
       process.env.OIDC_CLIENT_ID,
       process.env.OIDC_CLIENT_SECRET
     );
-    console.log("OIDC Discovery successful");
+    
+    if (!discoveredConfig.authorization_endpoint) {
+      throw new Error("Discovery succeeded but authorization_endpoint is missing!");
+    }
+
+    config = discoveredConfig;
+    console.log("OIDC Discovery successful. Endpoint:", config.authorization_endpoint);
   } catch (err) {
     console.error("OIDC Init Error:", err);
+    throw err; 
   }
 };
-initializeOIDC();
 
 console.log(config);
 
@@ -344,5 +349,4 @@ const startServer = async () => {
   }
 };
 
-// 4. Run the startup sequence
 startServer();
