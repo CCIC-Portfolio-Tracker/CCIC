@@ -133,15 +133,35 @@ function Graphics() {
       options: { responsive: true, maintainAspectRatio: false },
     });
 
-    // Chart 3 (bar)
+    // Chart 3 (100% stacked bar)
     chartRef3.current = new Chart(canvasRef3.current, {
       type: "bar",
       data: {
         labels: ["Year1", "Year2", "Year3", "Year4", "Year5"],
         datasets: [
           {
-            label: "Sector Performance",
-            data: [12, 19, 3, 5, 2],
+            label: "Tech",
+            data: [38, 40, 42, 41, 39],
+            borderWidth: 1,
+          },
+          {
+            label: "Healthcare",
+            data: [24, 23, 22, 23, 24],
+            borderWidth: 1,
+          },
+          {
+            label: "Energy/Infrastructure",
+            data: [22, 21, 20, 21, 22],
+            borderWidth: 1,
+          },
+          {
+            label: "Consumer",
+            data: [10, 10, 10, 9, 10],
+            borderWidth: 1,
+          },
+          {
+            label: "Emerging Markets",
+            data: [6, 6, 6, 6, 5],
             borderWidth: 1,
           },
         ],
@@ -151,7 +171,21 @@ function Graphics() {
         maintainAspectRatio: false,
         scales: {
           x: { stacked: true },
-          y: { stacked: true },
+          y: {
+            stacked: true,
+            min: 0,
+            max: 100,
+            ticks: {
+              callback: (value) => `${value}%`,
+            },
+          },
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}%`,
+            },
+          },
         },
       },
     });
