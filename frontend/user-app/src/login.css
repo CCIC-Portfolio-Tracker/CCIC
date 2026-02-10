@@ -1,3 +1,5 @@
+/* CSS styling for Login page */
+
 * { box-sizing: border-box; }
 
 /* Center item in page */
@@ -29,20 +31,6 @@
     text-align: center;
   }
   
-  /* Inputs */
-  .text_area {
-    width: 100%;
-    max-width: 480px;      
-    height: 48px;
-    margin: 0 auto 20px auto; 
-    padding: 0 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    outline: none;
-    display: block;
-  }
-  
   /* Button */
   .button {
     width: 100%;
@@ -58,7 +46,7 @@
     display: block;
   }
   
-  
+  /* Button Hover effect */
   .button:hover {
     background-color: #43a047;
   }  

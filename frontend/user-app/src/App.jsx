@@ -4,6 +4,7 @@ import Login from "./login";
 import News from "./news";
 import Graphics from "./graphics";
 import Admin from "./admin";
+import TickerPage from "./tickerPage";
 import "./App.css";
 
 const App = () => {
@@ -15,6 +16,7 @@ const App = () => {
   const loggedIn = true; // from backend
 
   const [activeTab, setActiveTab] = useState("account");
+  const [selectedTicker, setSelectedTicker] = useState(null);
 
   // fetch auth status on app load
  /*useEffect(() => {
@@ -46,6 +48,8 @@ const App = () => {
   */
   const goToTab = (tab) => {
     // Prevent access to protected tabs when logged out
+    setSelectedTicker(null);
+
     if (!loggedIn && tab !== "account") {
       setActiveTab("account");
     } else {
@@ -87,10 +91,10 @@ const App = () => {
           News
         </button>
 
-        {/* Account / Login tab */}
+        {/* Account or Login tab based on staus*/}
         <button
           className={`login-tab ${activeTab === "account" ? "active" : ""}`}
-          onClick={() => setActiveTab("account")}
+          onClick={() => goToTab("account")}
           type="button"
         >
           {loggedIn ? "Account" : "Login"}
@@ -100,10 +104,23 @@ const App = () => {
       {/* Page content */}
       <main className="page">
         {activeTab === "home" && <Graphics />}
-        {activeTab === "portfolio" && (
+        {/*{activeTab === "portfolio" && (
           <Holdings isAdmin={isAdmin} loggedIn={loggedIn} />
         )}
-        {activeTab === "news" && <News />}
+          */}
+        {activeTab === "portfolio" && (
+          selectedTicker ? (
+            <TickerPage ticker={selectedTicker} />
+          ) : (
+            <Holdings
+              isAdmin={isAdmin}
+              loggedIn={loggedIn}
+              onSelectTicker={setSelectedTicker} 
+            />
+          )
+        )}
+
+        {activeTab === "news" && <News ticker="APPL" />}
 
         {activeTab === "account" &&
           (loggedIn ? (isAdmin ? <Login /> : <div>Account page</div>) : <Login />)}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import "./graphics.css";
 
+// Graphics page to display charts of portfolio performance and sector allocation
 function Graphics() {
   const RANGE_ENDPOINTS = {
     "1y": "https://ccic.onrender.com/api/total-value",

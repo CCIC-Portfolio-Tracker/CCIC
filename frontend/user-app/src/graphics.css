@@ -1,57 +1,63 @@
-.charts-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 48px;
-    padding: 40px 0;
-  }
-  
-  .charts-row {
-    display: flex;
-    gap: 48px;
-    justify-content: center;
-    flex-wrap: wrap; 
-  }
-  
-  .chart-single {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-  }
-  
-  .chart-box {
-    width: 560px;     
-    height: 420px;   
-    padding: 14px 18px 18px;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .chart-canvas {
-    position: relative;
-    flex: 1;
-    min-height: 320px;
-  }
-  
-  .chart-canvas canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-  }
+/* Chart styling for Graphics page */
 
-    .chart-header {
-        font-size: 18px;
-        font-weight: 600;
-        color: #2c3e50;
-        font-family: Arial, sans-serif;
-    }
+/* Container for the entire charts page */
+.charts-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  padding: 40px 0;
+}
+
+/* Row container for grouping multiple charts */
+.charts-row {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  flex-wrap: wrap; 
+}
+
+/* Wrapper for a single chart */
+.chart-single {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Box containing the chart and its header */
+.chart-box {
+  width: 560px;     
+  height: 420px;   
+  padding: 14px 18px 18px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header section of the chart box */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-family: Arial, sans-serif;
+}
+
+/* Canvas container for rendering the chart */
+.chart-canvas {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+}
+
+/* Ensures the canvas fills its container */
+.chart-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}

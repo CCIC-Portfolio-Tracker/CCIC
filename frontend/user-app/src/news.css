@@ -1,4 +1,6 @@
+/* CSS styles for the News component */
 
+/* Container for the entire news pane */
 .news-pane {
   width: 420px;
   height: 600px;
@@ -13,6 +15,7 @@
   font-family: Arial, sans-serif;
 }
 
+/* Header section of the news pane */
 .news-header {
   padding: 12px 14px;
   font-weight: 700;
@@ -22,7 +25,7 @@
   flex: 0 0 auto;
 }
 
-
+/* Scrollable area for the news content */
 .news-scroll {
   flex: 1;            
   overflow-y: auto;
@@ -30,37 +33,44 @@
   -webkit-overflow-scrolling: touch; 
 }
 
+/* Individual news item container */
 .news-item {
   padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* Headline of a news item */
 .news-headline {
   font-weight: 600;
   color: #1a73e8;
   text-decoration: none;
 }
 
+/* Hover effect for the news headline */
 .news-headline:hover {
   text-decoration: underline;
 }
 
+/* Metadata for a news item (e.g., author, date) */
 .news-meta {
   margin-top: 4px;
   font-size: 12px;
   color: #666;
 }
 
+/* Summary or description of a news item */
 .news-summary {
   margin-top: 6px;
   font-size: 13px;
   color: #333;
 }
 
+/* Error message styling */
 .news-error {
   color: #b00020;
 }
 
+/* Styling for empty state message */
 .news-empty {
   color: #666;
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import News from "./news";
 
 export default function TickerPage({ ticker }) {
   return (
@@ -15,6 +16,7 @@ export default function TickerPage({ ticker }) {
         }}
       >
         {ticker}
+        <News ticker={ticker} />
       </div>
     </div>
   );

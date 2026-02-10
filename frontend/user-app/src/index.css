@@ -49,13 +49,14 @@ h1 {
   text-align: center;
 }
 
+/* Button to add a holding */
 #add-row-btn {
   margin: 16px auto 0 auto;
   display: block;
 
   font-family: Arial, sans-serif;
   font-size: 16px;         
-  color: #3e3434;            
+  color: #b0193a;            
 
   background-color: #ffffff;
   border: 0px solid #ffffff;
@@ -65,6 +66,7 @@ h1 {
   cursor: pointer;
 }
 
+/* Hover effect for the add row button */
 #add-row-btn:hover {
   background-color: #e6e6e6;
 }
