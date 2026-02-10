@@ -64,8 +64,6 @@ const initializeOIDC = async () => {
 };
 initializeOIDC();
 
-console.log(config);
-
 // Calls updates every day at 9:31 est
 cron.schedule('31 09 * * 1-5', async () => {
   console.log("Running scheduled daily portfolio update at 09:31 EST...");
@@ -312,6 +310,21 @@ app.get("/api/ytd", async (req, res) => {
     res.json(valueData);
   } catch (error) {
     console.error("Failed to fetch total value data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/news/:ticker", async (req, res) => {
+  try {
+    const ticker = (req.params.ticker || "").toUpperCase();
+    if(!ticker) {
+      return res.status(400).json({ error: "Bad Request: Missing ticker parameter" });
+    }
+    const news = await getStockNews(ticker);
+
+    res.json(news);
+  } catch (error) {
+    console.error("Failed to fetch news:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
