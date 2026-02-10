@@ -31,15 +31,6 @@ export async function createDatabase() {
         purchase_date string not null default "2025-01-01"
     )`);
 
-    await db.execute(`create table if not exists holding_table (
-        holding_pk integer primary key autoincrement,
-        portfolio_fk integer not null,
-        ticker_fk integer not null,
-        tot_holdings real not null,
-        holding_active boolean not null default 1,
-        purchase_price real not null default 100
-    )`);
-
     await db.execute(`create table if not exists value_table (
         value_pk integer primary key autoincrement,
         tot_value real not null,
