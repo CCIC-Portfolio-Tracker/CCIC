@@ -41,7 +41,7 @@ async function getTotalValue(timestamp) {
             AND h.holding_active = 1 AND h.tot_holdings > 0
         `;
 
-        const result = await db.execute(query, [timestamp]);
+        const result = await db.execute(query, [...tickerPKs, timestamp]);
         let totalValue = new Decimal(0);
 
         result.rows.forEach(row => {
