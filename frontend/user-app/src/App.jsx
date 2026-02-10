@@ -4,6 +4,7 @@ import Login from "./login";
 import News from "./news";
 import Graphics from "./graphics";
 import Admin from "./admin";
+import TickerPage from "./tickerPage";
 import "./App.css";
 
 const App = () => {
