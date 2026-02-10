@@ -6,6 +6,7 @@ import "gridjs/dist/theme/mermaid.css";
 function Holdings({ onSelectTicker, isAdmin }) {
   //const [rows, setRows] = useState([]);
   //const [isAdmin, setIsAdmin] = useState(false); // from backend
+  // change holdings to retrieve secure cookie from backend individually
   const [rows, setRows] = useState([]);
 
   // get isAdmin from backend session
