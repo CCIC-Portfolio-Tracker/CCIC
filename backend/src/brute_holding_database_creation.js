@@ -48,7 +48,6 @@ export async function createHoldingDatabase() {
             (3, 39, 31.59, 78.68, '${fixedDate}'),    -- XOM (Energy/Infra)
             (5, 40, 2.00, 130.71, '${fixedDate}'),    -- FISV (Financials)
             (6, 41, 1.03, 282.77, '${fixedDate}'),    -- GD (Aerospace & Defense)
-            (1, 42, 63.87, 48.79, '${fixedDate}'),    -- INTC (Tech - 2nd entry)
             (7, 43, 5.19, 80.84, '${fixedDate}'),     -- IRM (Real Estate)
             (3, 44, 12.96, 16.62, '${fixedDate}'),    -- KMI (Energy/Infra)
             (2, 45, 10.84, 94.53, '${fixedDate}'),    -- MRK (Healthcare)

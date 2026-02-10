@@ -82,6 +82,5 @@ export async function createTickerDatabase() {
        ('LAC', 'Lithium Americas Corp', 3),
        ('NXT', 'Nextpower Inc.', 3),
        ('PSN', 'PARSONS CORPORATION', 3),
-       ('XYL', 'XYLEM INC.', 3),
-       ('TOTZF', 'TOTAL ENERGY SERVICES INC.', 3)`);
+       ('XYL', 'XYLEM INC.', 3)`);
 }
