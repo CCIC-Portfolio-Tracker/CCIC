@@ -58,6 +58,11 @@ const initializeOIDC = async () => {
       process.env.OIDC_CLIENT_SECRET
     );
     console.log("OIDC Discovery successful");
+
+    const metadata = config.serverMetadata ? config.serverMetadata : config;
+    console.log("Authorization endpoint:", metadata.authorization_endpoint);
+    console.log("Token endpoint:", metadata.token_endpoint);
+
   } catch (err) {
     console.error("OIDC Init Error:", err);
   }
