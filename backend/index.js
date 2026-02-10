@@ -341,6 +341,50 @@ app.get("/api/ytd", async (req, res) => {
   }
 });
 
+// send back updated total portfolio value for the past year (for graph)
+app.get("/api/total-value-twr", async (req, res) => {
+  try {
+    const valueData = await importOneYearTWR();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch twr data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// send back updated total portfolio value for six months
+app.get("/api/six-months-twr", async (req, res) => {
+  try {
+    const valueData = await importSixMonthTWR();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch twr data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// send back updated total portfolio value for three months
+app.get("/api/three-months-twr", async (req, res) => {
+  try {
+    const valueData = await importThreeMonthTWR();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch twr data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// send back updated total portfolio value for six months
+app.get("/api/ytd-twr", async (req, res) => {
+  try {
+    const valueData = await importYTDTWR();
+    res.json(valueData);
+  } catch (error) {
+    console.error("Failed to fetch twr data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("/api/news/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
