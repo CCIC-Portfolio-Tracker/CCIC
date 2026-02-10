@@ -45,9 +45,6 @@ function Admin() {
 
   return (
     <div className="admin-page">
-      <h1 className="admin-title">Admin</h1>
-
-      <h2 className="admin-section-title">Users</h2>
       {users.length === 0 ? (
         <div className="admin-empty">No users found.</div>
       ) : (

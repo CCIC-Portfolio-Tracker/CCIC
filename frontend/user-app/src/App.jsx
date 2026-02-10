@@ -3,6 +3,7 @@ import Holdings from "./holdings";
 import Login from "./login";
 import Graphics from "./graphics";
 import Admin from "./admin";
+import Account from "./account";
 import TickerPage from "./tickerPage";
 import "./App.css";
 
@@ -133,9 +134,12 @@ const App = () => {
         {activeTab === "account" &&
           (debugLoggedIn ? (
             debugIsAdmin ? (
-              <Admin />
+              <>
+                <Account />
+                <Admin />
+              </>
             ) : (
-              <div>Account page</div>
+              <Account />
             )
           ) : (
             <Login />
