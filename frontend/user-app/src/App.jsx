@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Holdings from "./holdings";
 import Login from "./login";
-import News from "./news";
 import Graphics from "./graphics";
 import Admin from "./admin";
 import TickerPage from "./tickerPage";
@@ -83,14 +82,6 @@ const App = () => {
           Portfolio
         </button>
 
-        <button
-          className={activeTab === "news" ? "active" : ""}
-          onClick={() => goToTab("news")}
-          type="button"
-        >
-          News
-        </button>
-
         {/* Account or Login tab based on staus*/}
         <button
           className={`login-tab ${activeTab === "account" ? "active" : ""}`}
@@ -119,8 +110,6 @@ const App = () => {
             />
           )
         )}
-
-        {activeTab === "news" && <News ticker="APPL" />}
 
         {activeTab === "account" &&
           (loggedIn ? (isAdmin ? <Login /> : <div>Account page</div>) : <Login />)}
