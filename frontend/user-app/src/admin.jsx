@@ -16,21 +16,19 @@ function Admin() {
         setLoading(true);
         setError("");
 
-        const usersRes = await fetch("https://ccic.onrender.com/api/admin/users", {
-          method: "GET",
-          credentials: "include", // important if auth uses cookies/sessions
-          headers: { Accept: "application/json" },
+        const res = await fetch("https://ccic.onrender.com/api/admin/users", {
+          credentials: "include",
         });
 
-        if (!usersRes.ok) {
-          const text = await usersRes.text();
-          throw new Error(text || `HTTP ${usersRes.status}`);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
         }
 
-        const usersJson = await usersRes.json();
-        if (!cancelled) setUsers(Array.isArray(usersJson) ? usersJson : []);
+        const json = await res.json();
+        if (!cancelled) setUsers(json || []);
       } catch (e) {
-        if (!cancelled) setError(e?.message || "Failed to fetch users.");
+        if (!cancelled) setError(e.message || "Failed to load users");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -44,11 +42,45 @@ function Admin() {
     };
   }, [isAdmin]);
 
+  const updateUserRole = async (user_pk, newRole) => {
+    // optimistic update
+    const prevUsers = users;
+    setUsers((u) =>
+      u.map((user) =>
+        user.user_pk === user_pk
+          ? { ...user, user_role: newRole }
+          : user
+      )
+    );
+
+    try {
+      const res = await fetch(
+        `https://ccic.onrender.com/api/admin/users/${user_pk}/role`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ role: newRole }),
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Failed to update role");
+      }
+    } catch (e) {
+      // rollback on error
+      setUsers(prevUsers);
+      alert(e.message || "Failed to update user role");
+    }
+  };
+
   const removeUser = (user_pk) => {
     const ok = window.confirm("Are you sure you want to delete this user?");
     if (!ok) return;
 
-    // client-side remove for now
     setUsers((prev) => prev.filter((u) => u.user_pk !== user_pk));
   };
 
@@ -73,13 +105,21 @@ function Admin() {
             {users.map((u) => (
               <tr key={u.user_pk}>
                 <td>{u.user_name}</td>
-                <td>{u.user_role}</td>
+                <td>
+                  <select
+                    value={u.user_role}
+                    onChange={(e) =>
+                      updateUserRole(u.user_pk, e.target.value)
+                    }
+                  >
+                    <option value="member">member</option>
+                    <option value="admin">admin</option>
+                  </select>
+                </td>
                 <td className="admin-delete">
                   <button
                     type="button"
                     className="admin-delete-btn"
-                    aria-label={`Remove ${u.user_name}`}
-                    title="Remove user"
                     onClick={() => removeUser(u.user_pk)}
                   >
                     ✕
