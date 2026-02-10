@@ -1,4 +1,5 @@
 import db from "./db.js";
+import { Decimal } from 'decimal.js';
 
 // Function to get all active tickers from ticker_table
 async function importTickerPK() {
@@ -28,12 +29,14 @@ async function getTotalValue(timestamp) {
         `;
 
         const result = await db.execute(query, [...tickerPKs, timestamp]);
-        console.log(result.rows.length);
-        let totalValue = 0;
-
+        
+        let totalValue = new Decimal(0);
 
         result.rows.forEach(row => {
-            totalValue += row.price_price * row.tot_holdings;
+            const price = new Decimal(row.price_price);
+            const holdings = new Decimal(row.tot_holdings);
+
+            totalValue = totalValue.plus(price.times(holdings));
         });
 
         return totalValue;
@@ -47,7 +50,7 @@ async function getTotalValue(timestamp) {
 async function loadHistoricalValue() {
     try {
         let currentDate = new Date('2025-01-01');
-        const endDate = new Date('2025-02-08');
+        const endDate = new Date('2026-02-08');
 
         console.log("Starting historical value backfill...");
 

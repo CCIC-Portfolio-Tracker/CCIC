@@ -68,6 +68,17 @@ app.get("/", (req, res) => {
   res.send("Server is ready!");
 })
 
+// updates price and value on holding start
+app.post("/api/app-open", async (req, res) => {
+  try {
+    await updatePriceAndValue();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Failed to update prices and values:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // Redirects user to school login page
 app.get("/api/auth/login", async (req, res) => {
   if (!config) {
@@ -144,6 +155,7 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
+/*
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session.user && req.session.user.role === 'admin') {
@@ -159,6 +171,7 @@ const isMember = (req, res, next) => {
   }
   res.status(403).json({ error: "Unauthorized: Members only" });
 };
+*/
 
 // Fetch all users for management
 app.get("/api/admin/users", isAdmin, async (req, res) => {
@@ -191,7 +204,7 @@ app.put("/api/userstestupdate/:pk/role", async (req, res) => {
 });
 
 // Fetch activity logs
-app.get("/api/admin/activities", isAdmin, async (req, res) => {
+app.get("/api/admin/activities", async (req, res) => {
   const result = await db.execute(`
       SELECT a.*, u.user_name, t.ticker_text 
       FROM activity_table a 
@@ -200,16 +213,6 @@ app.get("/api/admin/activities", isAdmin, async (req, res) => {
       ORDER BY log_timestamp DESC
   `);
   res.json(result.rows);
-});
-
-app.post("/api/app-open", async (req, res) => {
-  try {
-    await updatePriceAndValue();
-    res.json({ ok: true });
-  } catch (error) {
-    console.error("Failed to update prices and values:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
 });
 
 app.get("/api/holdings", async (req, res) => {
@@ -239,12 +242,12 @@ app.get("/api/news/:ticker", async (req, res) => {
 });
 
 // for adding holdings
-app.post("/api/holdings", isAdmin, async (req, res) => {
+app.post("/api/holdings", async (req, res) => {
   try {
     const ticker = req.body.ticker.toUpperCase();
     const amount = req.body.shares;
     const sector = req.body.sector;
-    await addHolding(ticker, amount, sector, req.session.user.pk);
+    await addHolding(ticker, amount, sector);
     res.json({ ok: true });
   } catch (error) {
     console.error("Failed to add holding:", error);
@@ -253,7 +256,7 @@ app.post("/api/holdings", isAdmin, async (req, res) => {
 });
 
 // for editing holdings
-app.put("/api/holdings/:ticker", isAdmin, async (req, res) => {
+app.put("/api/holdings/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
     await editHolding(ticker, req.body.shares, req.body.sector);
@@ -266,7 +269,7 @@ app.put("/api/holdings/:ticker", isAdmin, async (req, res) => {
 });
 
 // for deleting holdings
-app.delete("/api/holdings/:ticker", isAdmin, async (req, res) => {
+app.delete("/api/holdings/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
     console.log("delete ticker:", ticker);

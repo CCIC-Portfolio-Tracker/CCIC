@@ -50,19 +50,6 @@ async function importHoldings() {
     const result = await db.execute(query);
     let rows = result.rows;
 
-    // Fallback if no data exists for the specific calculated date
-    if (rows.length === 0) {
-      const fallbackQuery = `
-        SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date
-        FROM price_table p
-        INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
-        WHERE p.tot_holdings > 0 
-        AND p.price_date = (SELECT MAX(price_date) FROM price_table)
-      `;
-      const fallbackResult = await db.execute(fallbackQuery);
-      rows = fallbackResult.rows;
-    }
-
     return rows.map(row => ({
       ticker: row.ticker_text,
       name: row.ticker_co,

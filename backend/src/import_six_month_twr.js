@@ -13,8 +13,10 @@ async function importSixMonthTWR() {
         const endVal = values.rows[i].tot_value;
         const date = values.rows[i].value_date;
         
-        // check if cash flow occurred on this date
-        const flow = cashFlows.rows.find(f => f.cash_date === date)?.cash_amount || 0;
+        // check if cash flow occurred on this date and finds their sum
+        const flow = cashFlows.rows
+            .filter(f => f.cash_date === date)
+            .reduce((sum, f) => sum + parseFloat(f.cash_amount), 0);
         
         const subPeriodReturn = (endVal - flow) / startVal;
         

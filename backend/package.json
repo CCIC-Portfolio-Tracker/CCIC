@@ -13,6 +13,7 @@
     "@libsql/client": "^0.17.0",
     "connect-sqlite3": "^0.9.16",
     "cors": "^2.8.6",
+    "decimal.js": "^10.6.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.19.0",

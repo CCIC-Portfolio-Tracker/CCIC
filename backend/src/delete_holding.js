@@ -1,6 +1,6 @@
 import db from "./db.js";
 
-async function deleteHolding(ticker, userPK) {
+async function deleteHolding(ticker) {
     const query = `
                 UPDATE holding_table
                 SET tot_holdings = ?, holding_active = ?
@@ -19,10 +19,12 @@ async function deleteHolding(ticker, userPK) {
         args: [ticker]
     });
 
+    /*
     await db.execute({
         sql: `INSERT INTO activity_table (user_fk, ticker_fk, log_action) VALUES (?, ?, ?)`,
         args: [userPK, tickerPK, `DELETE`]
     });
+    */
 }
 
 export default deleteHolding;

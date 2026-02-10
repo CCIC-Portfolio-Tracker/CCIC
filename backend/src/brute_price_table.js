@@ -11,7 +11,7 @@ async function loadHistoricalPrices() {
         `);
 
         const startDate = new Date('2025-01-01');
-        const endDate = new Date('2025-02-08'); 
+        const endDate = new Date('2026-02-08'); 
 
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
 
