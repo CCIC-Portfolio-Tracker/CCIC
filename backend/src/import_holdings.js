@@ -6,17 +6,34 @@ async function importHoldings() {
     const now = new Date();
     const nyTimeString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
     const nyDate = new Date(nyTimeString);
+    const dayOfWeek = nyDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
     const cutoff = new Date(nyDate);
     cutoff.setHours(9, 30, 0, 0);
 
     let targetDate;
 
-    if (nyDate >= cutoff) {
+    if (dayOfWeek === 0) {
+      const friday = new Date(nyDate);
+      friday.setDate(nyDate.getDate() - 2);
+      targetDate = friday.toLocaleDateString('en-CA');
+    } 
+    else if (dayOfWeek === 6) {
+      const friday = new Date(nyDate);
+      friday.setDate(nyDate.getDate() - 1);
+      targetDate = friday.toLocaleDateString('en-CA');
+    } 
+    else if (dayOfWeek === 1 && nyDate < cutoff) {
+      const friday = new Date(nyDate);
+      friday.setDate(nyDate.getDate() - 3);
+      targetDate = friday.toLocaleDateString('en-CA');
+    } 
+    else if (nyDate >= cutoff) {
       targetDate = nyDate.toLocaleDateString('en-CA');
-    } else {
+    } 
+    else {
       const yesterday = new Date(nyDate);
-      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setDate(nyDate.getDate() - 1);
       targetDate = yesterday.toLocaleDateString('en-CA');
     }
 
@@ -35,6 +52,19 @@ async function importHoldings() {
 
     const result = await db.execute(query);
     let rows = result.rows;
+
+    // Fallback if no data exists for the specific calculated date
+    if (rows.length === 0) {
+      const fallbackQuery = `
+        SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date
+        FROM price_table p
+        INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
+        WHERE p.tot_holdings > 0 
+        AND p.price_date = (SELECT MAX(price_date) FROM price_table)
+      `;
+      const fallbackResult = await db.execute(fallbackQuery);
+      rows = fallbackResult.rows;
+    }
 
     return rows.map(row => ({
       ticker: row.ticker_text,
