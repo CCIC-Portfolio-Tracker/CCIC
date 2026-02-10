@@ -1,0 +1,1 @@
+//user page didplays your username and status
