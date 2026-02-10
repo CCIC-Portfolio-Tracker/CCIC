@@ -71,7 +71,7 @@ function Holdings({ onSelectTicker }) {
       const res = await fetch("https://ccic.onrender.com/api/holdings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ REQUIRED so backend sees session/admin
+        credentials: "include", 
         body: JSON.stringify({ ticker, shares, sector }),
       });
 

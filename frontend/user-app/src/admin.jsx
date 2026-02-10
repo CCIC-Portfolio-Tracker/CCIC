@@ -16,7 +16,7 @@ function Admin() {
       try {
         // fetch users list (admin-only endpoint)
         const usersRes = await fetch(
-          "https://ccic.onrender.com/api/admin/users",
+          "https://ccic.onrender.com/api/admin/userstest",
         );
 
         if (!usersRes.ok) {

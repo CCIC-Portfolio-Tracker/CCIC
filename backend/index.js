@@ -199,6 +199,21 @@ app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 
+// Fetch all users for management
+app.get("/api/admin/userstest", async (req, res) => {
+  const result = await db.execute("SELECT * FROM user_table");
+  res.json(result.rows);
+});
+
+// Update a user's role
+app.put("/api/admin/userstest/:pk/role", async (req, res) => {
+  await db.execute({
+      sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
+      args: [req.body.role, req.params.pk]
+  });
+  res.json({ ok: true });
+});
+
 // Fetch activity logs
 app.get("/api/admin/activities", isAdmin, async (req, res) => {
   const result = await db.execute(`
