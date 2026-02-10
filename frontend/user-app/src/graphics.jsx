@@ -11,6 +11,12 @@ function Graphics() {
     "ytd": "https://ccic.onrender.com/api/ytd",
   };
 
+  // Chart 2 uses the same base endpoints as Chart 1, but with "-twr"
+  const getTwrEndpoint = (rangeKey) => {
+    const base = RANGE_ENDPOINTS[rangeKey];
+    return base ? `${base}-twr` : null;
+  };
+
   // dropdown state for charts
   const [sel1, setSel1] = useState("1y");
   const [sel2, setSel2] = useState("6m");
@@ -58,13 +64,15 @@ function Graphics() {
     };
   }, [sel1]);
 
-  // change chart 2 data
+  // get chart 2 data 
   useEffect(() => {
     let cancelled = false;
 
     async function fetchChart2() {
       try {
-        const endpoint = RANGE_ENDPOINTS[sel2];
+        const endpoint = getTwrEndpoint(sel2);
+        if (!endpoint) throw new Error(`Unknown range key for Chart 2: ${sel2}`);
+
         const res = await fetch(endpoint);
         if (!res.ok) throw new Error(`Chart 2 fetch failed: ${res.status}`);
 
@@ -156,7 +164,6 @@ function Graphics() {
       chartRef2.current = null;
       chartRef3.current = null;
     };
- 
   }, []);
 
   // update chart 1
