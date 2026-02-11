@@ -5,7 +5,7 @@ import { Decimal } from 'decimal.js';
 async function editHolding(ticker, amount) {
 
     const tickerResult = await db.execute({
-        sql: `SELECT t.ticker_pk, h.tot_holdings FROM ticker_table t WHERE ticker_text = ? INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk`,
+        sql: `SELECT t.ticker_pk, h.tot_holdings FROM ticker_table t INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk WHERE ticker_text = ? `,
         args: [ticker]
     });
 
@@ -19,7 +19,7 @@ async function editHolding(ticker, amount) {
         sql: `UPDATE holding_table SET tot_holdings = ? WHERE ticker_fk = ?`,
         args: [amountDiff, tickerPK]
     });
-    
+
     await db.execute({
         sql :`UPDATE price_table
                 SET tot_holdings = ?
