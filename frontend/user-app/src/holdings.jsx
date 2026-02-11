@@ -120,7 +120,7 @@ function Holdings({ onSelectTicker, isAdmin }) {
       setBusy(true);
       setModalError("");
 
-      // BUY -> create holding
+      // BUY 
       if (modalMode === "buy") {
         const res = await fetch("https://ccic.onrender.com/api/holdings", {
           method: "POST",
@@ -135,15 +135,18 @@ function Holdings({ onSelectTicker, isAdmin }) {
         }
       }
 
-      // SELL -> edit holding (new endpoint: PUT /api/holdings)
+      // SELL
       if (modalMode === "sell") {
-        const res = await fetch("https://ccic.onrender.com/api/holdings", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        });
-
+        const res = await fetch(
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(payload.ticker)}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ shares: payload.shares, sector: payload.sector }),
+          }
+        );
+      
         if (!res.ok) {
           const text = await res.text();
           throw new Error(text || `HTTP ${res.status}`);

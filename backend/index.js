@@ -22,8 +22,6 @@ import updatePriceAndValue from "./src/update_call.js";
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
 
-app.set('trust proxy', 1);
-
 app.use(cors({
   origin: "https://ccic-phi.vercel.app",
   credentials: true
@@ -157,7 +155,6 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
-/*
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session.user && req.session.user.role === 'admin') {
@@ -173,7 +170,20 @@ const isMember = (req, res, next) => {
   }
   res.status(403).json({ error: "Unauthorized: Members only" });
 };
-*/
+
+// send a users secure session cookie info to frontend to determine auth status & login state
+app.get("/api/auth/status", (req, res) => {
+  if (req.session.user) {
+    res.json({
+      loggedIn: true,
+      isAdmin: req.session.user.role === 'admin',
+      isMember: req.session.user.role === 'member' || req.session.user.role === 'admin',
+      userName: req.session.user.name
+    });
+  } else {
+    res.json({ loggedIn: false, isAdmin: false, isMember: false });
+  }
+});
 
 // Fetch all users for management
 app.get("/api/admin/users", async (req, res) => {
@@ -258,9 +268,9 @@ app.post("/api/holdings", async (req, res) => {
 });
 
 // for editing holdings
-app.put("/api/holdings", async (req, res) => {
+app.put("/api/holdings/:ticker", async (req, res) => {
   try {
-    const ticker = req.body.ticker.toUpperCase();
+    const ticker = (req.params.ticker || "").toUpperCase();
     await editHolding(ticker, req.body.shares, req.body.sector);
     // can configure req.body to better fit db needs
     res.json({ ok: true });
