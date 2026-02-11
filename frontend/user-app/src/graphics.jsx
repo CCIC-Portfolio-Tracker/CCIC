@@ -156,7 +156,7 @@ function Graphics() {
         });
 
         setChart4Series({
-          labels: ["Historical"],
+          labels: ["Year Ago"],
           datasets: buildSectorDatasets(payload?.historical),
         });
       } catch (err) {
@@ -360,7 +360,7 @@ function Graphics() {
 
         <div className="chart-box">
           <div className="chart-header">
-            <h3>Historical Sector Allocation</h3>
+            <h3>Year Ago Sector Allocation</h3>
           </div>
 
           <div className="chart-canvas">
