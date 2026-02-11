@@ -23,7 +23,7 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
             console.log(`Prices for ${timestamp} already exist. Skipping Yahoo fetch to prevent Rate Limiting (429).`);
             return; 
         }
-        
+
         console.log(`Starting price update for ${timestamp}...`);
 
         // Get all active holdings
@@ -89,7 +89,7 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
                 }
 
                 batchQueries.push({
-                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
+                    sql: `INSERT or REPLACE INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
                     args: [tickerPK, price, timestamp, amount]
                 });
 
