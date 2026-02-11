@@ -1,4 +1,4 @@
-import getSectorBreakdown from "./sector_breakdown";
+import getSectorBreakdown from "./sector_breakdown.js";
 
 async function importSectorBreakdown() {
     const now = new Date()
