@@ -31,7 +31,7 @@ function escapeHtml(str) {
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
-const DEBUG_AUTH = true;
+const DEBUG_AUTH = false;
 
 app.use(cors({
   origin: "https://ccic-phi.vercel.app",
@@ -46,7 +46,7 @@ const isProd = true;
 
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
-  name: "ccic_session",
+  name: "connect.sid",
   store: new SQLiteStore({
     db: 'sessions.sqlite', 
     dir: './' 
@@ -124,7 +124,7 @@ app.get("/api/auth/login", async (req, res) => {
   req.session.state = state;
 
   console.log("Login state", state);
-  console.log("Login code_verifier", !!code_verifier);
+  console.log("Login code_verifier", !!req.session.code_verifier);
 
   const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier)
   
@@ -153,8 +153,10 @@ app.get("/api/auth/callback", async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.get('host');
     //const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
+
     const currentUrl = new URL(process.env.OIDC_REDIRECT_URI);
     currentUrl.search = new URLSearchParams(req.query).toString();
+
 
 
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {

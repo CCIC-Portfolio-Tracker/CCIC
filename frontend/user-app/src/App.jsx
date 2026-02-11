@@ -105,6 +105,7 @@ const App = () => {
     return <div className="page">Loading…</div>;
   }
 
+
   return (
     <>
       {/* Navigation tabs */}
