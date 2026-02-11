@@ -13,6 +13,8 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
 
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
 
+        const ticker_text = tickerData.rows[0].ticker_text;
+
         try {
             const results = await yahooFinance.historical(ticker_text, {
                 period1: startDate,
