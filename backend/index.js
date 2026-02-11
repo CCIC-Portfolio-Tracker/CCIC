@@ -253,12 +253,13 @@ app.get("/api/news/:ticker", async (req, res) => {
   }
 });
 
-// for adding holdings
+// for buying holdings
 app.post("/api/holdings", async (req, res) => {
   try {
     const ticker = req.body.ticker.toUpperCase();
     const amount = req.body.shares;
     const sector = req.body.sector;
+    // need some way to see if the ticker already exists in the db, if so, add to existing shares instead of creating new entry
     await addHolding(ticker, amount, sector);
     res.json({ ok: true });
   } catch (error) {
@@ -267,12 +268,13 @@ app.post("/api/holdings", async (req, res) => {
   }
 });
 
-// for editing holdings
+// for selling holdings
 app.put("/api/holdings/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
     await editHolding(ticker, req.body.shares, req.body.sector);
-    // can configure req.body to better fit db needs
+    // need to change so that it subtracts the shares instead of replacing them
+    // can we remove sector from this call?
     res.json({ ok: true });
   } catch (error) {
     console.error("Failed to edit holding:", error);

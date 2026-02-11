@@ -177,8 +177,10 @@ function Holdings({ onSelectTicker, isAdmin }) {
       },
       "Name",
       "Shares",
+      "Purchase Price",
       "Current Price",
       "Total Value",
+      "Sector",
     ],
     []
   );
