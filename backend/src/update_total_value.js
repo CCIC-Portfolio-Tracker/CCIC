@@ -7,8 +7,8 @@ import loadHistoricalValue from "./historical_value_update.js";
 async function importOldestValueDate() {
     const query = `SELECT value_date FROM value_table ORDER BY value_date DESC LIMIT 1`;
     const result = await db.execute(query);
-    console.log("Oldest value date:", result.rows.map(row => row.value_date));
-    return result.rows.map(row => row.value_date);
+    if (result.rows.length === 0) return null;    
+    return result.rows[0].value_date;
 }
 
 async function checkExistingValue(timestamp) {
@@ -18,8 +18,10 @@ async function checkExistingValue(timestamp) {
         WHERE value_date = ?
     `;
     const result = await db.execute(query, [timestamp]);
-    console.log(`Existing value check for ${timestamp}:`, result.rows);
-    return result.rows.totalValue;
+    if (result.rows.length > 0) {
+        return result.rows[0].tot_value;
+    }
+    return 0;
 }
 
 // Function to get all active tickers from ticker_table
@@ -36,12 +38,18 @@ async function importTickerPK() {
 
 async function getTotalValue(timestamp) {
     try {
+        console.log(timestamp);
         const currentDate = new Date(timestamp);
+        currentDate.setDate(currentDate.getDate() - 1);
+        const endDate = currentDate.toISOString().split('T')[0];
         const oldestDate = await importOldestValueDate();
         const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
-        const endDate = currentDate - 1;
         console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
-        await loadHistoricalValue(startDate, endDate);
+        
+        if (startDate <= endDate) {
+            console.log("Historical value data is missing. Initiating backfill...");
+            await loadHistoricalValue(startDate, endDate);
+       }
 
         const tickerPKs = await importTickerPK();
 
@@ -89,10 +97,9 @@ async function updateTotalValue(timestamp) {
     if (await checkExistingValue(timestamp) > 0) {
         console.log("Value for this date already exists. Checking update necessity...");
         const query = `
-        UPDATE value_table (tot_value) VALUES (?) WHERE value_date = '${timestamp}'
+        UPDATE value_table SET tot_value = ? WHERE value_date = ?
         `;
-        await db.execute(query, [totalValue]);
-        return;
+        await db.execute(query, [totalValue, timestamp]);
     } else {
 
         const query = `

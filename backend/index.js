@@ -273,7 +273,7 @@ app.post("/api/holdings", async (req, res) => {
 app.put("/api/holdings/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
-    await editHolding(ticker, req.body.shares, req.body.sector);
+    await editHolding(ticker, req.body.shares);
     // need to change so that it subtracts the shares instead of replacing them
     // can we remove sector from this call?
     res.json({ ok: true });

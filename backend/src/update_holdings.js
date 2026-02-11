@@ -8,7 +8,8 @@ async function importOldestPriceDate(tickerPK) {
     const query = `SELECT price_date FROM price_table WHERE ticker_fk = ? ORDER BY price_date DESC LIMIT 1`;
     const result = await db.execute(query, [tickerPK]);
     console.log("Oldest price data for ticker PK", tickerPK, ":", result.rows.map(row => row.price_date));
-    return result.rows.map(row => row.price_date);
+    if (result.rows.length === 0) return null;
+    return result.rows[0].price_date;
 }
 
 // Function to get all tickers from ticker_table
@@ -43,15 +44,16 @@ async function getOutdatedTickers(timestamp) {
         return { outdatedTickers: [], outdatedTickerPKs: [] };
     }
 
+    const placeholders = outdatedTickerPKs.map(() => '?').join(',');
     const query = `
             SELECT DISTINCT t.ticker_text, t.ticker_pk, h.tot_holdings
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
-            WHERE ticker_pk IN (${outdatedTickerPKs.join(',')})
+            WHERE ticker_pk IN (${placeholders})
             AND h.holding_active = 1;
         `;
 
-    const result = await db.execute(query);
+    const result = await db.execute(query, outdatedTickerPKs);
     return {
         outdatedTickers: result.rows.map(row => row.ticker_text),
         outdatedTickerPKs: result.rows.map(row => row.ticker_pk),
@@ -77,15 +79,26 @@ async function getUpdatedPrices(timestamp) {
 
         for (const stock of resultsArray) {
             const index = outdatedTickers.findIndex(t => t.toUpperCase() === stock.symbol.toUpperCase());
+            if (index === -1) continue;
+
             const matchPK = outdatedTickerPKs[index];
             const holdings = currentHoldings[index];
 
-            const oldestDate = new Date(importOldestPriceDate(matchPK)).toLocaleDateString('en-CA');
-            const startDate = oldestDate + 1;
-            const endDate = timestamp - 1;
-            console.log(`Updating ${stock.symbol} with historical backfill from ${startDate} to ${endDate}...`);
-            await loadHistoricalPrices(startDate, endDate, matchPK);
+            const endObj = new Date(timestamp);
+            endObj.setDate(endObj.getDate() - 1);
+            const endDate = endObj.toISOString().split('T')[0];
 
+            const lastRecordedDate = await importOldestPriceDate(matchPK); // Add await!
+            if (lastRecordedDate) {
+                const startObj = new Date(lastRecordedDate);
+                startObj.setDate(startObj.getDate() + 1);
+                const startDate = startObj.toISOString().split('T')[0];
+
+                if (startDate <= endDate) {
+                    console.log(`Updating ${stock.symbol} with historical backfill from ${startDate} to ${endDate}...`);
+                    await loadHistoricalPrices(startDate, endDate, matchPK);
+                }
+            }
 
             if (matchPK) {
                 batchQueries.push({
