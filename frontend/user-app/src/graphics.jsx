@@ -21,7 +21,7 @@ function Graphics() {
   };
 
   // Chart 3/4 (sector allocation)
-  const SECTOR_ENDPOINT = "git";
+  const SECTOR_ENDPOINT = "/api/sector";
 
   // dropdown state for charts
   const [sel1, setSel1] = useState("1y");
