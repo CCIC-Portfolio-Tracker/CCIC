@@ -1,7 +1,5 @@
 /* CSS styling for Login page */
 
-* { box-sizing: border-box; }
-
 /* Center item in page */
 .login-page {
     height: 100vh;
@@ -50,3 +48,5 @@
   .button:hover {
     background-color: #43a047;
   }  
+
+  * { box-sizing: border-box; }

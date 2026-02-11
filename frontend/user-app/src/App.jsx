@@ -7,6 +7,12 @@ import TickerPage from "./tickerPage";
 import Account from "./account";
 import "./App.css";
 
+/**
+ * Main app component that manages navigation and authentication state. On load, it pings the backend to indicate the app was 
+ * opened and fetches the user's auth status. It conditionally renders the Home, Portfolio, and Account/Admin tabs based on 
+ * the user's auth status and permissions.
+ * @returns Main app component
+ */
 const App = () => {
   // auth state populated from backend
   const [authLoaded, setAuthLoaded] = useState(false);
@@ -14,8 +20,7 @@ const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [userName, setUserName] = useState("");
-  //const isAdmin = true; // from backend
-  //const loggedIn = true; // from backend
+
 
   const [activeTab, setActiveTab] = useState("account");
   const [selectedTicker, setSelectedTicker] = useState(null);
@@ -99,7 +104,6 @@ const App = () => {
   if (!authLoaded) {
     return <div className="page">Loading…</div>;
   }
-    
 
   return (
     <>

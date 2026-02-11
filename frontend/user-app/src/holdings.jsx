@@ -18,6 +18,14 @@ const SECTOR_OPTIONS = [
   "Other",
 ];
 
+/**
+ * Generates a holdings page that allows the users to view and edit the portfolio based on their permissions
+ * @param {*} isAdmin, only admins can see the Buy/Sell buttons and perform trades
+ * @param {*} isMember, members and admins can see the portfolio grid; non-members see an empty grid with no data
+ * @param {*} loggedIn, only logged in users can see the portfolio grid; non-logged in users see an empty grid with no data
+ * @param {*} onSelectTicker, callback function that is called when a ticker link is clicked in the grid; receives the ticker as an argument   
+ * @returns Holdings page
+ */
 function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
   // Grid rows displayed in GridJS
   const [rows, setRows] = useState([]);
@@ -204,7 +212,7 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
     []
   );
 
-  // Handle clicks on ticker links inside GridJS via event delegation
+  // Handle clicks on ticker links inside GridJS 
   useEffect(() => {
     const wrapper = document.getElementById("wrapper");
     if (!wrapper) return;

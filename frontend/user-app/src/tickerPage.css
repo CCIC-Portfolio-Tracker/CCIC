@@ -1,7 +1,11 @@
+/* Styles for the ticker page */
+
+/* Styles for the ticker page container */
 .ticker-page {
     padding: 24px;
 }
-  
+
+/** Styles for the main title on the ticker page */
 .ticker-heading {
     font-family: Arial, sans-serif;
     font-size: 18px;

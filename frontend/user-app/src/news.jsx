@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./news.css";
 
-// Cleans and normalizes backend response into a consistent format for the UI
+/**
+ * Cleans and normalizes backend response into a consistent format for the UI
+ * @param {*} rawData 
+ * @returns reformatted date
+ */
 function cleanInput(rawData) {
   // If backend returned an error object
   if (rawData?.error) {
@@ -31,7 +35,11 @@ function cleanInput(rawData) {
   return { articles, error: "" };
 }
 
-// News component to display news articles related to a given ticker
+/**
+ * News component to display news articles related to a given ticker
+ * @param {*} ticker company tickecr
+ * @returns scrollable news bar
+ */
 function News({ticker}) {
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState("");
@@ -111,6 +119,9 @@ function News({ticker}) {
     };
   }, [ticker]);
 
+  /**
+   * Generate ticker-related news articles list
+   */
   return (
     <div className="news-pane">
       <div className="news-header">News</div>

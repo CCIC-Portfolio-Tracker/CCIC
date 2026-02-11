@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import "./login.css";   
 
-// Handles the login page and OIDC authentication flow
+/** 
+ * Generates a loin page that directs users to the OIDC authentication flow
+ * @returns Login page
+*/
 function Login() {
     const handleOIDCLogin = () => {
         window.location.href = "https://ccic.onrender.com/api/auth/login";
