@@ -73,13 +73,13 @@ const App = () => {
 
   useEffect(() => {
     const handleAuth = async () => {
-      // check if ticket is in url
+      // check for ticket in URL
       const params = new URLSearchParams(window.location.search);
       const ticket = params.get("handover_ticket");
 
       if (ticket) {
+        console.log("Found ticket, attempting exchange:", ticket);
         try {
-          // get a session cookie
           const res = await fetch("/api/auth/handover", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -88,15 +88,18 @@ const App = () => {
           });
 
           if (res.ok) {
-            // remove ticket from url
+            console.log("Handover successful!");
+            // remove ticket from URL 
             window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            console.error("Handover failed:", await res.text());
           }
         } catch (err) {
-          console.error("Handover failed:", err);
+          console.error("Handover error:", err);
         }
       }
 
-      // fetch auth status with cookie
+      // fetch status (now that cookie should be set)
       fetchAuthStatus();
     };
 

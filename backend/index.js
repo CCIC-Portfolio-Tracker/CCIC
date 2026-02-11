@@ -33,7 +33,7 @@ const handoverTickets = new Map();
 const app = express();
 
 // to ensure secure cookie
-app.set("trust proxy", 1)
+app.set('trust proxy', 1)
 
 const SQLiteStore = SQLiteStoreFactory(session); 
 const DEBUG_AUTH = false;
@@ -50,19 +50,16 @@ const isProd = true;
 
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
-  name: "connect.sid",
-  store: new SQLiteStore({
-    db: 'sessions.sqlite', 
-    dir: './' 
-  }),
-  secret: process.env.SESSION_SECRET,
+  store: new SQLiteStore({ db: "sessions.db", dir: "./" }),
+  name: "ccic_session", 
+  secret: process.env.SESSION_SECRET || "secret",
   resave: false,
-  saveUninitialized: false, 
-  cookie: { 
-    secure: true,      
-    httpOnly: true, 
-    sameSite:'none',  
-    maxAge: 24 * 60 * 60 * 1000 
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, 
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', 
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
