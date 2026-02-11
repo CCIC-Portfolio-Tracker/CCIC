@@ -152,10 +152,10 @@ app.get("/api/auth/callback", async (req, res) => {
 
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.get('host');
-    //const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
+    const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
 
-    const currentUrl = new URL(process.env.OIDC_REDIRECT_URI);
-    currentUrl.search = new URLSearchParams(req.query).toString();
+    //const currentUrl = new URL(process.env.OIDC_REDIRECT_URI);
+    //currentUrl.search = new URLSearchParams(req.query).toString();
 
 
 
