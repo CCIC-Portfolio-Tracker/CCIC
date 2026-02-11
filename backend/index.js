@@ -31,7 +31,7 @@ app.use(express.json());
 
 // to ensure secure cookie
 app.set("trust proxy", 1)
-const isProd = process.env.NODE_ENV == "production";
+const isProd = true;
 
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
@@ -44,9 +44,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false, 
   cookie: { 
-    secure: isProd,      
+    secure: true,      
     httpOnly: true, 
-    sameSite: isProd ? 'none' : 'lax',  
+    sameSite:'none',  
     maxAge: 24 * 60 * 60 * 1000 
   }
 }));
@@ -86,6 +86,7 @@ app.post("/api/app-open", async (req, res) => {
 
 // Redirects user to school login page
 app.get("/api/auth/login", async (req, res) => {
+  console.log("Login attempt with", req.sessionID);
   if (!config) {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
@@ -95,6 +96,9 @@ app.get("/api/auth/login", async (req, res) => {
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
+
+  console.log("Login state", state);
+  console.log("Login code_verifier", !!code_verifier);
 
   const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier)
   
@@ -114,6 +118,12 @@ app.get("/api/auth/login", async (req, res) => {
 // where school sends user with a code after login, sends school code and client secret to get necessary information
 app.get("/api/auth/callback", async (req, res) => {
   try {
+    console.log("callback sessionID:", req.sessionID);
+    console.log("callback has cookie header:", !!req.headers.cookie);
+    console.log("callback session state:", req.session.state);
+    console.log("callback has code_verifier:", !!req.session.code_verifier);
+    console.log("callback query:", req.query);
+
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.get('host');
     const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
