@@ -154,8 +154,7 @@ app.get("/api/auth/callback", async (req, res) => {
     console.log("callback query:", req.query);
 
     if (!req.session || !req.session.state || !req.session.code_verifier) {
-      console.error("Error: Session was lost during redirect. Missing state/verifier.");
-      console.error("Browser likely blocked the cookie.");
+      console.warn("Notice: Session data missing on this request. Redirecting to login.");
       return res.redirect("/api/auth/login");
     }
 
