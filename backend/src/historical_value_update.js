@@ -47,31 +47,37 @@ async function getTotalValue(timestamp) {
     }
 }
 
-async function loadHistoricalValue(startDate, endDate) {
+async function loadHistoricalValue(startDateStr, endDateStr) {
     try {
 
         console.log("Starting historical value backfill...");
 
-        while (startDate <= endDate) {
-            const timestamp = startDate.toLocaleDateString('en-CA', {
-                timeZone: 'America/New_York' 
-            });
+        let loopDate = new Date(startDateStr);
+        const finalDate = new Date(endDateStr);
+
+        if (isNaN(loopDate) || isNaN(finalDate)) {
+            console.error("Invalid dates passed to loadHistoricalValue");
+            return;
+        }
+
+        while (loopDate <= finalDate) {
+            const timestamp = loopDate.toISOString().split('T')[0];
 
             console.log(`Processing: ${timestamp}`);
 
             const totalValue = await getTotalValue(timestamp);
 
-            if (totalValue > 0) {
+            if (totalValue && !totalValue.equals(0)) {
                 const query = `
                     INSERT OR IGNORE INTO value_table (tot_value, value_date) 
                     VALUES (?, ?)
                 `;
-                await db.execute(query, [totalValue, timestamp]);
+                await db.execute(query, [totalValue.toString(), timestamp]);
             } else {
                 console.log(`No price data found for ${timestamp}, skipping.`);
             }
 
-            currentDate.setDate(currentDate.getDate() + 1);
+            loopDate.setDate(loopDate.getDate() + 1);        
         }
 
         console.log("Total value backfill");

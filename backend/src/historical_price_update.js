@@ -11,9 +11,12 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
             WHERE t.ticker_pk = ?
         `, [tickerPK]);
 
+        if (tickerData.rows.length === 0) return;
+
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
 
         const ticker_text = tickerData.rows[0].ticker_text;
+        const tot_holdings = tickerData.rows[0].tot_holdings;
 
         try {
             const results = await yahooFinance.historical(ticker_text, {
@@ -36,7 +39,7 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
                         sql: `INSERT OR IGNORE INTO price_table 
                                   (ticker_fk, price_price, price_date, tot_holdings) 
                                   VALUES (?, ?, ?, ?)`,
-                        args: [ticker_pk, day.open, formattedDate, tot_holdings]
+                        args: [tickerPK, day.open, formattedDate, tot_holdings]
                     };
                 });
 
