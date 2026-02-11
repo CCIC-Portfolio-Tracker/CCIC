@@ -78,5 +78,38 @@ h1 {
   padding: 20px;
 }
 
+/* Toolbar above the grid */
+.trade-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 20px 0 20px;
+}
+
+/* Buy/Sell buttons */
+.trade-btn {
+  appearance: none;
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.trade-btn:hover {
+  background: #e6e6e6;
+}
+
+.trade-buy {
+  border-color: #1f7a3a;
+}
+
+.trade-sell {
+  border-color: #b00020;
+}
+
 
 

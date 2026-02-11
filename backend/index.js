@@ -258,9 +258,9 @@ app.post("/api/holdings", async (req, res) => {
 });
 
 // for editing holdings
-app.put("/api/holdings/:ticker", async (req, res) => {
+app.put("/api/holdings", async (req, res) => {
   try {
-    const ticker = (req.params.ticker || "").toUpperCase();
+    const ticker = req.body.ticker.toUpperCase();
     await editHolding(ticker, req.body.shares, req.body.sector);
     // can configure req.body to better fit db needs
     res.json({ ok: true });

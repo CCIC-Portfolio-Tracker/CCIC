@@ -8,7 +8,6 @@ function Account() {
         padding: "20px",
       }}
     >
-      <h2>User Profile</h2>
 
       <p>
         <strong>Username:</strong> testuser

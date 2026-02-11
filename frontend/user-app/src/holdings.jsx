@@ -3,27 +3,38 @@ import { Grid } from "gridjs-react";
 import { html } from "gridjs";
 import "gridjs/dist/theme/mermaid.css";
 
+const SECTOR_OPTIONS = [
+  "Technology",
+  "Healthcare",
+  "Energy/Infrastructure",
+  "Consumer",
+  "Financials",
+  "Aerospace & Defense",
+  "Real Estate",
+  "Emerging Markets",
+  "ETF",
+  "Bankruptcy",
+  "Other",
+];
+
 function Holdings({ onSelectTicker, isAdmin }) {
-  //const [rows, setRows] = useState([]);
-  //const [isAdmin, setIsAdmin] = useState(false); // from backend
-  // change holdings to retrieve secure cookie from backend individually
+  // Grid rows
   const [rows, setRows] = useState([]);
 
-  // get isAdmin from backend session
-  /*useEffect(() => {
-    fetch("https://ccic.onrender.com/api/auth/status", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setIsAdmin(!!data.isAdmin))
-      .catch((err) => {
-        console.error("Failed to load /api/auth/status:", err);
-        setIsAdmin(false);
-      });
-  }, []);
-  */
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("buy"); // "buy" | "sell"
+  const [busy, setBusy] = useState(false);
+  const [modalError, setModalError] = useState("");
 
-  // load from backend function
+  // Shared form fields (buy/sell)
+  const [form, setForm] = useState({
+    ticker: "",
+    shares: "",
+    sector: "Technology",
+  });
+
+  // Fetch holdings from backend and map to GridJS rows
   const loadHoldings = useCallback(() => {
     fetch("https://ccic.onrender.com/api/holdings")
       .then((res) => res.json())
@@ -43,189 +54,150 @@ function Holdings({ onSelectTicker, isAdmin }) {
       });
   }, []);
 
-  // initial load
+  // Initial load
   useEffect(() => {
     loadHoldings();
   }, [loadHoldings]);
 
-  // send add to backend via POST, then reload from backend
-  const addRow = async () => {
-    if (!isAdmin) return; // admin-only guard
+  // Close modal and reset state
+  const closeModal = () => {
+    setModalOpen(false);
+    setBusy(false);
+    setModalError("");
+  };
 
-    const ticker = prompt("Enter Ticker (e.g., AAPL):");
-    if (!ticker) return;
+  // Open Buy modal (blank fields)
+  const openBuyModal = () => {
+    if (!isAdmin) return;
+    setModalMode("buy");
+    setForm({ ticker: "", shares: "", sector: "Technology" });
+    setModalError("");
+    setModalOpen(true);
+  };
 
-    const shareSt = prompt("Enter Share Count:");
-    if (!shareSt) return;
+  // Open Sell modal (blank fields – user enters ticker now)
+  const openSellModal = () => {
+    if (!isAdmin) return;
+    setModalMode("sell");
+    setForm({ ticker: "", shares: "", sector: "Technology" });
+    setModalError("");
+    setModalOpen(true);
+  };
 
-    const shares = Number(shareSt);
-    if (Number.isNaN(shares)) {
-      alert("Share must be a number.");
+  // Basic validation for both buy and sell
+  const validate = () => {
+    const ticker = String(form.ticker || "").trim().toUpperCase();
+    const shares = Number(form.shares);
+
+    if (!ticker) return "Ticker is required.";
+
+    if (!/^[A-Z.\-]{1,10}$/.test(ticker)) return "Ticker looks invalid.";
+    if (!Number.isFinite(shares) || shares <= 0)
+      return "Shares must be a number greater than 0.";
+    if (!SECTOR_OPTIONS.includes(form.sector))
+      return "Please select a valid sector.";
+    return "";
+  };
+
+  // Submit Buy/Sell using the appropriate endpoint
+  const submitTrade = async () => {
+    if (!isAdmin) return;
+
+    const err = validate();
+    if (err) {
+      setModalError(err);
       return;
     }
 
-    const sector = prompt("Enter Sector:");
-    if (!sector) return;
+    const payload = {
+      ticker: String(form.ticker).trim().toUpperCase(),
+      shares: Number(form.shares),
+      sector: form.sector,
+    };
 
     try {
-      const res = await fetch("https://ccic.onrender.com/api/holdings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ ticker, shares, sector }),
-      });
+      setBusy(true);
+      setModalError("");
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
+      // BUY -> create holding
+      if (modalMode === "buy") {
+        const res = await fetch("https://ccic.onrender.com/api/holdings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
+        }
       }
 
+      // SELL -> edit holding (new endpoint: PUT /api/holdings)
+      if (modalMode === "sell") {
+        const res = await fetch("https://ccic.onrender.com/api/holdings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
+        }
+      }
+
+      closeModal();
       loadHoldings();
     } catch (e) {
-      console.error("POST /api/holdings failed:", e);
-      alert("Failed to add holding.");
+      console.error(`${modalMode} failed:`, e);
+      setModalError(e?.message || "Trade failed.");
+      setBusy(false);
     }
   };
 
-  // send edit to backend
-  const editHolding = useCallback(
-    async (ticker) => {
-      if (!isAdmin) return; // admin-only guard
-
-      const shares = prompt("Enter Share Count:");
-      const sector = prompt("Enter sector");
-
-      const updates = {};
-      if (shares !== null && shares !== "") updates.shares = shares;
-      if (sector !== null && sector !== "") updates.sector = sector;
-
-      if (Object.keys(updates).length === 0) return;
-
-      try {
-        const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify(updates),
-          }
-        );
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `HTTP ${res.status}`);
-        }
-
-        loadHoldings();
-      } catch (e) {
-        console.error("PUT /api/holdings failed:", e);
-        alert("Failed to edit holding.");
-      }
-    },
-    [isAdmin, loadHoldings]
-  );
-
-  // send delete to backend
-  const deleteHolding = useCallback(
-    async (ticker) => {
-      if (!isAdmin) return; // admin-only guard
-
-      const ok = window.confirm(`Delete ${ticker}?`);
-      if (!ok) return;
-
-      try {
-        const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          }
-        );
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `HTTP ${res.status}`);
-        }
-
-        loadHoldings();
-      } catch (e) {
-        console.error("DELETE /api/holdings failed:", e);
-        alert("Failed to delete holding.");
-      }
-    },
-    [isAdmin, loadHoldings]
-  );
-
-  // columns (Ticker is clickable)
+// Grid columns
   const columns = useMemo(
-    () =>
-      [
-        {
-          name: "Ticker",
-          formatter: (cell) => {
-            const ticker = String(cell ?? "");
-            return html(
-              `<a href="#" class="ticker-link" data-ticker="${ticker}">${ticker}</a>`
-            );
-          },
+    () => [
+      {
+        name: "Ticker",
+        // Make ticker clickable
+        formatter: (cell) => {
+          const ticker = String(cell ?? "");
+          return html(
+            `<a href="#" class="ticker-link" data-ticker="${ticker}">${ticker}</a>`
+          );
         },
-        "Name",
-        "Shares",
-        "Current Price",
-        "Total Value",
-        isAdmin
-          ? {
-              name: "Actions",
-              formatter: (cell, row) => {
-                const ticker = row.cells[0].data;
-                return html(`
-                  <button class="edit-btn" data-ticker="${ticker}">Edit</button>
-                  <button class="delete-btn" data-ticker="${ticker}">Delete</button>
-                `);
-              },
-            }
-          : undefined,
-      ].filter(Boolean),
-    [isAdmin]
+      },
+      "Name",
+      "Shares",
+      "Current Price",
+      "Total Value",
+    ],
+    []
   );
 
-  // click handling (ticker link + buttons)
+  // Handle ticker link click
   useEffect(() => {
     const wrapper = document.getElementById("wrapper");
     if (!wrapper) return;
 
     const onClick = (e) => {
-      // ticker link
       const link = e.target.closest("a.ticker-link");
       if (link) {
         e.preventDefault();
         const ticker = link.getAttribute("data-ticker");
         if (ticker && onSelectTicker) onSelectTicker(ticker);
-        return;
-      }
-
-      // Only admins can use edit/delete buttons
-      if (!isAdmin) return;
-
-      const btn = e.target.closest("button");
-      if (!btn) return;
-
-      const ticker = btn.getAttribute("data-ticker");
-      if (!ticker) return;
-
-      if (btn.classList.contains("edit-btn")) {
-        editHolding(ticker);
-      } else if (btn.classList.contains("delete-btn")) {
-        deleteHolding(ticker);
       }
     };
 
     wrapper.addEventListener("click", onClick);
     return () => wrapper.removeEventListener("click", onClick);
-  }, [isAdmin, editHolding, deleteHolding, onSelectTicker]);
+  }, [onSelectTicker]);
 
-  // grid styling
+  // Grid styling
   const gridStyle = useMemo(
     () => ({
       table: { "font-family": "Arial, sans-serif", "font-size": "14px" },
@@ -242,10 +214,16 @@ function Holdings({ onSelectTicker, isAdmin }) {
 
   return (
     <>
+      {/* Toolbar above the portfolio */}
       {isAdmin && (
-        <button id="add-row-btn" onClick={addRow}>
-          Add New Holding
-        </button>
+        <div className="trade-toolbar">
+          <button className="trade-btn trade-buy" onClick={openBuyModal}>
+            Buy
+          </button>
+          <button className="trade-btn trade-sell" onClick={openSellModal}>
+            Sell
+          </button>
+        </div>
       )}
 
       <div id="wrapper">
@@ -258,6 +236,92 @@ function Holdings({ onSelectTicker, isAdmin }) {
           style={gridStyle}
         />
       </div>
+
+      {/* Buy/Sell Modal */}
+      {modalOpen && (
+        <div
+          className="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            // Click outside to close
+            if (e.target.classList.contains("modal-overlay")) closeModal();
+          }}
+        >
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">
+                {modalMode === "buy" ? "Buy" : "Sell"}
+              </div>
+              <button className="modal-x" onClick={closeModal} aria-label="Close">
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {/* Ticker */}
+              <label className="modal-label">
+                Ticker
+                <input
+                  className="modal-input"
+                  value={form.ticker}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, ticker: e.target.value }))
+                  }
+                  placeholder="AAPL"
+                />
+              </label>
+
+              {/* Shares */}
+              <label className="modal-label">
+                Shares
+                <input
+                  className="modal-input"
+                  value={form.shares}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, shares: e.target.value }))
+                  }
+                  placeholder="100"
+                  inputMode="decimal"
+                />
+              </label>
+
+              {/* Sector dropdown */}
+              <label className="modal-label">
+                Sector
+                <select
+                  className="modal-input"
+                  value={form.sector}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, sector: e.target.value }))
+                  }
+                >
+                  {SECTOR_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {modalError && <div className="modal-error">{modalError}</div>}
+            </div>
+
+            <div className="modal-footer">
+              <button className="modal-btn" onClick={closeModal} disabled={busy}>
+                Cancel
+              </button>
+              <button
+                className="modal-btn modal-btn-primary"
+                onClick={submitTrade}
+                disabled={busy}
+              >
+                {busy ? "Submitting..." : modalMode === "buy" ? "Buy" : "Sell"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
