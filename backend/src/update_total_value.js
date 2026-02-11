@@ -36,6 +36,7 @@ async function importTickerPK() {
 
 async function getTotalValue(timestamp) {
     try {
+        console.log(timestamp);
         const currentDate = new Date(timestamp);
         const oldestDate = await importOldestValueDate();
         const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
