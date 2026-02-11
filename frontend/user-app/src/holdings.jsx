@@ -19,7 +19,6 @@ const SECTOR_OPTIONS = [
 ];
 
 function Holdings({ onSelectTicker, isAdmin }) {
-  // Grid rows
   const [rows, setRows] = useState([]);
 
   // Modal state
@@ -33,11 +32,12 @@ function Holdings({ onSelectTicker, isAdmin }) {
     ticker: "",
     shares: "",
     sector: "Technology",
+    purchasePrice: "", // BUY-only field
   });
 
   // Fetch holdings from backend and map to GridJS rows
   const loadHoldings = useCallback(() => {
-    fetch("https://ccic.onrender.com/api/holdings")
+    fetch("https://ccic.onrender.com/api/holdings", { credentials: "include" })
       .then((res) => res.json())
       .then((json) => {
         const mapped = (json || []).map((d) => [
@@ -55,12 +55,10 @@ function Holdings({ onSelectTicker, isAdmin }) {
       });
   }, []);
 
-  // Initial load
   useEffect(() => {
     loadHoldings();
   }, [loadHoldings]);
 
-  // Close modal and reset state
   const closeModal = () => {
     setModalOpen(false);
     setBusy(false);
@@ -71,36 +69,53 @@ function Holdings({ onSelectTicker, isAdmin }) {
   const openBuyModal = () => {
     if (!isAdmin) return;
     setModalMode("buy");
-    setForm({ ticker: "", shares: "", sector: "Technology" });
+    setForm({
+      ticker: "",
+      shares: "",
+      sector: "Technology",
+      purchasePrice: "",
+    });
     setModalError("");
     setModalOpen(true);
   };
 
-  // Open Sell modal (blank fields – user enters ticker now)
+  // Open Sell modal (blank fields)
   const openSellModal = () => {
     if (!isAdmin) return;
     setModalMode("sell");
-    setForm({ ticker: "", shares: "", sector: "Technology" });
+    setForm({
+      ticker: "",
+      shares: "",
+      sector: "Technology",
+      purchasePrice: "", // ignored for sell
+    });
     setModalError("");
     setModalOpen(true);
   };
 
-  // Basic validation for both buy and sell
+  // Validation for buy/sell
   const validate = () => {
     const ticker = String(form.ticker || "").trim().toUpperCase();
     const shares = Number(form.shares);
 
     if (!ticker) return "Ticker is required.";
-
     if (!/^[A-Z.\-]{1,10}$/.test(ticker)) return "Ticker looks invalid.";
     if (!Number.isFinite(shares) || shares <= 0)
       return "Shares must be a number greater than 0.";
     if (!SECTOR_OPTIONS.includes(form.sector))
       return "Please select a valid sector.";
+
+    // BUY
+    if (modalMode === "buy") {
+      const pp = Number(form.purchasePrice);
+      if (!Number.isFinite(pp) || pp <= 0) {
+        return "Purchase price must be a number greater than 0.";
+      }
+    }
+
     return "";
   };
 
-  // Submit Buy/Sell using the appropriate endpoint
   const submitTrade = async () => {
     if (!isAdmin) return;
 
@@ -110,18 +125,21 @@ function Holdings({ onSelectTicker, isAdmin }) {
       return;
     }
 
-    const payload = {
-      ticker: String(form.ticker).trim().toUpperCase(),
-      shares: Number(form.shares),
-      sector: form.sector,
-    };
+    const ticker = String(form.ticker).trim().toUpperCase();
 
     try {
       setBusy(true);
       setModalError("");
 
-      // BUY 
+      // BUY
       if (modalMode === "buy") {
+        const payload = {
+          ticker,
+          shares: Number(form.shares),
+          sector: form.sector,
+          purchasePrice: Number(form.purchasePrice), // NEW
+        };
+
         const res = await fetch("https://ccic.onrender.com/api/holdings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -135,18 +153,21 @@ function Holdings({ onSelectTicker, isAdmin }) {
         }
       }
 
-      // SELL
+      // SELL 
       if (modalMode === "sell") {
         const res = await fetch(
-          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(payload.ticker)}`,
+          `https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ shares: payload.shares, sector: payload.sector }),
+            body: JSON.stringify({
+              shares: Number(form.shares),
+              sector: form.sector,
+            }),
           }
         );
-      
+
         if (!res.ok) {
           const text = await res.text();
           throw new Error(text || `HTTP ${res.status}`);
@@ -162,12 +183,10 @@ function Holdings({ onSelectTicker, isAdmin }) {
     }
   };
 
-// Grid columns
   const columns = useMemo(
     () => [
       {
         name: "Ticker",
-        // Make ticker clickable
         formatter: (cell) => {
           const ticker = String(cell ?? "");
           return html(
@@ -177,15 +196,12 @@ function Holdings({ onSelectTicker, isAdmin }) {
       },
       "Name",
       "Shares",
-      "Purchase Price",
       "Current Price",
       "Total Value",
-      "Sector",
     ],
     []
   );
 
-  // Handle ticker link click
   useEffect(() => {
     const wrapper = document.getElementById("wrapper");
     if (!wrapper) return;
@@ -203,7 +219,6 @@ function Holdings({ onSelectTicker, isAdmin }) {
     return () => wrapper.removeEventListener("click", onClick);
   }, [onSelectTicker]);
 
-  // Grid styling
   const gridStyle = useMemo(
     () => ({
       table: { "font-family": "Arial, sans-serif", "font-size": "14px" },
@@ -220,7 +235,6 @@ function Holdings({ onSelectTicker, isAdmin }) {
 
   return (
     <>
-      {/* Toolbar above the portfolio */}
       {isAdmin && (
         <div className="trade-toolbar">
           <button className="trade-btn trade-buy" onClick={openBuyModal}>
@@ -243,64 +257,66 @@ function Holdings({ onSelectTicker, isAdmin }) {
         />
       </div>
 
-      {/* Buy/Sell Modal */}
       {modalOpen && (
         <div
           className="modal-overlay"
           role="dialog"
           aria-modal="true"
           onMouseDown={(e) => {
-            // Click outside to close
             if (e.target.classList.contains("modal-overlay")) closeModal();
           }}
         >
           <div className="modal">
             <div className="modal-header">
-              <div className="modal-title">
-                {modalMode === "buy" ? "Buy" : "Sell"}
-              </div>
+              <div className="modal-title">{modalMode === "buy" ? "Buy" : "Sell"}</div>
               <button className="modal-x" onClick={closeModal} aria-label="Close">
                 ✕
               </button>
             </div>
 
             <div className="modal-body">
-              {/* Ticker */}
               <label className="modal-label">
                 Ticker
                 <input
                   className="modal-input"
                   value={form.ticker}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, ticker: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, ticker: e.target.value }))}
                   placeholder="AAPL"
                 />
               </label>
 
-              {/* Shares */}
               <label className="modal-label">
                 Shares
                 <input
                   className="modal-input"
                   value={form.shares}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, shares: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, shares: e.target.value }))}
                   placeholder="100"
                   inputMode="decimal"
                 />
               </label>
 
-              {/* Sector dropdown */}
+              {modalMode === "buy" && (
+                <label className="modal-label">
+                  Purchase Price
+                  <input
+                    className="modal-input"
+                    value={form.purchasePrice}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, purchasePrice: e.target.value }))
+                    }
+                    placeholder="150.25"
+                    inputMode="decimal"
+                  />
+                </label>
+              )}
+
               <label className="modal-label">
                 Sector
                 <select
                   className="modal-input"
                   value={form.sector}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, sector: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, sector: e.target.value }))}
                 >
                   {SECTOR_OPTIONS.map((s) => (
                     <option key={s} value={s}>

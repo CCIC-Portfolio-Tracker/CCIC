@@ -259,6 +259,7 @@ app.post("/api/holdings", async (req, res) => {
     const ticker = req.body.ticker.toUpperCase();
     const amount = req.body.shares;
     const sector = req.body.sector;
+    const purchasePrice = req.body.purchasePrice;
     // need some way to see if the ticker already exists in the db, if so, add to existing shares instead of creating new entry
     await addHolding(ticker, amount, sector);
     res.json({ ok: true });
