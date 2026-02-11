@@ -28,6 +28,7 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+const handoverTickets = new Map();
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -188,13 +189,28 @@ app.get("/api/auth/callback", async (req, res) => {
 
     const userData = userResult.rows[0];
 
+    /*
     req.session.user = {
       pk: userData.user_pk,
       name: userData.user_name,
       role: userData.user_role 
     };
+    */
 
-    res.redirect("https://ccic-phi.vercel.app");
+    // generate a secure, random ticket
+    const ticket = oidc.randomState();
+
+    // store necessary user data in memory with the ticket as the key
+    handoverTickets.set(ticket, {
+      pk: userData.user_pk,
+      name: userData.user_name,
+      role: userData.user_role 
+    });
+
+    // delete ticket after 60 seconds
+    setTimeout(() => handoverTickets.delete(ticket), 60000);
+
+    res.redirect(`https://ccic-phi.vercel.app?handover_ticket=${ticket}`);
   } catch (err) {
     const debug = {
       message: err?.message,
@@ -229,6 +245,32 @@ app.get("/api/auth/callback", async (req, res) => {
   }  
   }
 );
+
+app.post("/api/auth/handover", (req, res) => {
+  const { ticket } = req.body;
+
+  if (!ticket || !handoverTickets.has(ticket)) {
+    return res.status(401).json({ error: "Invalid or expired ticket" });
+  }
+
+  // get user data associated with this ticket
+  const user = handoverTickets.get(ticket);
+
+  // Set the session user
+  req.session.user = user;
+
+  req.session.save((err) => {
+    if (err) {
+      console.error("Session save error:", err);
+      return res.status(500).json({ error: "Failed to save session" });
+    }
+    
+    // Delete ticket 
+    handoverTickets.delete(ticket);
+
+    res.json({ ok: true, user });
+  });
+});
 
 // logs user out
 app.post("/api/auth/logout", (req, res) => {
