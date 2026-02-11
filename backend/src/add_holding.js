@@ -75,7 +75,7 @@ async function addHolding(ticker, amount, sector) {
     });
     */
 
-    await updatePriceAndValue();
+    await updatePriceAndValue(true, false);
 
     console.log(`Successfully added ${amount} shares of ${result.symbol}`);
     return { success: true, tickerPK };

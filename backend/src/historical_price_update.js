@@ -19,9 +19,14 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
         const tot_holdings = tickerData.rows[0].tot_holdings;
 
         try {
+
+            const yahooEndDate = new Date(endDate);
+            yahooEndDate.setDate(yahooEndDate.getDate() + 1);
+            const period2Str = yahooEndDate.toISOString().split('T')[0];
+
             const results = await yahooFinance.historical(ticker_text, {
                 period1: startDate,
-                period2: endDate,
+                period2: period2Str,
                 interval: '1d'
             });
 
@@ -29,19 +34,21 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
                 console.log(`Warning: No historical data found for ${ticker_text}`);
                 return;
             }
+            
+            const batchQueries = [];
 
-            const batchQueries = results
-                .filter(day => day.open != null)
-                .map(day => {
-                    const formattedDate = new Date(day.date).toLocaleDateString('en-CA');
+            results.filter(day => day.open != null).forEach(day => {
+                const formattedDate = new Date(day.date).toLocaleDateString('en-CA');
 
-                    return {
+                allHoldings.forEach(holding => {
+                    batchQueries.push({
                         sql: `INSERT OR IGNORE INTO price_table 
-                                  (ticker_fk, price_price, price_date, tot_holdings) 
-                                  VALUES (?, ?, ?, ?)`,
-                        args: [tickerPK, day.open, formattedDate, tot_holdings]
-                    };
+                              (ticker_fk, price_price, price_date, tot_holdings) 
+                              VALUES (?, ?, ?, ?)`,
+                        args: [tickerPK, day.open, formattedDate, holding.tot_holdings]
+                    });
                 });
+            });
 
             if (batchQueries.length > 0) {
                 await db.batch(batchQueries, "write");

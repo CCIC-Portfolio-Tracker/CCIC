@@ -13,7 +13,7 @@ async function importOldestPriceDate(tickerPK) {
 }
 
 // Main function to update prices
-async function getUpdatedPrices(timestamp) {
+async function getUpdatedPrices(timestamp, histUpdate = true) {
     try {
         console.log(`Starting price update for ${timestamp}...`);
 
@@ -25,7 +25,7 @@ async function getUpdatedPrices(timestamp) {
             WHERE h.holding_active = 1;
         `;
         const result = await db.execute(query);
-        
+
         if (result.rows.length === 0) {
             console.log("No active holdings found.");
             return;
@@ -37,7 +37,7 @@ async function getUpdatedPrices(timestamp) {
         // Get prices for unique tickers
         const quotes = await yahooFinance.quote(uniqueTickerTexts);
         const quotesArray = Array.isArray(quotes) ? quotes : [quotes];
-        
+
         // Map prices
         const priceMap = new Map();
         quotesArray.forEach(q => {
@@ -65,20 +65,21 @@ async function getUpdatedPrices(timestamp) {
                     args: [tickerPK, price, timestamp, amount]
                 });
 
-                
-                const endDateObj = new Date(timestamp);
-                endDateObj.setDate(endDateObj.getDate() - 1);
-                const endDate = endDateObj.toISOString().split('T')[0];
+                if (histUpdate) {
+                    const endDateObj = new Date(timestamp);
+                    endDateObj.setDate(endDateObj.getDate() - 1);
+                    const endDate = endDateObj.toISOString().split('T')[0];
 
-                const lastDateRaw = await importOldestPriceDate(tickerPK);
-                
-                if (lastDateRaw) {
-                    const lastDateObj = new Date(lastDateRaw);
-                    lastDateObj.setDate(lastDateObj.getDate() + 1);
-                    const startDate = lastDateObj.toISOString().split('T')[0];
+                    const lastDateRaw = await importOldestPriceDate(tickerPK);
 
-                    if (startDate <= endDate) {
-                        await loadHistoricalPrices(startDate, endDate, tickerPK);
+                    if (lastDateRaw) {
+                        const lastDateObj = new Date(lastDateRaw);
+                        lastDateObj.setDate(lastDateObj.getDate() + 1);
+                        const startDate = lastDateObj.toISOString().split('T')[0];
+
+                        if (startDate <= endDate) {
+                            await loadHistoricalPrices(startDate, endDate, tickerPK);
+                        }
                     }
                 }
             } else {

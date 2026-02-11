@@ -36,6 +36,8 @@ async function editHolding(ticker, amount) {
     });
     */
 
+    await updatePriceAndValue(true, false);
+
     console.log(`Successfully updated ${ticker} to ${amount} shares and sector ${sector}`);
     return { success: true, tickerPK };
 }
