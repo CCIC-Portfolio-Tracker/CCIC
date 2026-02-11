@@ -38,11 +38,16 @@ async function getTotalValue(timestamp) {
     try {
         console.log(timestamp);
         const currentDate = new Date(timestamp);
+        currentDate.setDate(currentDate.getDate() - 1);
+        const endDate = currentDate.toISOString().split('T')[0];
         const oldestDate = await importOldestValueDate();
         const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
-        const endDate = currentDate - 1;
         console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
-        await loadHistoricalValue(startDate, endDate);
+        
+        if (startDate <= endDate) {
+            console.log("Historical value data is missing. Initiating backfill...");
+            await loadHistoricalValue(startDate, endDate);
+       }
 
         const tickerPKs = await importTickerPK();
 
