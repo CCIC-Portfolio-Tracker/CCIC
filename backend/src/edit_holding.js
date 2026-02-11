@@ -25,7 +25,7 @@ async function editHolding(ticker, amount) {
                 SET tot_holdings = ?
                 WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?)
                 AND price_date = (SELECT MAX(price_date) FROM price_table WHERE ticker_fk = (SELECT ticker_pk FROM ticker_table WHERE ticker_text = ?))`,
-        args: [amount, ticker, ticker]
+        args: [amountDiff, ticker, ticker]
 
     })
 

@@ -7,7 +7,7 @@ async function addHolding(ticker, amount, sector) {
     const result = await yahooFinance.quote(ticker);
 
     if (!result || result.regularMarketOpen === undefined) {
-        throw new error ("Ticker not valid");
+        throw new Error ("Ticker not valid");
     }
 
     let sectorID = 0;
@@ -33,7 +33,7 @@ async function addHolding(ticker, amount, sector) {
     } else if (sector == 'Bankruptcy') {
         sectorID = 10;
     } else {
-        throw new error ("Sector not valid");
+        throw new Error ("Sector not valid");
     }
 
 
@@ -62,10 +62,10 @@ async function addHolding(ticker, amount, sector) {
     });
 
     } catch (error) {
-        if (err.message.includes("UNIQUE constraint failed")) {
+        if (error.message.includes("UNIQUE constraint failed")) {
             throw new Error(`Database rejected duplicate ${result.symbol}. Your schema might prevent separate lots.`);
         }
-        throw err;
+        throw error;
     }
 
     /*

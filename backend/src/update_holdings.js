@@ -3,8 +3,8 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 import loadHistoricalPrices from './historical_price_update.js';
 
-// Function to get oldest date from price_table for a ticker
-async function importOldestPriceDate(tickerPK) {
+// Function to get latest date from price_table for a ticker
+async function getLatestPriceDate(tickerPK) {
     const query = `SELECT price_date FROM price_table WHERE ticker_fk = ? ORDER BY price_date DESC LIMIT 1`;
     const result = await db.execute(query, [tickerPK]);
     // Safety check if no data exists
@@ -19,10 +19,11 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
 
         // Get all active holdings
         const query = `
-            SELECT t.ticker_text, t.ticker_pk, h.tot_holdings
+            SELECT t.ticker_text, t.ticker_pk, SUM(h.tot_holdings) as tot_holdings
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
-            WHERE h.holding_active = 1;
+            WHERE h.holding_active = 1
+            GROUP BY t.ticker_text, t.ticker_pk;
         `;
         const result = await db.execute(query);
 
@@ -60,17 +61,12 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
             const price = priceMap.get(tickerText);
 
             if (price !== undefined) {
-                batchQueries.push({
-                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
-                    args: [tickerPK, price, timestamp, amount]
-                });
-
                 if (histUpdate) {
                     const endDateObj = new Date(timestamp);
                     endDateObj.setDate(endDateObj.getDate() - 1);
                     const endDate = endDateObj.toISOString().split('T')[0];
 
-                    const lastDateRaw = await importOldestPriceDate(tickerPK);
+                    const lastDateRaw = await getLatestPriceDate(tickerPK);
 
                     if (lastDateRaw) {
                         const lastDateObj = new Date(lastDateRaw);
@@ -82,6 +78,13 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
                         }
                     }
                 }
+
+                batchQueries.push({
+                    sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
+                    args: [tickerPK, price, timestamp, amount]
+                });
+
+                
             } else {
                 console.warn(`Could not find price for ${tickerText}`);
             }

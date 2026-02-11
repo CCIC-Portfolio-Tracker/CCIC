@@ -18,6 +18,7 @@ import importSixMonthTWR from "./src/import_six_month_twr.js";
 import importThreeMonthTWR from "./src/import_three_month_twr.js";
 import importYTDTWR from "./src/import_ytd_twr.js";
 import updatePriceAndValue from "./src/update_call.js";
+import importSectorBreakdown from "./src/import_sector_breakdown.js";
 
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
@@ -294,8 +295,17 @@ app.delete("/api/holdings/:ticker", async (req, res) => {
     console.error("Failed to delete holding:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
 
-
+// 
+app.get("/api/sector", async (req, res) => {
+  try {
+    const sectorData = await importSectorBreakdown();
+    res.json(sectorData);
+  } catch (error) {
+    console.error("Failed to fetch sector data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // send back updated total portfolio value for the past year (for graph)

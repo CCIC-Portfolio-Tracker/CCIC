@@ -5,10 +5,11 @@ import db from "./db.js";
 async function loadHistoricalPrices(startDate, endDate, tickerPK) {
     try {
         const tickerData = await db.execute(`
-            SELECT t.ticker_text, h.tot_holdings 
+            SELECT t.ticker_text, SUM(h.tot_holdings) as tot_holdings
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
             WHERE t.ticker_pk = ?
+            GROUP BY t.ticker_text
         `, [tickerPK]);
 
         if (tickerData.rows.length === 0) return;
@@ -34,19 +35,17 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
                 console.log(`Warning: No historical data found for ${ticker_text}`);
                 return;
             }
-            
+
             const batchQueries = [];
 
             results.filter(day => day.open != null).forEach(day => {
                 const formattedDate = new Date(day.date).toLocaleDateString('en-CA');
 
-                allHoldings.forEach(holding => {
-                    batchQueries.push({
-                        sql: `INSERT OR IGNORE INTO price_table 
+                batchQueries.push({
+                    sql: `INSERT OR IGNORE INTO price_table 
                               (ticker_fk, price_price, price_date, tot_holdings) 
                               VALUES (?, ?, ?, ?)`,
-                        args: [tickerPK, day.open, formattedDate, holding.tot_holdings]
-                    });
+                    args: [tickerPK, day.open, formattedDate, tot_holdings]
                 });
             });
 
