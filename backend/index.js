@@ -48,6 +48,8 @@ app.use(express.json());
 
 const isProd = true;
 
+const isLive = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
+
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
   store: new SQLiteStore({ db: "sessions.db", dir: "./" }),
@@ -58,8 +60,8 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, 
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    secure: isLive, 
+    sameSite: isLive ? 'none' : 'lax'
   }
 }));
 
@@ -150,6 +152,12 @@ app.get("/api/auth/callback", async (req, res) => {
     console.log("callback session state:", req.session.state);
     console.log("callback has code_verifier:", !!req.session.code_verifier);
     console.log("callback query:", req.query);
+
+    if (!req.session || !req.session.state || !req.session.code_verifier) {
+      console.error("Error: Session was lost during redirect. Missing state/verifier.");
+      console.error("Browser likely blocked the cookie.");
+      return res.redirect("/api/auth/login");
+    }
 
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.get('host');
