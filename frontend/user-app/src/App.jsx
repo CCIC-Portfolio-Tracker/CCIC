@@ -64,9 +64,42 @@ const App = () => {
       }
     };
 
+    /*
   // determine auth status on open
   useEffect(() => {
     fetchAuthStatus();
+  }, []);
+  */
+
+  useEffect(() => {
+    const handleAuth = async () => {
+      // check if ticket is in url
+      const params = new URLSearchParams(window.location.search);
+      const ticket = params.get("handover_ticket");
+
+      if (ticket) {
+        try {
+          // get a session cookie
+          const res = await fetch("/api/auth/handover", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ticket }),
+          });
+
+          if (res.ok) {
+            // remove ticket from url
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } catch (err) {
+          console.error("Handover failed:", err);
+        }
+      }
+
+      // fetch auth status with cookie
+      fetchAuthStatus();
+    };
+
+    handleAuth();
   }, []);
 
   // Prevent access to protected tabs when logged out
