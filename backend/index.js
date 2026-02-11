@@ -412,6 +412,7 @@ app.put("/api/holdings/:ticker", async (req, res) => {
 app.get("/api/sector", async (req, res) => {
   try {
     const sectorData = await importSectorBreakdown();
+    console.log("Sector data fetched:", sectorData);
     res.json(sectorData);
   } catch (error) {
     console.error("Failed to fetch sector data:", error);
