@@ -14,8 +14,8 @@ async function importSectorBreakdown() {
     });
 
     const [currentData, historicalData] = await Promise.all([
-        getSectorBreakdown(currentDateStr),
-        getSectorBreakdown(pastDateStr)
+        getSectorBreakdown(currentDate),
+        getSectorBreakdown(pastDate)
     ]);
 
     return {
