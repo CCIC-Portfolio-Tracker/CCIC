@@ -1,71 +1,85 @@
+/* Styling for Admin page */
+
+/* Styles for the admin page container */
 .admin-page {
-    padding: 24px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .admin-title {
-    margin: 0 0 16px 0;
-    font-size: 28px;
-  }
-  
-  .admin-section-title {
-    margin: 16px 0 10px 0;
-    font-size: 18px;
-    font-weight: 700;
-  }
-  
-  .admin-table {
-    width: 100%;
-    max-width: 720px;
-    border-collapse: collapse;
-    border: 1px solid #ddd;
-    background: #fff;
-  }
-  
-  .admin-table th,
-  .admin-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-  }
-  
-  .admin-table th {
-    background: #f6f6f6;
-    font-weight: 700;
-  }
-  
-  .admin-table tr:hover td {
-    background: #fafafa;
-  }
-  
-  .admin-delete {
-    width: 56px;
-    text-align: center;
-  }
-  
-  .admin-delete-btn {
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: #cc0000;
-    font-weight: 900;
-    font-size: 16px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 6px 8px;
-    border-radius: 6px;
-  }
-  
-  .admin-delete-btn:hover {
-    background: rgba(204, 0, 0, 0.08);
-  }
-  
-  .admin-empty {
-    color: #666;
-    margin-top: 8px;
-  }
-  
-  .admin-error {
-    color: #b00020;
-  }
+  padding: 24px;
+  font-family: Arial, sans-serif;
+}
+
+/* Styles for the main title on the admin page */
+.admin-title {
+  margin: 0 0 16px 0;
+  font-size: 28px;
+}
+
+/* Styles for section titles within the admin page */
+.admin-section-title {
+  margin: 16px 0 10px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Styles for the admin table */
+.admin-table {
+  width: 100%;
+  max-width: 720px;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+/* Styles for table header and data cells */
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+/* Styles for table header cells */
+.admin-table th {
+  background: #f6f6f6;
+  font-weight: 700;
+}
+
+/* Hover effect for table rows */
+.admin-table tr:hover td {
+  background: #fafafa;
+}
+
+/* Styles for the delete column in the table */
+.admin-delete {
+  width: 56px;
+  text-align: center;
+}
+
+/* Styles for the delete button */
+.admin-delete-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #cc0000;
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+/* Hover effect for the delete button */
+.admin-delete-btn:hover {
+  background: rgba(204, 0, 0, 0.08);
+}
+
+/* Styles for empty state messages */
+.admin-empty {
+  color: #666;
+  margin-top: 8px;
+}
+
+/* Styles for error messages */
+.admin-error {
+  color: #b00020;
+}
   

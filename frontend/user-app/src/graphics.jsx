@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import "./graphics.css";
 
-// Graphics page to display charts of portfolio performance and sector allocation
+/**
+ * Generates a graphics to display charts of portfolio performance and sector allocation
+ * @returns Graphics page
+ */
 function Graphics() {
   const RANGE_ENDPOINTS = {
     "1y": "https://ccic.onrender.com/api/total-value",
@@ -18,7 +21,7 @@ function Graphics() {
   };
 
   // Chart 3/4 (sector allocation)
-  const SECTOR_ENDPOINT = "https://ccic.onrender.com/api/sector";
+  const SECTOR_ENDPOINT = "git";
 
   // dropdown state for charts
   const [sel1, setSel1] = useState("1y");
@@ -110,7 +113,7 @@ function Graphics() {
     };
   }, [sel2]);
 
-  // helper: convert backend data to correctly formatted datasets for Chart.js stacked bar
+  // convert backend data to correctly formatted datasets for Chart.js stacked bar
   const buildSectorDatasets = (alloc) => {
     const sectors = [
       { label: "Technology", key: "techPercent" },
@@ -307,6 +310,7 @@ function Graphics() {
     chart.update();
   }, [chart4Series]);
 
+  // Return graphics
   return (
     <div className="charts-page">
       <div className="charts-row">
@@ -346,7 +350,7 @@ function Graphics() {
       <div className="charts-row">
         <div className="chart-box">
           <div className="chart-header">
-            <h3>Sector Allocation (Current)</h3>
+            <h3>Current Sector Allocation</h3>
           </div>
 
           <div className="chart-canvas">
@@ -356,7 +360,7 @@ function Graphics() {
 
         <div className="chart-box">
           <div className="chart-header">
-            <h3>Sector Allocation (Historical)</h3>
+            <h3>Historical Sector Allocation</h3>
           </div>
 
           <div className="chart-canvas">

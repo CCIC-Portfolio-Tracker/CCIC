@@ -19,8 +19,19 @@ import importYTDTWR from "./src/import_ytd_twr.js";
 import updatePriceAndValue from "./src/update_call.js";
 import importSectorBreakdown from "./src/import_sector_breakdown.js";
 
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
+const DEBUG_AUTH = true;
 
 app.use(cors({
   origin: "https://ccic-phi.vercel.app",
@@ -29,8 +40,13 @@ app.use(cors({
 
 app.use(express.json());
 
+// to ensure secure cookie
+app.set("trust proxy", 1)
+const isProd = true;
+
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
+  name: "ccic_session",
   store: new SQLiteStore({
     db: 'sessions.sqlite', 
     dir: './' 
@@ -41,10 +57,25 @@ app.use(session({
   cookie: { 
     secure: true,      
     httpOnly: true, 
-    sameSite: 'none',  
+    sameSite:'none',  
     maxAge: 24 * 60 * 60 * 1000 
   }
 }));
+
+// debug
+app.get("/api/debug/session", (req, res) => {
+  res.json({
+    hasCookieHeader: !!req.headers.cookie,
+    sessionID: req.sessionID,
+    session: {
+      hasUser: !!req.session.user,
+      hasState: !!req.session.state,
+      hasCodeVerifier: !!req.session.code_verifier,
+    },
+    nodeEnv: process.env.NODE_ENV,
+  });
+});
+
 
 // connects with CC CAS to get necessary data like authorized endpoint
 let config;
@@ -76,11 +107,12 @@ app.post("/api/app-open", async (req, res) => {
   } catch (error) {
     console.error("Failed to update prices and values:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  }
+}
 });
 
 // Redirects user to school login page
 app.get("/api/auth/login", async (req, res) => {
+  console.log("Login attempt with", req.sessionID);
   if (!config) {
     return res.status(503).send("Authentication server is still initializing. Please refresh in a moment.");
   }
@@ -90,6 +122,9 @@ app.get("/api/auth/login", async (req, res) => {
 
   req.session.code_verifier = code_verifier;
   req.session.state = state;
+
+  console.log("Login state", state);
+  console.log("Login code_verifier", !!code_verifier);
 
   const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier)
   
@@ -109,9 +144,18 @@ app.get("/api/auth/login", async (req, res) => {
 // where school sends user with a code after login, sends school code and client secret to get necessary information
 app.get("/api/auth/callback", async (req, res) => {
   try {
+    console.log("callback sessionID:", req.sessionID);
+    console.log("callback has cookie header:", !!req.headers.cookie);
+    console.log("callback session state:", req.session.state);
+    console.log("callback has code_verifier:", !!req.session.code_verifier);
+    console.log("callback query:", req.query);
+
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.get('host');
-    const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
+    //const currentUrl = new URL(`${protocol}://${host}${req.originalUrl}`);
+    const currentUrl = new URL(process.env.OIDC_REDIRECT_URI);
+    currentUrl.search = new URLSearchParams(req.query).toString();
+
 
     const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
       pkceCodeVerifier: req.session.code_verifier,
@@ -126,10 +170,10 @@ app.get("/api/auth/callback", async (req, res) => {
       args: [claims.sub]
     });
 
-    // if new user, register them as 'viewer'
+    // if new user, register them as 'member'
     if (userResult.rows.length === 0) {
       await db.execute({
-        sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'viewer')",
+        sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'member')",
         args: [claims.sub, claims.name || claims.email]
       });
 
@@ -150,10 +194,53 @@ app.get("/api/auth/callback", async (req, res) => {
 
     res.redirect("https://ccic-phi.vercel.app");
   } catch (err) {
+    const debug = {
+      message: err?.message,
+      name: err?.name,
+      error: err?.error,
+      error_description: err?.error_description,
+      stack: err?.stack?.split("\n").slice(0, 8),
+      hasCookieHeader: !!req.headers.cookie,
+      sessionID: req.sessionID,
+      sessionHasState: !!req.session?.state,
+      sessionHasCodeVerifier: !!req.session?.code_verifier,
+      queryState: req.query?.state,
+      queryCodePresent: !!req.query?.code,
+      nodeEnv: process.env.NODE_ENV,
+      trustedProto: req.headers["x-forwarded-proto"],
+      host: req.get("host"),
+      originalUrl: req.originalUrl,
+      redirectUriEnv: process.env.OIDC_REDIRECT_URI,
+    };
+  
     console.error("Callback Error:", err);
+  
+    if (DEBUG_AUTH) {
+      // show debug in the browser
+      return res
+        .status(500)
+        .type("html")
+        .send(`<pre>${escapeHtml(JSON.stringify(debug, null, 2))}</pre>`);
+    }
+  
     res.status(500).send("Authentication failed");
+  }  
   }
+);
+
+// logs user out
+app.post("/api/auth/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Logout Error:", err);
+      return res.status(500).json({ error: "Failed to log out" });
+    }
+    res.clearCookie("ccic_session", {
+       secure: isProd, httpOnly: true, sameSite: isProd ? 'none' : 'lax'});
+    res.json({ ok: true });
+  });
 });
+
 
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
@@ -165,7 +252,7 @@ const isAdmin = (req, res, next) => {
 
 // checks if logged in user is a member
 const isMember = (req, res, next) => {
-  if (req.session.user && req.session.user.role === 'member') {
+  if (req.session.user && (req.session.user.role === 'member' || req.session.user.role === 'admin')) {
     return next();
   }
   res.status(403).json({ error: "Unauthorized: Members only" });
@@ -186,28 +273,13 @@ app.get("/api/auth/status", (req, res) => {
 });
 
 // Fetch all users for management
-app.get("/api/admin/users", async (req, res) => {
+app.get("/api/admin/users", isAdmin, async (req, res) => {
   const result = await db.execute("SELECT * FROM user_table");
   res.json(result.rows);
 });
 
 // Update a user's role
-app.put("/api/admin/users/:pk/role", async (req, res) => {
-  await db.execute({
-      sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
-      args: [req.body.role, req.params.pk]
-  });
-  res.json({ ok: true });
-});
-
-// Fetch all users for management
-app.get("/api/userstest", async (req, res) => {
-  const result = await db.execute("SELECT * FROM user_table");
-  res.json(result.rows);
-});
-
-// Update a user's role
-app.put("/api/userstestupdate/:pk/role", async (req, res) => {
+app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
   await db.execute({
       sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
       args: [req.body.role, req.params.pk]
@@ -216,7 +288,7 @@ app.put("/api/userstestupdate/:pk/role", async (req, res) => {
 });
 
 // Fetch activity logs
-app.get("/api/admin/activities", async (req, res) => {
+app.get("/api/admin/activities", isAdmin, async (req, res) => {
   const result = await db.execute(`
       SELECT a.*, u.user_name, t.ticker_text 
       FROM activity_table a 
