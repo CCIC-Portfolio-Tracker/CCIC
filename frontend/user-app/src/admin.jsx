@@ -13,10 +13,9 @@ import "./admin.css";
 function Admin() {
 
     // Local state for loading, users list, and error message
-     const [loading, setLoading] = useState(true);
-     const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [users, setUsers] = useState([]);
     const [error, setError] = useState("");
-    const isAdmin = true; // hardcoded for now
 
     useEffect(() => {
         let cancelled = false;
@@ -35,8 +34,8 @@ function Admin() {
             throw new Error(text || `HTTP ${res.status}`);
             }
 
-            const json = await res.json();
-            if (!cancelled) setUsers(json || []);
+        const json = await res.json();
+        if (!cancelled) setUsers(json || []);
         } catch (e) {
             if (!cancelled) setError(e.message || "Failed to load users");
         } finally {
@@ -44,47 +43,47 @@ function Admin() {
         }
         }
 
-        if (isAdmin) loadUsers();
-        else setLoading(false);
+        loadUsers();
 
         return () => {
         cancelled = true;
         };
-    }, [isAdmin]);
+    }, []);
 
+    // update users role
     const updateUserRole = async (user_pk, newRole) => {
-        // update
-        const prevUsers = users;
-        setUsers((u) =>
-        u.map((user) =>
-            user.user_pk === user_pk
-            ? { ...user, user_role: newRole }
-            : user
-        )
+
+        // backup previous state in case of error
+        const prevUsers = users.map((u) => ({ ...u }));
+
+        setUsers((list) =>
+            list.map((u) =>
+            u.user_pk === user_pk ? { ...u, user_role: newRole } : u
+            )
         );
 
         try {
-        const res = await fetch(
-            `https://ccic.onrender.com/api/admin/users/${user_pk}/role`,
-            {
-            method: "PUT",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ role: newRole }),
-            }
-        );
+            const res = await fetch(
+                `https://ccic.onrender.com/api/admin/users/${user_pk}/role`,
+                {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ role: newRole }),
+                }
+            );
 
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(text || "Failed to update role");
-        }
-        } catch (e) {
-        // rollback on error
-        setUsers(prevUsers);
-        alert(e.message || "Failed to update user role");
-        }
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || "Failed to update role");
+            }
+            } catch (e) {
+            // rollback on error
+            setUsers(prevUsers);
+            alert(e.message || "Failed to update user role");
+            }
     };
 
     // Note: This only removes the user from the UI. The backend API for deleting users is not implemented, so this does not complete the deletion
@@ -97,7 +96,6 @@ function Admin() {
 
     // Loading and authorization states
     if (loading) return <div>Loading…</div>;
-    if (!isAdmin) return <div>Unauthorized.</div>;
     if (error) return <div className="admin-error">{error}</div>;
 
   return (

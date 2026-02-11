@@ -4,6 +4,7 @@ import Login from "./login";
 import Graphics from "./graphics";
 import Admin from "./admin";
 import TickerPage from "./tickerPage";
+import Account from "./account";
 import "./App.css";
 
 const App = () => {
@@ -78,7 +79,7 @@ const App = () => {
   // logout function
   const sendLogout = async () => {
     try {
-      await fetch("https://ccic.onrender.com/api/auth/logout", {
+      const res = await fetch("https://ccic.onrender.com/api/auth/logout", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

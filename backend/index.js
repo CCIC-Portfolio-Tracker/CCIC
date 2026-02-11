@@ -31,6 +31,7 @@ app.use(express.json());
 
 // to ensure secure cookie
 app.set("trust proxy", 1)
+const isProd = process.env.NODE_ENV == "production";
 
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
@@ -43,9 +44,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false, 
   cookie: { 
-    secure: true,      
+    secure: isProd,      
     httpOnly: true, 
-    sameSite: 'none',  
+    sameSite: isProd ? 'none' : 'lax',  
     maxAge: 24 * 60 * 60 * 1000 
   }
 }));
@@ -130,10 +131,10 @@ app.get("/api/auth/callback", async (req, res) => {
       args: [claims.sub]
     });
 
-    // if new user, register them as 'viewer'
+    // if new user, register them as 'member'
     if (userResult.rows.length === 0) {
       await db.execute({
-        sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'viewer')",
+        sql: "INSERT INTO user_table (user_oidc_sub, user_name, user_role) VALUES (?, ?, 'member')",
         args: [claims.sub, claims.name || claims.email]
       });
 
@@ -160,7 +161,6 @@ app.get("/api/auth/callback", async (req, res) => {
 });
 
 // logs user out
-const environment = process.env.NODE_ENV == "production";
 app.post("/api/auth/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -168,7 +168,7 @@ app.post("/api/auth/logout", (req, res) => {
       return res.status(500).json({ error: "Failed to log out" });
     }
     res.clearCookie("ccic_session", {
-       secure: true, httpOnly: true, sameSite: environment ? 'none' : 'lax'});
+       secure: isProd, httpOnly: true, sameSite: isProd ? 'none' : 'lax'});
     res.json({ ok: true });
   });
 });
@@ -184,7 +184,7 @@ const isAdmin = (req, res, next) => {
 
 // checks if logged in user is a member
 const isMember = (req, res, next) => {
-  if (req.session.user && req.session.user.role === 'member') {
+  if (req.session.user && (req.session.user.role === 'member' || req.session.user.role === 'admin')) {
     return next();
   }
   res.status(403).json({ error: "Unauthorized: Members only" });

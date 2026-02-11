@@ -164,13 +164,16 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
 
       // SELL
       if (modalMode === "sell") {
-        await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
+        const res = await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
            method: "PUT",
            headers: { "Content-Type": "application/json" },
            credentials: "include",
            body: JSON.stringify({ shares: Number(form.shares) }),
        });
-
+       if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}`);
+      }
         closeModal();
         return;
       }
