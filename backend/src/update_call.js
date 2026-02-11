@@ -1,8 +1,9 @@
+import db from "./db.js";
 import getUpdatedPrices from "./update_holdings.js";
 import updateTotalValue from "./update_total_value.js";
 
 // updates the price and total value for the current date (or previous date if before cutoff time or weekend) in the database
-async function updatePriceAndValue() {
+async function updatePriceAndValue(forceUpdate = false, histUpdate = true) {
   try {
     const now = new Date();
     const nyTimeString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
@@ -40,7 +41,19 @@ async function updatePriceAndValue() {
 
     console.log("Target Date:", targetDate);
 
-    await getUpdatedPrices(targetDate);
+    if (!forceUpdate) {
+        const check = await db.execute(
+          "SELECT value_pk FROM value_table WHERE value_date = ? LIMIT 1", 
+          [targetDate]
+        );
+  
+        if (check.rows.length > 0) {
+          console.log(`Data for ${targetDate} already exists. Skipping update.`);
+          return; 
+        }
+      }
+
+    await getUpdatedPrices(targetDate, histUpdate);
     await updateTotalValue(targetDate);
 
     console.log("Updated price and total value");

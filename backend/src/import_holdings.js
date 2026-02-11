@@ -38,9 +38,11 @@ async function importHoldings() {
 
     const query = {
       sql: `
-        SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date
+        SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date, h.purchase_price, pf.portfolio_name
         FROM price_table p
         INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
+        INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
+        INNER JOIN portfolio_table pf ON h.portfolio_fk = pf.portfolio_pk
         WHERE p.tot_holdings > 0 
         AND p.price_date = ?
       `,
@@ -55,6 +57,8 @@ async function importHoldings() {
       name: row.ticker_co,
       price: row.price_price,
       holdings: row.tot_holdings,
+      purchasePrice: row.purchase_price,
+      sector: row.portfolio_name,
       totalValue: (row.price_price * row.tot_holdings).toFixed(2)
     }));
 
