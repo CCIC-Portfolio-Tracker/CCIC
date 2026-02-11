@@ -3,7 +3,6 @@ import cors from "cors";
 import db from "./src/db.js";
 import importHoldings from "./src/import_holdings.js"
 import getStockNews from "./src/company_news.js"
-import deleteHolding from "./src/delete_holding.js"
 import addHolding from "./src/add_holding.js"
 import editHolding from "./src/edit_holding.js"
 import * as oidc from 'openid-client';
@@ -284,20 +283,7 @@ app.put("/api/holdings/:ticker", async (req, res) => {
   }
 });
 
-// for deleting holdings
-app.delete("/api/holdings/:ticker", async (req, res) => {
-  try {
-    const ticker = (req.params.ticker || "").toUpperCase();
-    console.log("delete ticker:", ticker);
-    await deleteHolding(ticker);
-    res.json({ ok: true });
-  } catch (error) {
-    console.error("Failed to delete holding:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// 
+// sends sector data to frontend for sector breakdown graph
 app.get("/api/sector", async (req, res) => {
   try {
     const sectorData = await importSectorBreakdown();

@@ -2,8 +2,11 @@ import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 
+// get historical prices for a given ticker and date range, then insert into price_table
 async function loadHistoricalPrices(startDate, endDate, tickerPK) {
     try {
+
+        // Get ticker text and total holdings for the given tickerPK
         const tickerData = await db.execute(`
             SELECT t.ticker_text, SUM(h.tot_holdings) as tot_holdings
             FROM ticker_table t
@@ -21,10 +24,12 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
 
         try {
 
+            // Yahoo Finance's API is exclusive of the end date, so we need to add 1 day to ensure we get data for the specified end date
             const yahooEndDate = new Date(endDate);
             yahooEndDate.setDate(yahooEndDate.getDate() + 1);
             const period2Str = yahooEndDate.toISOString().split('T')[0];
 
+            // Fetch historical data for the ticker and date range
             const results = await yahooFinance.historical(ticker_text, {
                 period1: startDate,
                 period2: period2Str,
@@ -38,6 +43,7 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
 
             const batchQueries = [];
 
+            // Filter out entries with null open price and prepare batch insert queries
             results.filter(day => day.open != null).forEach(day => {
                 const formattedDate = new Date(day.date).toLocaleDateString('en-CA');
 
@@ -49,6 +55,7 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
                 });
             });
 
+            // Execute batch insert if there are valid entries
             if (batchQueries.length > 0) {
                 await db.batch(batchQueries, "write");
                 console.log(`Loaded ${batchQueries.length} entries for ${ticker_text}`);

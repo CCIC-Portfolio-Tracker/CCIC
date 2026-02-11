@@ -1,5 +1,6 @@
 import db from "./db.js";
 
+// Imports current holdings for the database
 async function importHoldings() {
   try {
     const now = new Date();
@@ -12,6 +13,7 @@ async function importHoldings() {
 
     let targetDate;
 
+    // If its sunday or saturday, get friday data. If after 9:30 on a day, get yesterdays data
     if (dayOfWeek === 0) {
       const friday = new Date(nyDate);
       friday.setDate(nyDate.getDate() - 2);
@@ -36,6 +38,7 @@ async function importHoldings() {
       targetDate = yesterday.toLocaleDateString('en-CA');
     }
 
+    // get necessary data from tables
     const query = {
       sql: `
         SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date, h.purchase_price, pf.portfolio_name
@@ -52,6 +55,7 @@ async function importHoldings() {
     const result = await db.execute(query);
     let rows = result.rows;
 
+    // prepare data for front end
     return rows.map(row => ({
       ticker: row.ticker_text,
       name: row.ticker_co,

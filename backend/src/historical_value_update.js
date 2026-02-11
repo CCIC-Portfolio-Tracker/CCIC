@@ -12,6 +12,7 @@ async function importTickerPK() {
     return result.rows.map(row => row.ticker_pk);
 }
 
+// Function to calculate total portfolio value for a given date
 async function getTotalValue(timestamp) {
     try {
         const tickerPKs = await importTickerPK();
@@ -45,6 +46,7 @@ async function getTotalValue(timestamp) {
     }
 }
 
+// Main function to load historical total portfolio value into value_table
 async function loadHistoricalValue(startDateStr, endDateStr) {
     try {
 
