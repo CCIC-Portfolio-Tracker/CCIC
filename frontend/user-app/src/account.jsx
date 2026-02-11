@@ -1,6 +1,6 @@
-import React from "react";
+import React, { use } from "react";
 
-function Account() {
+function Account({userName, isAdmin, isMember, logout}) {
   return (
     <div
       style={{
@@ -10,12 +10,17 @@ function Account() {
     >
 
       <p>
-        <strong>Username:</strong> testuser
+        <strong>Username:</strong> {userName}
       </p>
 
       <p>
-        <strong>Permissions:</strong> member
+        <strong>Permissions:</strong> {isAdmin ? "Admin" : isMember ? "Member" : "User"}
       </p>
+
+      <button style ={{marginTop: "10px"}} onClick={logout} type="button">
+        Logout
+
+      </button>
     </div>
   );
 }

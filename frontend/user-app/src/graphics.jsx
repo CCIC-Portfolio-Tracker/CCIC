@@ -346,7 +346,7 @@ function Graphics() {
       <div className="charts-row">
         <div className="chart-box">
           <div className="chart-header">
-            <h3>Sector Allocation (Current)</h3>
+            <h3>Current Sector Allocation</h3>
           </div>
 
           <div className="chart-canvas">
@@ -356,7 +356,7 @@ function Graphics() {
 
         <div className="chart-box">
           <div className="chart-header">
-            <h3>Sector Allocation (Historical)</h3>
+            <h3>Historical Sector Allocation</h3>
           </div>
 
           <div className="chart-canvas">

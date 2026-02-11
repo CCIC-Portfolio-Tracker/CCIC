@@ -30,8 +30,12 @@ app.use(cors({
 
 app.use(express.json());
 
+// to ensure secure cookie
+app.set("trust proxy", 1)
+
 // stops memory leaks, creates secure session cookie for users
 app.use(session({
+  name: "ccic_session",
   store: new SQLiteStore({
     db: 'sessions.sqlite', 
     dir: './' 
@@ -156,6 +160,21 @@ app.get("/api/auth/callback", async (req, res) => {
   }
 });
 
+// logs user out
+const environment = process.env.NODE_ENV == "production";
+app.post("/api/auth/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Logout Error:", err);
+      return res.status(500).json({ error: "Failed to log out" });
+    }
+    res.clearCookie("ccic_session", {
+       secure: true, httpOnly: true, sameSite: environment ? 'none' : 'lax'});
+    res.json({ ok: true });
+  });
+});
+
+
 // checks if logged in user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session.user && req.session.user.role === 'admin') {
@@ -187,28 +206,13 @@ app.get("/api/auth/status", (req, res) => {
 });
 
 // Fetch all users for management
-app.get("/api/admin/users", async (req, res) => {
+app.get("/api/admin/users", isAdmin, async (req, res) => {
   const result = await db.execute("SELECT * FROM user_table");
   res.json(result.rows);
 });
 
 // Update a user's role
-app.put("/api/admin/users/:pk/role", async (req, res) => {
-  await db.execute({
-      sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
-      args: [req.body.role, req.params.pk]
-  });
-  res.json({ ok: true });
-});
-
-// Fetch all users for management
-app.get("/api/userstest", async (req, res) => {
-  const result = await db.execute("SELECT * FROM user_table");
-  res.json(result.rows);
-});
-
-// Update a user's role
-app.put("/api/userstestupdate/:pk/role", async (req, res) => {
+app.put("/api/admin/users/:pk/role", isAdmin, async (req, res) => {
   await db.execute({
       sql: "UPDATE user_table SET user_role = ? WHERE user_pk = ?",
       args: [req.body.role, req.params.pk]
@@ -217,7 +221,7 @@ app.put("/api/userstestupdate/:pk/role", async (req, res) => {
 });
 
 // Fetch activity logs
-app.get("/api/admin/activities", async (req, res) => {
+app.get("/api/admin/activities", isAdmin, async (req, res) => {
   const result = await db.execute(`
       SELECT a.*, u.user_name, t.ticker_text 
       FROM activity_table a 

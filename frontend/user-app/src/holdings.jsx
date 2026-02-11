@@ -18,7 +18,7 @@ const SECTOR_OPTIONS = [
   "Other",
 ];
 
-function Holdings({ onSelectTicker, isAdmin }) {
+function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
   // Grid rows displayed in GridJS
   const [rows, setRows] = useState([]);
 
@@ -28,7 +28,7 @@ function Holdings({ onSelectTicker, isAdmin }) {
   const [busy, setBusy] = useState(false);
   const [modalError, setModalError] = useState("");
 
-  // Shared form fields (ticker/shares always; sector & purchasePrice are BUY-only)
+  // Shared form fields (ticker/shares always; sector & purchasePrice are for buying)
   const [form, setForm] = useState({
     ticker: "",
     shares: "",
