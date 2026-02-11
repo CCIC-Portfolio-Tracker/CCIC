@@ -50,6 +50,7 @@ async function addHolding(ticker, amount, sector) {
     if (tickerResult.rows.length === 0) throw new Error("Ticker ID not found.");
     const tickerPK = tickerResult.rows[0].ticker_pk;
 
+    try {
     const holdingQuery = `
                         INSERT INTO holding_table (ticker_fk, tot_holdings, portfolio_fk, holding_active, purchase_price)
                         VALUES (?, ?, ?, 1, ?)
@@ -59,6 +60,13 @@ async function addHolding(ticker, amount, sector) {
         sql: holdingQuery,
         args: [tickerPK, amount, sectorID, result.regularMarketOpen]
     });
+
+    } catch (error) {
+        if (err.message.includes("UNIQUE constraint failed")) {
+            throw new Error(`Database rejected duplicate ${result.symbol}. Your schema might prevent separate lots.`);
+        }
+        throw err;
+    }
 
     /*
     await db.execute({

@@ -25,7 +25,7 @@ async function checkCurrentHoldings(timestamp) {
     if (tickerPKs.length === 0) return [];
 
     const query = `
-            SELECT ticker_fk, price_date
+            SELECT ticker_fk
             FROM price_table
             WHERE price_date = ?
         `;
@@ -46,7 +46,7 @@ async function getOutdatedTickers(timestamp) {
 
     const placeholders = outdatedTickerPKs.map(() => '?').join(',');
     const query = `
-            SELECT DISTINCT t.ticker_text, t.ticker_pk, h.tot_holdings
+            SELECT t.ticker_text, t.ticker_pk, h.tot_holdings
             FROM ticker_table t
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
             WHERE ticker_pk IN (${placeholders})
@@ -54,6 +54,7 @@ async function getOutdatedTickers(timestamp) {
         `;
 
     const result = await db.execute(query, outdatedTickerPKs);
+
     return {
         outdatedTickers: result.rows.map(row => row.ticker_text),
         outdatedTickerPKs: result.rows.map(row => row.ticker_pk),
@@ -71,18 +72,27 @@ async function getUpdatedPrices(timestamp) {
             return;
         }
 
-        // gets list of prices from yahooFinance
-        const results = await yahooFinance.quote(outdatedTickers);
+        const uniqueTickers = [...new Set(outdatedTickers)];
+        const results = await yahooFinance.quote(uniqueTickers);
         const resultsArray = Array.isArray(results) ? results : [results];
+
+        const priceMap = new Map();
+        resultsArray.forEach(stock => {
+            priceMap.set(stock.symbol.toUpperCase(), stock.regularMarketOpen);
+        });
 
         const batchQueries = [];
 
-        for (const stock of resultsArray) {
-            const index = outdatedTickers.findIndex(t => t.toUpperCase() === stock.symbol.toUpperCase());
-            if (index === -1) continue;
+        for (let i = 0; i < outdatedTickers.length; i++) {
+            const tickerText = outdatedTickers[i].toUpperCase();
+            const matchPK = outdatedTickerPKs[i];
+            const holdings = currentHoldings[i];
+            const price = priceMap.get(tickerText);
 
-            const matchPK = outdatedTickerPKs[index];
-            const holdings = currentHoldings[index];
+            if (price === undefined) {
+                console.warn(`No price found for ${tickerText}`);
+                continue;
+            }
 
             const endObj = new Date(timestamp);
             endObj.setDate(endObj.getDate() - 1);
@@ -103,7 +113,7 @@ async function getUpdatedPrices(timestamp) {
             if (matchPK) {
                 batchQueries.push({
                     sql: `INSERT INTO price_table (ticker_fk, price_price, price_date, tot_holdings) VALUES (?, ?, ?, ?)`,
-                    args: [matchPK, stock.regularMarketOpen, timestamp, holdings]
+                    args: [matchPK, price, timestamp, holdings]
                 });
             }
         }
