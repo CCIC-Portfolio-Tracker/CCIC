@@ -19,8 +19,19 @@ import importYTDTWR from "./src/import_ytd_twr.js";
 import updatePriceAndValue from "./src/update_call.js";
 import importSectorBreakdown from "./src/import_sector_breakdown.js";
 
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
 const app = express();
 const SQLiteStore = SQLiteStoreFactory(session); 
+const DEBUG_AUTH = true;
 
 app.use(cors({
   origin: "https://ccic-phi.vercel.app",
@@ -81,7 +92,7 @@ app.post("/api/app-open", async (req, res) => {
   } catch (error) {
     console.error("Failed to update prices and values:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  }
+}
 });
 
 // Redirects user to school login page
@@ -165,10 +176,39 @@ app.get("/api/auth/callback", async (req, res) => {
 
     res.redirect("https://ccic-phi.vercel.app");
   } catch (err) {
+    const debug = {
+      message: err?.message,
+      name: err?.name,
+      error: err?.error,
+      error_description: err?.error_description,
+      stack: err?.stack?.split("\n").slice(0, 8),
+      hasCookieHeader: !!req.headers.cookie,
+      sessionID: req.sessionID,
+      sessionHasState: !!req.session?.state,
+      sessionHasCodeVerifier: !!req.session?.code_verifier,
+      queryState: req.query?.state,
+      queryCodePresent: !!req.query?.code,
+      nodeEnv: process.env.NODE_ENV,
+      trustedProto: req.headers["x-forwarded-proto"],
+      host: req.get("host"),
+      originalUrl: req.originalUrl,
+      redirectUriEnv: process.env.OIDC_REDIRECT_URI,
+    };
+  
     console.error("Callback Error:", err);
+  
+    if (DEBUG_AUTH) {
+      // show debug in the browser
+      return res
+        .status(500)
+        .type("html")
+        .send(`<pre>${escapeHtml(JSON.stringify(debug, null, 2))}</pre>`);
+    }
+  
     res.status(500).send("Authentication failed");
+  }  
   }
-});
+);
 
 // logs user out
 app.post("/api/auth/logout", (req, res) => {
