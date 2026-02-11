@@ -7,8 +7,8 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
         const tickerData = await db.execute(`
             SELECT t.ticker_text, h.tot_holdings 
             FROM ticker_table t
-            WHERE t.ticker_pk = ?
             INNER JOIN holding_table h ON t.ticker_pk = h.ticker_fk
+            WHERE t.ticker_pk = ?
         `, [tickerPK]);
 
         console.log(`Starting historical backfill for ${tickerData.rows.length} tickers...`);
