@@ -27,7 +27,7 @@ const App = () => {
 
   // ping backend that app was opened
   useEffect(() => {
-    fetch("https://ccic.onrender.com/api/app-open", {
+    fetch("/api/app-open", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -39,7 +39,7 @@ const App = () => {
   // fetch auth status on app load
    const fetchAuthStatus = async () => {
       try {
-        const res = await fetch(`https://ccic.onrender.com/api/auth/status`, {
+        const res = await fetch("/api/auth/status", {
           credentials: "include",
         });
 
@@ -121,7 +121,7 @@ const App = () => {
   // logout function
   const sendLogout = async () => {
     try {
-      const res = await fetch("https://ccic.onrender.com/api/auth/logout", {
+      const res = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

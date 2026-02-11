@@ -23,7 +23,7 @@ function Admin() {
             setLoading(true);
             setError("");
 
-            const res = await fetch("https://ccic.onrender.com/api/admin/users", {
+            const res = await fetch("/api/admin/users", {
             credentials: "include",
             });
 
@@ -62,7 +62,7 @@ function Admin() {
 
         try {
             const res = await fetch(
-                `https://ccic.onrender.com/api/admin/users/${user_pk}/role`,
+                `/api/admin/users/${user_pk}/role`,
                 {
                 method: "PUT",
                 credentials: "include",

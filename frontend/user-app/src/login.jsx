@@ -7,7 +7,7 @@ import "./login.css";
 */
 function Login() {
     const handleOIDCLogin = () => {
-        window.location.href = "https://ccic.onrender.com/api/auth/login";
+        window.location.href = "/api/auth/login";
     };
 
     return (

@@ -46,7 +46,7 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
 
   // Load holdings from backend and map them to GridJS row arrays
   const loadHoldings = useCallback(() => {
-    fetch("https://ccic.onrender.com/api/holdings", { credentials: "include" })
+    fetch("/api/holdings", { credentials: "include" })
       .then((res) => res.json())
       .then((json) => {
         const mapped = (json || []).map((d) => [
@@ -153,7 +153,7 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
           purchasePrice: Number(form.purchasePrice),
         };
 
-        const res = await fetch("https://ccic.onrender.com/api/holdings", {
+        const res = await fetch("/api/holdings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -172,7 +172,7 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
 
       // SELL
       if (modalMode === "sell") {
-        const res = await fetch(`https://ccic.onrender.com/api/holdings/${encodeURIComponent(ticker)}`, {
+        const res = await fetch(`/api/holdings/${encodeURIComponent(ticker)}`, {
            method: "PUT",
            headers: { "Content-Type": "application/json" },
            credentials: "include",

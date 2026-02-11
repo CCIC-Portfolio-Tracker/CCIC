@@ -64,7 +64,7 @@ function News({ticker}) {
         }
 
         // fetch news from backend API 
-        const url = `https://ccic.onrender.com/api/news/${encodeURIComponent(t)}`;
+        const url = `/api/news/${encodeURIComponent(t)}`;
         const res = await fetch(url, { headers: { Accept: "application/json" } });
 
 
