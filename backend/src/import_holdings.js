@@ -38,7 +38,7 @@ async function importHoldings() {
 
     const query = {
       sql: `
-        SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date, h.purchase_price, p.portfolio_name
+        SELECT t.ticker_text, t.ticker_co, p.price_price, p.tot_holdings, p.price_date, h.purchase_price, pf.portfolio_name
         FROM price_table p
         INNER JOIN ticker_table t ON p.ticker_fk = t.ticker_pk
         INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
