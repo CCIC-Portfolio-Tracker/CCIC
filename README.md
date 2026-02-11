@@ -1,7 +1,7 @@
 # CCIC
 # CCIC Portfolio Tracker
 
-A full-stack web application designed to track, manage, and visualize the investment portfolio for the CCIC (College Investment Club). This system replaces manual spreadsheets with real-time data fetching, historical performance tracking, and secure role-based access.
+A full-stack web application designed to track, manage, and visualize the investment portfolio for the CCIC (Colorado College Investment Club). This system replaces manual spreadsheets with real-time data fetching, historical performance tracking, and secure role-based access.
 
 ## Warnings
 
