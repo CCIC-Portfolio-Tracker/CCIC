@@ -31,6 +31,10 @@ function escapeHtml(str) {
 const handoverTickets = new Map();
 
 const app = express();
+
+// to ensure secure cookie
+app.set("trust proxy", 1)
+
 const SQLiteStore = SQLiteStoreFactory(session); 
 const DEBUG_AUTH = false;
 
@@ -41,8 +45,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// to ensure secure cookie
-app.set("trust proxy", 1)
+
 const isProd = true;
 
 // stops memory leaks, creates secure session cookie for users
