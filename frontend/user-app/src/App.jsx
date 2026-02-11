@@ -5,7 +5,7 @@ import Graphics from "./graphics";
 import Admin from "./admin";
 import TickerPage from "./tickerPage";
 import Account from "./account";
-import "./App.css";
+import "./index.css";
 
 /**
  * Main app component that manages navigation and authentication state. On load, it pings the backend to indicate the app was 
