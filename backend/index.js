@@ -227,6 +227,7 @@ app.get("/api/admin/activities", async (req, res) => {
   res.json(result.rows);
 });
 
+// send price data to front end
 app.get("/api/holdings", async (req, res) => {
   try {
     const holdings = await importHoldings();
@@ -238,6 +239,7 @@ app.get("/api/holdings", async (req, res) => {
   }
 });
 
+// send news data to front end
 app.get("/api/news/:ticker", async (req, res) => {
   try {
     const ticker = (req.params.ticker || "").toUpperCase();
@@ -381,22 +383,6 @@ app.get("/api/ytd-twr", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-app.get("/api/news/:ticker", async (req, res) => {
-  try {
-    const ticker = (req.params.ticker || "").toUpperCase();
-    if(!ticker) {
-      return res.status(400).json({ error: "Bad Request: Missing ticker parameter" });
-    }
-    const news = await getStockNews(ticker);
-
-    res.json(news);
-  } catch (error) {
-    console.error("Failed to fetch news:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 
 const port = process.env.PORT || 3000;
 

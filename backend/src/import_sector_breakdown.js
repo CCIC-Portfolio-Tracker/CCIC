@@ -1,6 +1,6 @@
 import getSectorBreakdown from "./sector_breakdown.js";
 
-// 
+// get current and historical sector breakdown data for frontend display
 async function importSectorBreakdown() {
     const now = new Date()
     
