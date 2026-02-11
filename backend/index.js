@@ -62,6 +62,21 @@ app.use(session({
   }
 }));
 
+// debug
+app.get("/api/debug/session", (req, res) => {
+  res.json({
+    hasCookieHeader: !!req.headers.cookie,
+    sessionID: req.sessionID,
+    session: {
+      hasUser: !!req.session.user,
+      hasState: !!req.session.state,
+      hasCodeVerifier: !!req.session.code_verifier,
+    },
+    nodeEnv: process.env.NODE_ENV,
+  });
+});
+
+
 // connects with CC CAS to get necessary data like authorized endpoint
 let config;
 const initializeOIDC = async () => {
