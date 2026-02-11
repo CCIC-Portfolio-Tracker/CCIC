@@ -4,7 +4,7 @@ import { Decimal } from 'decimal.js';
 import loadHistoricalValue from "./historical_value_update.js";
 
 // Function to get oldest date from value_table for a ticker
-async function importOldestValueDate() {
+async function getLatestValueDate() {
     const query = `SELECT value_date FROM value_table ORDER BY value_date DESC LIMIT 1`;
     const result = await db.execute(query);
     if (result.rows.length === 0) return null;    
@@ -38,18 +38,23 @@ async function importTickerPK() {
 
 async function getTotalValue(timestamp) {
     try {
-        console.log(timestamp);
         const currentDate = new Date(timestamp);
         currentDate.setDate(currentDate.getDate() - 1);
         const endDate = currentDate.toISOString().split('T')[0];
-        const oldestDate = await importOldestValueDate();
-        const startDate = new Date(oldestDate).toLocaleDateString('en-CA');
-        console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
         
-        if (startDate <= endDate) {
-            console.log("Historical value data is missing. Initiating backfill...");
-            await loadHistoricalValue(startDate, endDate);
-       }
+        const latestDate = await getLatestValueDate();
+        
+        if (latestDate) {
+            const startDate = new Date(latestDate).toLocaleDateString('en-CA');
+            console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
+            
+            if (startDate <= endDate) {
+                console.log("Gap in value history detected. Initiating backfill...");
+                await loadHistoricalValue(startDate, endDate);
+           }
+        } else {
+            console.log("No previous value history found. Skipping backfill to prevent history rewriting.");
+        }
 
         const tickerPKs = await importTickerPK();
 

@@ -1,3 +1,4 @@
+import db from "./db.js";
 import getUpdatedPrices from "./update_holdings.js";
 import updateTotalValue from "./update_total_value.js";
 
