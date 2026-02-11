@@ -1,5 +1,6 @@
 import db from "./db.js";
 
+// creates ticker database
 export async function createTickerDatabase() {
     await db.execute(`insert or ignore into ticker_table (ticker_text, ticker_co, ticker_portfolio)
     values 

@@ -1,5 +1,6 @@
 import db from "./db.js";
 
+// Creates database tables
 export async function createDatabase() {
     await db.execute(`create table if not exists ticker_table (
         ticker_pk integer primary key autoincrement,

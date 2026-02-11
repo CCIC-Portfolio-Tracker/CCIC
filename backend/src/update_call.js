@@ -15,6 +15,7 @@ async function updatePriceAndValue(forceUpdate = false, histUpdate = true) {
 
     let targetDate;
 
+    // If its sunday or saturday, get friday data. If before 9:30 on a day, get yesterdays data
     if (dayOfWeek === 0) {
       const friday = new Date(nyDate);
       friday.setDate(nyDate.getDate() - 2);
@@ -41,6 +42,7 @@ async function updatePriceAndValue(forceUpdate = false, histUpdate = true) {
 
     console.log("Target Date:", targetDate);
 
+    // Check if data for the target date already exists, unless forceUpdate is true
     if (!forceUpdate) {
         const check = await db.execute(
           "SELECT value_pk FROM value_table WHERE value_date = ? LIMIT 1", 

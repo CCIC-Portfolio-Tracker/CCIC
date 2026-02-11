@@ -36,6 +36,7 @@ async function importTickerPK() {
     return result.rows.map(row => row.ticker_pk);
 }
 
+// Main function to calculate total value for a specific date
 async function getTotalValue(timestamp) {
     try {
         const currentDate = new Date(timestamp);
@@ -43,7 +44,7 @@ async function getTotalValue(timestamp) {
         const endDate = currentDate.toISOString().split('T')[0];
         
         const latestDate = await getLatestValueDate();
-        
+
         if (latestDate) {
             const startDate = new Date(latestDate).toLocaleDateString('en-CA');
             console.log(`Calculating total value for ${timestamp} with historical backfill from ${startDate} to ${endDate}...`);
@@ -93,6 +94,7 @@ async function getTotalValue(timestamp) {
     }
 }
 
+// update total value for a specific date, if it already exists, update it, if not, insert it
 async function updateTotalValue(timestamp) {
 
     console.log("time:", timestamp);

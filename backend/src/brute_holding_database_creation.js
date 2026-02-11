@@ -1,5 +1,6 @@
 import db from "./db.js";
 
+// Inserts necessary entries into the holding table
 export async function createHoldingDatabase() {
     try {
         const fixedDate = '2025-02-08';

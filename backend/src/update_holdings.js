@@ -15,6 +15,15 @@ async function getLatestPriceDate(tickerPK) {
 // Main function to update prices
 async function getUpdatedPrices(timestamp, histUpdate = true) {
     try {
+
+        const checkQuery = `SELECT count(*) as count FROM price_table WHERE price_date = ?`;
+        const checkResult = await db.execute(checkQuery, [timestamp]);
+        
+        if (checkResult.rows[0].count > 0) {
+            console.log(`Prices for ${timestamp} already exist. Skipping Yahoo fetch to prevent Rate Limiting (429).`);
+            return; 
+        }
+        
         console.log(`Starting price update for ${timestamp}...`);
 
         // Get all active holdings

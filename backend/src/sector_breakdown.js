@@ -1,6 +1,7 @@
 import db from "./db.js";
 import { Decimal } from 'decimal.js';
 
+// get total value for a specific date
 async function getTotalValue(timestamp) {
     const result = await db.execute({
         sql: `SELECT tot_value FROM value_table WHERE value_date = ?`,
@@ -11,6 +12,7 @@ async function getTotalValue(timestamp) {
     return new Decimal(result.rows[0].tot_value);
 }
 
+// get sector breakdown for a specific date, returns percentage of total value for each sector
 async function getSectorBreakdown(timestamp) {
     const totalValue = await getTotalValue(timestamp);
     
@@ -45,12 +47,14 @@ async function getSectorBreakdown(timestamp) {
         11: new Decimal(0) // Other
     };
 
+    // Map sector totals from query result to sectors object
     result.rows.forEach(row => {
         if (sectors[row.portfolio_fk]) {
             sectors[row.portfolio_fk] = new Decimal(row.sector_total);
         }
     });
 
+    // Calculate percentage for each sector
     const getPercent = (sectorId) => {
         return sectors[sectorId].dividedBy(totalValue).times(100).toFixed(2);
     };

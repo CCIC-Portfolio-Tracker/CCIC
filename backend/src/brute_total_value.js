@@ -12,6 +12,7 @@ async function importTickerPK() {
     return result.rows.map(row => row.ticker_pk);
 }
 
+// Function to calculate total value for a given timestamp
 async function getTotalValue(timestamp) {
     try {
         const tickerPKs = await importTickerPK();
@@ -47,6 +48,7 @@ async function getTotalValue(timestamp) {
     }
 }
 
+// Main function to load total value for 2025
 async function load2025Value() {
     try {
         let currentDate = new Date('2025-01-02');

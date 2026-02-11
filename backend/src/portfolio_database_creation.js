@@ -1,5 +1,6 @@
 import db from "./db.js";
 
+// creates portfolio database
 export async function createPortfolioDatabase() {
 
     await db.execute(`insert or ignore into portfolio_table (portfolio_name)

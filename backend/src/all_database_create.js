@@ -5,6 +5,7 @@ import { createHoldingDatabase } from './brute_holding_database_creation.js';
 import load2025Price from './brute_price_table.js';
 import load2025Value from './brute_total_value.js';
 
+// Creates database and loads initial data
 async function runEverything() {
     try {
         console.log("Creating Database");

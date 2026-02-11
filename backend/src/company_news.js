@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Fetches recent news articles for a given stock ticker using the Finnhub API
 async function getStockNews(ticker) {
     const apiKey = process.env.FINNHUB_KEY;
     if (!apiKey) {
@@ -8,13 +9,14 @@ async function getStockNews(ticker) {
         return [];
     }
 
+    // Get news from the past day
     const to = new Date();
     const from = new Date();
     from.setDate(to.getDate() - 1);
 
-    // YYYY-MM-DD
     const formatDate = (date) => date.toISOString().split('T')[0];
 
+    // Defines params for api pull
     const params = new URLSearchParams({
         symbol: ticker.toUpperCase(),
         from: formatDate(from),
@@ -24,6 +26,7 @@ async function getStockNews(ticker) {
 
     const url = `https://finnhub.io/api/v1/company-news?${params}`;
 
+    // Make the API call and handle errors
     try {
         const response = await fetch(url);
         
@@ -33,7 +36,6 @@ async function getStockNews(ticker) {
 
         const data = await response.json();
 
-        // Ensure data is an array before mapping
         if (!Array.isArray(data)) return [];
 
         return data.map(article => ({

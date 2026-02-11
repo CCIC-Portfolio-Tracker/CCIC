@@ -2,6 +2,7 @@ import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 
+// gets price data from january 2nd 2025
 async function load2025Price() {
     try {
         const tickerData = await db.execute(`

@@ -1,5 +1,6 @@
 import db from "./db.js";
 
+// Retrieves total value for every day over six months
 async function importSixMonthValue() {
   try {
 
