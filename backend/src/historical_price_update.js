@@ -26,7 +26,7 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
 
             // Yahoo Finance's API is exclusive of the end date, so we need to add 1 day to ensure we get data for the specified end date
             const yahooEndDate = new Date(endDate);
-            yahooEndDate.setDate(yahooEndDate.getDate() + 1);
+            yahooEndDate.setDate(yahooEndDate.getDate());
             const period2Str = yahooEndDate.toISOString().split('T')[0];
 
             // Fetch historical data for the ticker and date range
