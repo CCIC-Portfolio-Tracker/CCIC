@@ -52,8 +52,8 @@ async function loadHistoricalValue(startDate, endDate) {
 
         console.log("Starting historical value backfill...");
 
-        while (currentDate <= endDate) {
-            const timestamp = currentDate.toLocaleDateString('en-CA', {
+        while (startDate <= endDate) {
+            const timestamp = startDate.toLocaleDateString('en-CA', {
                 timeZone: 'America/New_York' 
             });
 
