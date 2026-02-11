@@ -17,6 +17,10 @@ function Graphics() {
     return base ? `${base}-twr` : null;
   };
 
+  // Chart 3 (sector allocation) endpoint (POST)
+  // NOTE: Change this to whatever your real backend route is.
+  const SECTOR_ENDPOINT = "https://ccic.onrender.com/api/sector-allocation";
+
   // dropdown state for charts
   const [sel1, setSel1] = useState("1y");
   const [sel2, setSel2] = useState("1y");
@@ -24,6 +28,12 @@ function Graphics() {
   // chart series state
   const [chart1Series, setChart1Series] = useState({ labels: [], data: [] });
   const [chart2Series, setChart2Series] = useState({ labels: [], data: [] });
+
+  // Chart 3 series state (single stacked bar that sums to 100%)
+  const [chart3Series, setChart3Series] = useState({
+    labels: ["Portfolio"],
+    datasets: [],
+  });
 
   // canvas refs
   const canvasRef1 = useRef(null);
@@ -64,7 +74,7 @@ function Graphics() {
     };
   }, [sel1]);
 
-  // get chart 2 data 
+  // get chart 2 data
   useEffect(() => {
     let cancelled = false;
 
@@ -94,6 +104,66 @@ function Graphics() {
       cancelled = true;
     };
   }, [sel2]);
+
+  // get chart 3 data (sector allocation)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchChart3() {
+      try {
+        const res = await fetch(SECTOR_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          // If your backend expects something in the POST body, add it here:
+          // body: JSON.stringify({ ... }),
+        });
+
+        if (!res.ok) throw new Error(`Chart 3 fetch failed: ${res.status}`);
+
+        // Expected response format:
+        // {
+        //   techPercent, healthPercent, energyPercent, consumerPercent, financialPercent,
+        //   aeroPercent, realPercent, emergPercent, etfPercent, bankPercent, otherPercent
+        // }
+        const alloc = await res.json();
+
+        if (cancelled) return;
+
+        const sectors = [
+          { label: "Technology", key: "techPercent" },
+          { label: "Healthcare", key: "healthPercent" },
+          { label: "Energy/Infrastructure", key: "energyPercent" },
+          { label: "Consumer", key: "consumerPercent" },
+          { label: "Financials", key: "financialPercent" },
+          { label: "Aerospace & Defense", key: "aeroPercent" },
+          { label: "Real Estate", key: "realPercent" },
+          { label: "Emerging Markets", key: "emergPercent" },
+          { label: "ETF", key: "etfPercent" },
+          { label: "Bankruptcy", key: "bankPercent" },
+          { label: "Other", key: "otherPercent" },
+        ];
+
+        const datasets = sectors.map((s) => ({
+          label: s.label,
+          // single bar => one data point per dataset
+          data: [Number(alloc?.[s.key] ?? 0)],
+          borderWidth: 1,
+        }));
+
+        setChart3Series({
+          labels: ["Portfolio"],
+          datasets,
+        });
+      } catch (err) {
+        console.error("Failed to fetch chart 3:", err);
+      }
+    }
+
+    fetchChart3();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // create charts
   useEffect(() => {
@@ -137,34 +207,8 @@ function Graphics() {
     chartRef3.current = new Chart(canvasRef3.current, {
       type: "bar",
       data: {
-        labels: ["2022", "2023", "2024", "2025", "2026"],
-        datasets: [
-          {
-            label: "Tech",
-            data: [38, 40, 42, 41, 39],
-            borderWidth: 1,
-          },
-          {
-            label: "Healthcare",
-            data: [24, 23, 22, 23, 24],
-            borderWidth: 1,
-          },
-          {
-            label: "Energy/Infrastructure",
-            data: [22, 21, 20, 21, 22],
-            borderWidth: 1,
-          },
-          {
-            label: "Consumer",
-            data: [10, 10, 10, 9, 10],
-            borderWidth: 1,
-          },
-          {
-            label: "Emerging Markets",
-            data: [6, 6, 6, 6, 5],
-            borderWidth: 1,
-          },
-        ],
+        labels: chart3Series.labels,
+        datasets: chart3Series.datasets,
       },
       options: {
         responsive: true,
@@ -219,6 +263,16 @@ function Graphics() {
     chart.data.datasets[0].data = chart2Series.data;
     chart.update();
   }, [chart2Series]);
+
+  // update chart 3
+  useEffect(() => {
+    const chart = chartRef3.current;
+    if (!chart) return;
+
+    chart.data.labels = chart3Series.labels;
+    chart.data.datasets = chart3Series.datasets;
+    chart.update();
+  }, [chart3Series]);
 
   return (
     <div className="charts-page">
