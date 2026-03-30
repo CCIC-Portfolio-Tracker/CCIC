@@ -37,7 +37,7 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
         const result = await db.execute(query);
 
         if (result.rows.length === 0) {
-            console.log("No active holdings found.");
+            console.log("Zero active holdings found.");
             return;
         }
 
@@ -105,8 +105,12 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
         }
 
     } catch (error) {
-        console.error("Critical error in getUpdatedPrices:", error);
-        throw error;
+        if (error.message.includes("429") || error.message.includes("crumb")) {
+            console.warn("Yahoo Finance rate limit hit (429). Skipping live update for today.");
+        } else {
+            console.error("Critical error in getUpdatedPrices:", error);
+            throw error;
+        }
     }
 }
 

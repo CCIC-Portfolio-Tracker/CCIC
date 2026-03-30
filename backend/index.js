@@ -104,13 +104,22 @@ app.get("/", (req, res) => {
 
 // updates price and value on holding start
 app.post("/api/app-open", async (req, res) => {
+  if (isUpdatingPrices) {
+    console.log("Price update already in progress. Skipping duplicate request.");
+    return res.json({ ok: true, message: "Update in progress" });
+  }
+
   try {
+    isUpdatingPrices = true;
     await updatePriceAndValue();
+    isUpdatingPrices = false;
     res.json({ ok: true });
   } catch (error) {
-    console.error("Failed to update prices and values:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-}
+    isUpdatingPrices = false; 
+    
+    console.error("Yahoo Finance update failed (likely 429). Using existing database prices.", error.message);
+    res.json({ ok: true, warning: "Using cached prices due to rate limiting." });
+  }
 });
 
 // Redirects user to school login page

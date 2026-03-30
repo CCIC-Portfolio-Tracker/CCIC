@@ -64,11 +64,12 @@ async function getTotalValue(timestamp) {
         const placeholders = tickerPKs.map(() => '?').join(',');
 
         const query = `
-            SELECT p.price_price, p.price_date, h.tot_holdings
+            SELECT p.price_price, SUM(h.tot_holdings) as tot_holdings
             FROM price_table p
             INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
             WHERE p.ticker_fk IN (${placeholders}) AND p.price_date = ?
-            AND h.holding_active = 1 AND h.tot_holdings > 0
+            AND h.holding_active = 1
+            GROUP BY p.ticker_fk
         `;
 
         const result = await db.execute(query, [...tickerPKs, timestamp]);
