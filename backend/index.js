@@ -102,6 +102,8 @@ app.get("/", (req, res) => {
   res.send("Server is ready!");
 })
 
+let isUpdatingPrices = false;
+
 // updates price and value on holding start
 app.post("/api/app-open", async (req, res) => {
   if (isUpdatingPrices) {
