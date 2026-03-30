@@ -1,40 +1,46 @@
 import db from "./db.js";
 import { Decimal } from 'decimal.js';
 
-// get total value for a specific date
-async function getTotalValue(timestamp) {
+// Finds the next available date in the value_table and returns both the date and the total value
+async function getValidDateAndValue(timestamp) {
     const result = await db.execute({
-        sql: `SELECT tot_value FROM value_table WHERE value_date = ?`,
+        sql: `SELECT value_date, tot_value 
+              FROM value_table 
+              WHERE value_date >= ? 
+              ORDER BY value_date ASC 
+              LIMIT 1`,
         args: [timestamp]
     });
 
-    if (result.rows.length === 0) return new Decimal(0);
-    return new Decimal(result.rows[0].tot_value);
+    if (result.rows.length === 0) return null;
+
+    return {
+        validDate: result.rows[0].value_date,
+        totalValue: new Decimal(result.rows[0].tot_value)
+    };
 }
 
 // get sector breakdown for a specific date, returns percentage of total value for each sector
 async function getSectorBreakdown(timestamp) {
-    const totalValue = await getTotalValue(timestamp);
+    const dateAndValue = await getValidDateAndValue(timestamp);
     
-    if (totalValue.equals(0)) {
-        return { error: "Total portfolio value is 0" };
+    if (!dateAndValue || dateAndValue.totalValue.equals(0)) {
+        return { error: "Total portfolio value is 0 or no data found" };
     }
+
+    const { validDate, totalValue } = dateAndValue;
 
     const query = `
         SELECT h.portfolio_fk, SUM(p.price_price * p.tot_holdings) as sector_total
         FROM price_table p
         INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
-        WHERE p.price_date = (
-            SELECT MIN(price_date) 
-            FROM price_table 
-            WHERE price_date >= ?
-        )
+        WHERE p.price_date = ? AND h.holding_active = 1
         GROUP BY h.portfolio_fk
     `;
 
     const result = await db.execute({
         sql: query,
-        args: [timestamp]
+        args: [validDate] 
     });
 
     const sectors = {
@@ -48,17 +54,15 @@ async function getSectorBreakdown(timestamp) {
         8: new Decimal(0), // Emerging
         9: new Decimal(0), // ETF
         10: new Decimal(0), // Bank
-        11: new Decimal(0) // Other
+        11: new Decimal(0)  // Other
     };
 
-    // Map sector totals from query result to sectors object
     result.rows.forEach(row => {
-        if (sectors[row.portfolio_fk]) {
+        if (sectors[row.portfolio_fk] !== undefined) {
             sectors[row.portfolio_fk] = new Decimal(row.sector_total);
         }
     });
 
-    // Calculate percentage for each sector
     const getPercent = (sectorId) => {
         return sectors[sectorId].dividedBy(totalValue).times(100).toFixed(2);
     };
