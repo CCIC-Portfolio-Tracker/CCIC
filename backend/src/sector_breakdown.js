@@ -24,7 +24,11 @@ async function getSectorBreakdown(timestamp) {
         SELECT h.portfolio_fk, SUM(p.price_price * p.tot_holdings) as sector_total
         FROM price_table p
         INNER JOIN holding_table h ON p.ticker_fk = h.ticker_fk
-        WHERE p.price_date = ?
+        WHERE p.price_date = (
+            SELECT MIN(price_date) 
+            FROM price_table 
+            WHERE price_date >= ?
+        )
         GROUP BY h.portfolio_fk
     `;
 
