@@ -193,6 +193,7 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
   };
 
   // Grid columns definition (ticker is rendered as clickable link)
+  // Grid columns definition (ticker is rendered as clickable link, prices are formatted as currency)
   const columns = useMemo(
     () => [
       {
@@ -206,8 +207,24 @@ function Holdings({isAdmin, isMember, loggedIn, onSelectTicker}) {
       },
       "Name",
       "Shares",
-      "Current Price",
-      "Total Value",
+      {
+        name: "Current Price",
+        formatter: (cell) => {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          }).format(cell);
+        }
+      },
+      {
+        name: "Total Value",
+        formatter: (cell) => {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          }).format(cell);
+        }
+      }
     ],
     []
   );

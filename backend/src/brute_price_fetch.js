@@ -2,13 +2,10 @@ import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 
-// Helper function to prevent spamming Yahoo Finance too fast
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// gets price data from january 1st 2025 to today
 async function seedHistoricalPrices() {
     try {
-        // I added the active filter here so you don't fetch deleted stocks
         const tickerData = await db.execute(`
             SELECT t.ticker_pk, t.ticker_text, h.tot_holdings 
             FROM ticker_table t
@@ -19,7 +16,7 @@ async function seedHistoricalPrices() {
         console.log(`Starting historical backfill for ${tickerData.rows.length} active tickers...`);
 
         const startDate = new Date('2025-01-01');
-        const endDate = new Date(); // Dynamically gets the exact current date/time
+        const endDate = new Date(); 
 
         for (const row of tickerData.rows) {
             const { ticker_pk, ticker_text, tot_holdings } = row;
@@ -58,7 +55,6 @@ async function seedHistoricalPrices() {
                 console.error(`Skipping ${ticker_text}: ${yahooError.message}`);
             }
 
-            // Crucial: Wait 1.5 seconds between each stock to avoid a 429 ban
             await sleep(1500);
         }
 
@@ -68,5 +64,4 @@ async function seedHistoricalPrices() {
     }
 }
 
-// Execute the function
 seedHistoricalPrices();
