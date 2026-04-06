@@ -2,6 +2,7 @@ import YahooFinance from 'yahoo-finance2'
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 import loadHistoricalPrices from './historical_price_update.js';
+import { rotateProxy } from "./proxy_rotator.js";
 
 // Function to get latest date from price_table for a ticker
 async function getLatestPriceDate(tickerPK) {
@@ -18,10 +19,10 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
 
         const checkQuery = `SELECT count(*) as count FROM price_table WHERE price_date = ?`;
         const checkResult = await db.execute(checkQuery, [timestamp]);
-        
+
         if (checkResult.rows[0].count > 0) {
             console.log(`Prices for ${timestamp} already exist. Skipping Yahoo fetch to prevent Rate Limiting (429).`);
-            return; 
+            return;
         }
 
         console.log(`Starting price update for ${timestamp}...`);
@@ -44,9 +45,16 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
         const allHoldings = result.rows;
         const uniqueTickerTexts = [...new Set(allHoldings.map(h => h.ticker_text))];
 
+        rotateProxy();
+
         // Get prices for unique tickers
-        const quotes = await yahooFinance.quote(uniqueTickerTexts);
-        const quotesArray = Array.isArray(quotes) ? quotes : [quotes];
+        try {
+            const quotes = await yahooFinance.quote(uniqueTickerTexts); 
+            const quotesArray = Array.isArray(quotes) ? quotes : [quotes];
+
+        } catch (error) {
+            console.error("Batch quote failed:", error);
+        }
 
         // Map prices
         const priceMap = new Map();
@@ -93,7 +101,7 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
                     args: [tickerPK, price, timestamp, amount]
                 });
 
-                
+
             } else {
                 console.warn(`Could not find price for ${tickerText}`);
             }

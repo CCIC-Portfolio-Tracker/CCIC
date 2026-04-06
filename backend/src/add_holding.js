@@ -2,9 +2,12 @@ import db from "./db.js";
 import YahooFinance from 'yahoo-finance2';
 import updatePriceAndValue from "./update_call.js";
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+import { rotateProxy } from "./proxy_rotator.js"; // 1. IMPORT
 
 // Adds a new holding to the database
 async function addHolding(ticker, amount, sector) {
+    rotateProxy();
+    
     const result = await yahooFinance.quote(ticker);
 
     if (!result || result.regularMarketOpen === undefined) {
