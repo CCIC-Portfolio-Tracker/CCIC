@@ -1,7 +1,7 @@
 import db from "./db.js";
 import updatePriceAndValue from "./update_call.js";
-import yahooFinance from 'yahoo-finance2';
-yahooFinance.suppressNotices(['yahooSurvey']);
+import YahooFinance from 'yahoo-finance2';
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import { getNextProxyOptions } from "./proxy_rotator.js";
 
 // Adds a new holding to the database

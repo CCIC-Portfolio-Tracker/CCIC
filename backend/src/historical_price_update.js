@@ -1,6 +1,6 @@
 import db from "./db.js";
-import yahooFinance from 'yahoo-finance2';
-yahooFinance.suppressNotices(['yahooSurvey']);
+import YahooFinance from 'yahoo-finance2';
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import { getNextProxyOptions } from "./proxy_rotator.js";
 
 // get historical prices for a given ticker and date range, then insert into price_table

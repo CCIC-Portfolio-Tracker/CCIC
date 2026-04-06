@@ -1,7 +1,7 @@
 import db from "./db.js";
 import loadHistoricalPrices from './historical_price_update.js';
-import yahooFinance from 'yahoo-finance2';
-yahooFinance.suppressNotices(['yahooSurvey']);
+import YahooFinance from 'yahoo-finance2';
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import { getNextProxyOptions } from "./proxy_rotator.js";
 
 // Function to get latest date from price_table for a ticker
