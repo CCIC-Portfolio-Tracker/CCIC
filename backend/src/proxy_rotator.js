@@ -1,5 +1,5 @@
 import yahooFinance from 'yahoo-finance2';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import HttpsProxyAgent from 'https-proxy-agent';
 
 const proxyList = process.env.PROXY_LIST ? process.env.PROXY_LIST.split(',') : [];
 let currentIndex = 0;
