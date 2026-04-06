@@ -1,8 +1,6 @@
-import YahooFinance from 'yahoo-finance2'
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 import db from "./db.js";
 import loadHistoricalPrices from './historical_price_update.js';
-import { rotateProxy } from "./proxy_rotator.js";
+import { getRotatedYahoo } from "./proxy_rotator.js";
 
 // Function to get latest date from price_table for a ticker
 async function getLatestPriceDate(tickerPK) {
@@ -45,7 +43,7 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
         const allHoldings = result.rows;
         const uniqueTickerTexts = [...new Set(allHoldings.map(h => h.ticker_text))];
 
-        rotateProxy();
+        const yahooFinance = getRotatedYahoo();
 
         // Get prices for unique tickers
         try {
