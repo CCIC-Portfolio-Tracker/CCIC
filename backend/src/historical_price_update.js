@@ -1,13 +1,13 @@
 import db from "./db.js";
 import YahooFinance from 'yahoo-finance2';
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+
 import { getNextProxyOptions } from "./proxy_rotator.js";
 
-// get historical prices for a given ticker and date range, then insert into price_table
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function loadHistoricalPrices(startDate, endDate, tickerPK) {
     try {
-
-        // Get ticker text and total holdings for the given tickerPK
         const tickerData = await db.execute(`
             SELECT t.ticker_text, SUM(h.tot_holdings) as tot_holdings
             FROM ticker_table t
@@ -23,49 +23,61 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
         const ticker_text = tickerData.rows[0].ticker_text;
         const tot_holdings = tickerData.rows[0].tot_holdings;
 
-        try {
+        const yahooEndDate = new Date(endDate);
+        yahooEndDate.setDate(yahooEndDate.getDate());
+        const period2Str = yahooEndDate.toISOString().split('T')[0];
 
-            // Yahoo Finance's API is exclusive of the end date, so we need to add 1 day to ensure we get data for the specified end date
-            const yahooEndDate = new Date(endDate);
-            yahooEndDate.setDate(yahooEndDate.getDate());
-            const period2Str = yahooEndDate.toISOString().split('T')[0];
+        let results = [];
+        let fetchSuccess = false;
+        let attempts = 0;
+        const maxAttempts = 6; 
 
+        while (!fetchSuccess && attempts < maxAttempts) {
             const proxyOptions = getNextProxyOptions();
 
-            // Fetch historical data for the ticker and date range
-            const results = await yahooFinance.historical(ticker_text, {
-                period1: startDate,
-                period2: period2Str,
-                interval: '1d'
-            }, proxyOptions);
+            try {
+                results = await yahooFinance.historical(ticker_text, {
+                    period1: startDate,
+                    period2: period2Str,
+                    interval: '1d'
+                }, proxyOptions);
+                
+                fetchSuccess = true; 
+                console.log(`Historical fetch for ${ticker_text} successful on attempt ${attempts + 1}!`);
 
-            if (!results || results.length === 0) {
-                console.log(`Warning: No historical data found for ${ticker_text}`);
-                return;
+            } catch (yahooError) {
+                console.warn(`[Attempt ${attempts + 1}] Historical proxy hit a 429 Ban for ${ticker_text}. Rotating...`);
+                attempts++;
+                await sleep(1500); 
             }
+        }
 
-            const batchQueries = [];
+        if (!fetchSuccess) {
+            console.error(`All proxy attempts failed for ${ticker_text}. Skipping historical backfill.`);
+            return;
+        }
 
-            // Filter out entries with null open price and prepare batch insert queries
-            results.filter(day => day.open != null).forEach(day => {
-                const formattedDate = new Date(day.date).toLocaleDateString('en-CA');
+        if (!results || results.length === 0) {
+            console.log(`Warning: No historical data found for ${ticker_text}`);
+            return;
+        }
 
-                batchQueries.push({
-                    sql: `INSERT OR IGNORE INTO price_table 
-                              (ticker_fk, price_price, price_date, tot_holdings) 
-                              VALUES (?, ?, ?, ?)`,
-                    args: [tickerPK, day.open, formattedDate, tot_holdings]
-                });
+        const batchQueries = [];
+
+        results.filter(day => day.open != null).forEach(day => {
+            const formattedDate = new Date(day.date).toLocaleDateString('en-CA');
+
+            batchQueries.push({
+                sql: `INSERT OR IGNORE INTO price_table 
+                          (ticker_fk, price_price, price_date, tot_holdings) 
+                          VALUES (?, ?, ?, ?)`,
+                args: [tickerPK, day.open, formattedDate, tot_holdings]
             });
+        });
 
-            // Execute batch insert if there are valid entries
-            if (batchQueries.length > 0) {
-                await db.batch(batchQueries, "write");
-                console.log(`Loaded ${batchQueries.length} entries for ${ticker_text}`);
-            }
-
-        } catch (yahooError) {
-            console.error(`Skipping ${ticker_text}: ${yahooError.message}`);
+        if (batchQueries.length > 0) {
+            await db.batch(batchQueries, "write");
+            console.log(`Loaded ${batchQueries.length} entries for ${ticker_text}`);
         }
 
         console.log("Historical price table backfill complete.");

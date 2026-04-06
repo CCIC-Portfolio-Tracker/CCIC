@@ -45,15 +45,34 @@ async function getUpdatedPrices(timestamp, histUpdate = true) {
         const allHoldings = result.rows;
         const uniqueTickerTexts = [...new Set(allHoldings.map(h => h.ticker_text))];
 
-        const proxyOptions = getNextProxyOptions();
+        // --- NEW AUTO-RETRY LOOP ---
+        let quotesArray = [];
+        let fetchSuccess = false;
+        let attempts = 0;
+        const maxAttempts = 6; // It will try up to 6 different proxies before giving up
 
-        // Get prices for unique tickers
-        try {
-            const quotes = await yahooFinance.quote(uniqueTickerTexts, {}, proxyOptions); 
-            const quotesArray = Array.isArray(quotes) ? quotes : [quotes];
+        console.log(`Starting batch fetch for ${uniqueTickerTexts.length} tickers...`);
 
-        } catch (error) {
-            console.error("Batch quote failed:", error);
+        while (!fetchSuccess && attempts < maxAttempts) {
+            const proxyOptions = getNextProxyOptions();
+            
+            try {
+                const quotes = await yahooFinance.quote(uniqueTickerTexts, {}, proxyOptions);
+                quotesArray = Array.isArray(quotes) ? quotes : [quotes];
+                fetchSuccess = true; // If we reach this line, the proxy worked!
+                console.log(`Batch fetch successful on attempt ${attempts + 1}!`);
+                
+            } catch (err) {
+                console.warn(`[Attempt ${attempts + 1}] Proxy hit a 429 Ban. Rotating to next IP...`);
+                attempts++;
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+        }
+
+        if (!fetchSuccess) {
+            console.error("All proxy attempts failed. Skipping live update to protect server.");
+            return; 
         }
 
         // Map prices

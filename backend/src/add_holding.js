@@ -8,7 +8,35 @@ import { getNextProxyOptions } from "./proxy_rotator.js";
 async function addHolding(ticker, amount, sector) {
     const proxyOptions = getNextProxyOptions();
 
-    const result = await yahooFinance.quote(ticker, {}, proxyOptions);
+    let result;
+    let fetchSuccess = false;
+    let attempts = 0;
+    const maxAttempts = 6; // It will try up to 6 different proxies before giving up
+
+    console.log(`Starting batch fetch for ${uniqueTickerTexts.length} tickers...`);
+
+    while (!fetchSuccess && attempts < maxAttempts) {
+        const proxyOptions = getNextProxyOptions();
+
+        try {
+            // Pass proxyOptions as the 3rd argument
+            result = await yahooFinance.quote(ticker, {}, proxyOptions);
+            fetchSuccess = true; // If we reach this line, the proxy worked!
+
+        } catch (err) {
+            console.warn(`[Attempt ${attempts + 1}] Proxy hit a 429 Ban. Rotating to next IP...`);
+            attempts++;
+
+            // Pause for 1.5 seconds before retrying so we don't spam the network
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+    }
+
+    // If all attempts failed, exit safely without crashing the server
+    if (!fetchSuccess) {
+        console.error("All proxy attempts failed. Skipping live update to protect server.");
+        return;
+    }
 
     if (!result || result.regularMarketOpen === undefined) {
         throw new Error("Ticker not valid");
