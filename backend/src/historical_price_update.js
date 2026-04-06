@@ -1,5 +1,7 @@
 import db from "./db.js";
-import { getRotatedYahoo } from "./proxy_rotator.js";
+import yahooFinance from 'yahoo-finance2';
+yahooFinance.suppressNotices(['yahooSurvey']);
+import { getNextProxyOptions } from "./proxy_rotator.js";
 
 // get historical prices for a given ticker and date range, then insert into price_table
 async function loadHistoricalPrices(startDate, endDate, tickerPK) {
@@ -28,14 +30,14 @@ async function loadHistoricalPrices(startDate, endDate, tickerPK) {
             yahooEndDate.setDate(yahooEndDate.getDate());
             const period2Str = yahooEndDate.toISOString().split('T')[0];
 
-            const yahooFinance = getRotatedYahoo();
-            
+            const proxyOptions = getNextProxyOptions();
+
             // Fetch historical data for the ticker and date range
             const results = await yahooFinance.historical(ticker_text, {
                 period1: startDate,
                 period2: period2Str,
                 interval: '1d'
-            });
+            }, proxyOptions);
 
             if (!results || results.length === 0) {
                 console.log(`Warning: No historical data found for ${ticker_text}`);

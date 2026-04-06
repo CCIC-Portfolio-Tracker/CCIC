@@ -1,12 +1,14 @@
 import db from "./db.js";
 import updatePriceAndValue from "./update_call.js";
-import { getRotatedYahoo } from "./proxy_rotator.js";
+import yahooFinance from 'yahoo-finance2';
+yahooFinance.suppressNotices(['yahooSurvey']);
+import { getNextProxyOptions } from "./proxy_rotator.js";
 
 // Adds a new holding to the database
 async function addHolding(ticker, amount, sector) {
-    const yahooFinance = getRotatedYahoo();
+    const proxyOptions = getNextProxyOptions();
 
-    const result = await yahooFinance.quote(ticker);
+    const result = await yahooFinance.quote(ticker, {}, proxyOptions);
 
     if (!result || result.regularMarketOpen === undefined) {
         throw new Error("Ticker not valid");
